@@ -1,3 +1,3 @@
-var posts=["2024/12/22/mac安装 picgo 报错 文件损坏/","2024/12/23/超绝插图网站推荐/"];function toRandomPost(){
+var posts=["2024/12/22/mac安装 picgo 报错 文件损坏/","2024/12/23/超绝插图网站推荐/","2025/06/07/JDK 线程池里真的区分 核心线程与非核心线程吗？/","2025/06/07/MySQL 索引失效场景/","2025/06/07/Redis 底层数据结构/","2025/06/07/指令重排 真的有点阴/","2025/06/07/Redis学习笔记/","2025/06/07/新生代只有一个Eden+S0 可以吗/"];function toRandomPost(){
     pjax.loadUrl('/'+posts[Math.floor(Math.random() * posts.length)]);
   };
