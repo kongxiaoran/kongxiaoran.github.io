@@ -1,0 +1,829 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>从 CSV文件的加载、分区和处理 来理解 RDD | 凌霄的博客</title><meta name="keywords" content="HDFS,Spark,大数据,RDD"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="从 CSV文件的加载、分区和处理 来理解 RDD"><meta name="application-name" content="从 CSV文件的加载、分区和处理 来理解 RDD"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="从 CSV文件的加载、分区和处理 来理解 RDD"><meta property="og:url" content="http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="通过实际案例深入理解Spark RDD的分区机制、数据流转和Shuffle过程"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png"><meta name="description" content="通过实际案例深入理解Spark RDD的分区机制、数据流转和Shuffle过程"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '从 CSV文件的加载、分区和处理 来理解 RDD',
+  postAI: '',
+  pageFillDescription: '从 CSV文件的加载、分区和处理 来理解 RDD, 1. HDFS 存储层面：物理分块, 2. Spark 读取：创建初始 RDD (textFile), a) 确定 RDD 的分区数, b) 分区与 HDFS Block 的映射, 3. 数据存储位置：运行时过程, 执行阶段：, 4. 分区数据内容, 5.详细执行过程, 阶段1：加载与初始分区（窄依赖）, 阶段2：转换操作（窄依赖 - 流水线执行）, 阶段3：Shuffle操作（宽依赖 - 数据重组）, 步骤 1 划分 Stage（Driver决策）, 步骤 2：Stage 0 执行（Shuffle Write）, 步骤 3 Stage 1 执行（Shuffle Read）, 阶段 4 结果收集, Shuffle 数据流全景, 5. 核心问题解答, Q1：分区数据存储在哪里？, Q2：会多获取数据吗？, 6. 总结：从文件的加载分区和处理来理解之前看了不少关于的介绍其实看都可以看得懂但是还是会有不少疑问比如是抽象的那么中的谈到的分区列表依赖关系计算函数又是存储在哪的执行器是怎么就拿到了自己的分区数据的会不会多拿到其他分区的数据分区列表中如果不存储真实数据那么这些数据又是怎么分配到执行器的这里我拆解一个文件在上如何被加载分区和存储的就应该很方便理解了存储层面物理分块假设比如文件大小为默认块大小为行为会自动将文件切割成个物理块存储在节点和上副本存储在节点和上副本关键点这是物理存储级别的分块由控制目的是容错和分布式存储读取创建初始当我在中执行会执行以下操作确定的分区数默认规则每个对应个分区本例中文件被切分成个会有个分区手动指定分区数强制分成个分区如果文件不可切分如压缩文件分区数文件数如果文件可切分如会尝试按字节划分成份可能不等分分区与的映射分区负责的范围数据位置偏好分区的存储节点分区的存储节点极其重要每个分区知道它应该读取哪个并且知道该存储在哪些节点上数据存储位置运行时过程执行阶段分配任务根据分区的位置偏好将任务分配给离数据最近的例如处理分区优先调度到或上的处理分区优先调度到或上的读取数据每个启动后通过读取对应的本地性优化如果在执行它直接从本机的读取本地读取速度最快如果繁忙可能调度到从同一机架内的读取机架本地性速度中等最差情况跨机架读取如调度到读取数据在中的存储读取的数据以行的形式加载到内存每行是中的一条记录存储位置的堆内存中除非指定了持久化级别存储形式按分区存储每个处理的分区数据独立存在于执行它的内存中分区数据内容假设内容如下分区可能包含前分区可能包含后注意分区边界是按字节切割的可能截断某一行最后一行不完整会确保分区读取到第一个完整行最后一个完整行分区从上个分区未读完的位置开始直到文件结束详细执行过程我们所编写的代码整体如下刚刚说的是加载部分下面说的就是数据清洗与聚合了加载假设文件个个分区数据清洗过滤提取字段过滤标题行城市操作按城市聚合触发计算行动操作输出结果阶段加载与初始分区窄依赖读取读取阶段转换操作窄依赖流水线执行原始数据操作清洗后原始数据操作清洗后处理输入转换后处理输入转换后这里我们其实可以发现一个特点就是每个都整好处理的是自己机器上的数据关键特点无需跨节点通信各分区独立处理阶段操作宽依赖数据重组步骤划分决策识别是宽依赖创建新所有窄依赖操作步骤执行清洗后按城市分区清洗后按城市分区本地磁盘本地磁盘写操作每个将自己的数据按城市分组根据默认分区器计算目标分区值值将数据写入本地磁盘的临时文件并生成索引文件写入文件文件写入文件文件步骤执行文件文件创建新处理最终的处理最终的读操作从所有拉取属于的数据从拉取从拉取拉取的数据从拉取从拉取聚合计算执行执行阶段结果收集结果结果最终数据到达数据流全景磁盘文件磁盘文件数据数据数据数据最终结果为什么需要因为有些操作必须要将数据进行重新分区才好进行计算统计操作类型数据移动网络开销典型操作窄依赖数据不动移动低宽依赖数据按重组跨节点传输高通过这个完整示例就可以看到分区如何从物理存储映射到计算单元窄依赖如何实现零数据传输的流水线宽依赖如何通过重组数据划分如何驱动分布式计算这正是抽象的核心价值通过清晰的阶段划分和依赖关系在分布式环境中高效执行复杂计算不需要拘束于通过概念理解核心问题解答分区数据存储在哪里原始数据物理存储在如处理时计算中数据加载到的堆内存持久化后可缓存到内存磁盘通过会多获取数据吗绝对不会每个只读取自己分区映射的范围优化机制机制作用位置感知调度优先在存有数据的节点执行块定位直接读取本地或邻近节点的数据块精确的字节范围读取每个只读取分配给它的连续字节区间总结初始化阶段创建构建依赖图划分根据边界计算分区任务列表构建执行发送任务含分区计算逻辑读取指定数据块执行流水线操作将结果写入内存缓冲区排序按分区写入本地磁盘文件汇报状态和元数据执行发送任务含聚合逻辑根据元数据拉取对应分区的数据合并数据可能溢写到磁盘执行聚合操作返回最终结果分区数据汇总所有分区的结果关键原则移动计算而非数据将发送到数据所在的节点简而言之就是让计算尽量贴近数据我们可能习惯于将数据传输到计算端进行处理比如查询但是对于大数据处理来说计算逻辑好移动而数据难移动分而治之大文件被划分成小分区并行处理这其实就是类似于后端常用的多线程大文件划区之后并行处理那么整体速度就得到极大提升精准映射分区与一一对应无重复读取不光天然分块其实很多分布式文件系统都是有分块机制的比如对于不天然支持分块的数据源比如是可以人工分区的并行读取按照分区键进行划分区此处就是是分区是分区以此类推分区键最小值最大值分区数通过这种设计能高效处理远大于内存的分布式文件而开发者只需写几行代码',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-16 15:08:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 1.05rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 1.05rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 1.05rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/HDFS/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>HDFS</span></a><a class="article-meta__tags" href="/tags/Spark/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Spark</span></a><a class="article-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>大数据</span></a><a class="article-meta__tags" href="/tags/RDD/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>RDD</span></a></span></div></div><h1 class="post-title" itemprop="name headline">从 CSV文件的加载、分区和处理 来理解 RDD</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-15T11:00:00.000Z" title="发表于 2025-07-15 19:00:00">2025-07-15</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-16T07:08:00.249Z" title="更新于 2025-07-16 15:08:00">2025-07-16</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="从 CSV文件的加载、分区和处理 来理解 RDD"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/"><header><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a><a href="/tags/HDFS/" tabindex="-1" itemprop="url">HDFS</a><a href="/tags/Spark/" tabindex="-1" itemprop="url">Spark</a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url">大数据</a><a href="/tags/RDD/" tabindex="-1" itemprop="url">RDD</a><h1 id="CrawlerTitle" itemprop="name headline">从 CSV文件的加载、分区和处理 来理解 RDD</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-15T11:00:00.000Z" title="发表于 2025-07-15 19:00:00">2025-07-15</time><time itemprop="dateCreated datePublished" datetime="2025-07-16T07:08:00.249Z" title="更新于 2025-07-16 15:08:00">2025-07-16</time></header><h1 id="从-CSV文件的加载、分区和处理-来理解-RDD"><a href="#从-CSV文件的加载、分区和处理-来理解-RDD" class="headerlink" title="从 CSV文件的加载、分区和处理 来理解 RDD"></a>从 CSV文件的加载、分区和处理 来理解 RDD</h1><p>之前看了不少关于Spark RDD的介绍，其实看都可以看得懂，但是还是会有不少疑问。比如</p>
+<ul>
+<li>RDD 是抽象的，那么RDD中的谈到的分区列表、依赖关系、计算函数又是存储在哪的？</li>
+<li>执行器是怎么就拿到了自己的 分区数据的？会不会多拿到其他分区的数据</li>
+<li>RDD分区列表中如果不存储真实数据，那么这些数据又是怎么分配到执行器的？</li>
+</ul>
+<p>这里我拆解一个 csv文件在 HDFS上 如何被 Spark RDD 加载、分区和存储的，就应该很方便理解 RDD了。</p>
+<hr>
+<h2 id="1-HDFS-存储层面：物理分块"><a href="#1-HDFS-存储层面：物理分块" class="headerlink" title="1. HDFS 存储层面：物理分块"></a><strong>1. HDFS 存储层面：物理分块</strong></h2><ul>
+<li><strong>假设：</strong> 比如 CSV 文件 <code>data.csv</code> 大小为 <strong>256MB</strong>，HDFS 默认块大小（block size）为 <strong>128MB</strong>。</li>
+<li><strong>HDFS 行为：</strong><ul>
+<li>HDFS 会自动将文件切割成 2 个物理块：<ul>
+<li><code>Block 0</code>: 0 - 128MB (存储在节点 <code>Node1</code> 和 <code>Node2</code> 上，副本)</li>
+<li><code>Block 1</code>: 128MB - 256MB (存储在节点 <code>Node3</code> 和 <code>Node4</code> 上，副本)</li>
+</ul>
+</li>
+<li><strong>关键点：</strong> 这是 <strong>物理存储级别</strong> 的分块，由 HDFS 控制，目的是容错和分布式存储。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="2-Spark-读取：创建初始-RDD-textFile"><a href="#2-Spark-读取：创建初始-RDD-textFile" class="headerlink" title="2. Spark 读取：创建初始 RDD (textFile)"></a><strong>2. Spark 读取：创建初始 RDD (<code>textFile</code>)</strong></h2><p>当我在 Spark 中执行：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">JavaRDD</span>&lt;<span class="type">String</span>&gt; rdd = sc.textFile(<span class="string">&quot;hdfs://data/users.csv&quot;</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>Spark 会执行以下操作：</p>
+<h4 id="a-确定-RDD-的分区数"><a href="#a-确定-RDD-的分区数" class="headerlink" title="a) 确定 RDD 的分区数"></a><strong>a) 确定 RDD 的分区数</strong></h4><ul>
+<li><p><strong>默认规则：</strong> 每个 HDFS Block 对应 <strong>1个 RDD 分区</strong>。</p>
+<ul>
+<li>本例中：文件被切分成 2 个 HDFS Block → RDD 会有 <strong>2 个分区</strong> (<code>Partition 0</code>, <code>Partition 1</code>)。</li>
+</ul>
+</li>
+<li><p><strong>手动指定分区数：</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> rdd = sc.textFile(<span class="string">&quot;hdfs://path/to/data.csv&quot;</span>, <span class="number">4</span>) <span class="comment">// 强制分成4个分区</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>如果文件不可切分（如 GZIP 压缩文件），分区数 &#x3D; 文件数。</li>
+<li>如果文件可切分（如 CSV），Spark 会尝试按字节划分成 4 份（可能<strong>不等分</strong>）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="b-分区与-HDFS-Block-的映射"><a href="#b-分区与-HDFS-Block-的映射" class="headerlink" title="b) 分区与 HDFS Block 的映射"></a><strong>b) 分区与 HDFS Block 的映射</strong></h4><table>
+<thead>
+<tr>
+<th>RDD 分区</th>
+<th>负责的 HDFS Block 范围</th>
+<th>数据位置偏好 (Preferred Locations)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分区 0</td>
+<td>0 - 128MB (Block 0)</td>
+<td><code>[Node1, Node2]</code> (Block 0 的存储节点)</td>
+</tr>
+<tr>
+<td>分区 1</td>
+<td>128MB - 256MB (Block 1)</td>
+<td><code>[Node3, Node4]</code> (Block 1 的存储节点)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>✅ <strong>极其重要：</strong> 每个 RDD 分区知道它应该读取哪个 HDFS Block，并且知道该 Block 存储在哪些节点上。</p>
+</blockquote>
+<hr>
+<h2 id="3-数据存储位置：运行时过程"><a href="#3-数据存储位置：运行时过程" class="headerlink" title="3. 数据存储位置：运行时过程"></a><strong>3. 数据存储位置：运行时过程</strong></h2><h4 id="执行阶段："><a href="#执行阶段：" class="headerlink" title="执行阶段："></a><strong>执行阶段：</strong></h4><ol>
+<li><strong>Driver 分配任务：</strong><ul>
+<li>根据 RDD 分区的位置偏好，Driver 将任务分配给离数据最近的 Executor。</li>
+<li>例如：<ul>
+<li><code>Task 0</code> (处理分区0) → 优先调度到 <code>Node1</code> 或 <code>Node2</code> 上的 Executor。</li>
+<li><code>Task 1</code> (处理分区1) → 优先调度到 <code>Node3</code> 或 <code>Node4</code> 上的 Executor。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Executor 读取数据：</strong><ul>
+<li>每个 Task 启动后，通过 <strong>HDFS Client</strong> 读取对应的 Block。</li>
+<li><strong>本地性优化：</strong><ul>
+<li>如果 Task 在 <code>Node1</code> 执行，它直接从本机的 HDFS DataNode 读取 <code>Block 0</code> (<strong>本地读取</strong>，速度最快)。</li>
+<li>如果 <code>Node1</code> 繁忙，Task 可能调度到 <code>Node2</code> → 从同一机架内的 <code>Node1</code> 读取 (<strong>机架本地性</strong>，速度中等)。</li>
+<li>最差情况：跨机架读取（如调度到 <code>Node5</code> 读取 <code>Block 0</code>）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>数据在 Executor 中的存储：</strong><ul>
+<li>读取的数据以 <strong>行（String）</strong> 的形式加载到内存（每行是 CSV 中的一条记录）。</li>
+<li>存储位置：<strong>Executor 的 JVM 堆内存</strong> 中（除非指定了持久化级别）。</li>
+<li>存储形式：按分区存储，每个 Task 处理的分区数据独立存在于执行它的 Executor 内存中。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="4-分区数据内容"><a href="#4-分区数据内容" class="headerlink" title="4. 分区数据内容"></a><strong>4. 分区数据内容</strong></h2><p>假设 CSV 内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1,Alice,Beijing</span><br><span class="line">2,Bob,Shanghai</span><br><span class="line">1001,David,Shanghai</span><br><span class="line">1002,Eve,Shenzhen</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>分区 0 可能包含：</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">&quot;1,Alice,Beijing&quot;</span>, <span class="string">&quot;2,Bob,Shanghai&quot;</span>, <span class="string">&quot;3,Charlie,Beijing&quot;</span>, ...]  # 前<span class="number">128</span>MB</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>分区 1 可能包含：</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">&quot;1001,David,Shanghai&quot;</span>, <span class="string">&quot;1002,Eve,Shenzhen&quot;</span>, ...]  # 后<span class="number">128</span>MB</span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>注意：</strong> 分区边界是<strong>按字节切割的</strong>，可能<strong>截断某一行</strong>（最后一行不完整）。Spark 会确保：</p>
+<ul>
+<li>分区0读取到第一个完整行 → 最后一个完整行</li>
+<li>分区1从上个分区未读完的位置开始 → 直到文件结束</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="5-详细执行过程"><a href="#5-详细执行过程" class="headerlink" title="5.详细执行过程"></a>5.详细执行过程</h2><p>我们所编写的spark代码整体如下，刚刚说的是 加载csv部分，下面说的就是 数据清洗与聚合了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">JavaSparkContext sc = new JavaSparkContext();</span><br><span class="line"></span><br><span class="line">// 1. 加载 CSV（假设文件 256MB，2个HDFS Block）</span><br><span class="line">JavaRDD&lt;String&gt; rdd = sc.textFile(&quot;hdfs://data/users.csv&quot;);  // 2个分区</span><br><span class="line"></span><br><span class="line">// 2. 数据清洗（过滤 + 提取字段）</span><br><span class="line">JavaPairRDD&lt;String, Integer&gt; cleanedRdd = rdd.filter(new Function&lt;String, Boolean&gt;() &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public Boolean call(String line) throws Exception &#123;</span><br><span class="line">    return !line.contains(&quot;id&quot;);  // 过滤标题行</span><br><span class="line">  &#125;</span><br><span class="line">&#125;).mapToPair(new PairFunction&lt;String, String, Integer&gt;() &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public Tuple2&lt;String, Integer&gt; call(String line) throws Exception &#123;</span><br><span class="line">    String[] arr = line.split(&quot;,&quot;);</span><br><span class="line">    return new Tuple2&lt;&gt;(arr[2], 1);  // (城市, 1)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 3. Shuffle操作（按城市聚合）</span><br><span class="line">JavaPairRDD&lt;String, Integer&gt; cityCountRdd = cleanedRdd.reduceByKey(new Function2&lt;Integer, Integer, Integer&gt;() &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public Integer call(Integer a, Integer b) throws Exception &#123;</span><br><span class="line">    return a + b;  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 4. 触发计算（行动操作）</span><br><span class="line">List&lt;Tuple2&lt;String, Integer&gt;&gt; results = cityCountRdd.collect();</span><br><span class="line"></span><br><span class="line">// 输出结果</span><br><span class="line">for (Tuple2&lt;String, Integer&gt; result : results) &#123;</span><br><span class="line">  System.out.println(result._1() + &quot;: &quot; + result._2());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="阶段1：加载与初始分区（窄依赖）"><a href="#阶段1：加载与初始分区（窄依赖）" class="headerlink" title="阶段1：加载与初始分区（窄依赖）"></a>阶段1：加载与初始分区（窄依赖）</h3><pre class="mermaid">graph TB
+    A[HDFS Block 0] -->|读取| B[Executor1-Part0]
+    C[HDFS Block 1] -->|读取| D[Executor2-Part1]</pre>
+
+<h3 id="阶段2：转换操作（窄依赖-流水线执行）"><a href="#阶段2：转换操作（窄依赖-流水线执行）" class="headerlink" title="阶段2：转换操作（窄依赖 - 流水线执行）"></a>阶段2：转换操作（窄依赖 - 流水线执行）</h3><pre class="mermaid">graph LR
+    B[Part0原始数据] --> E[filter+map操作] --> F[Part0清洗后]
+    D[Part1原始数据] --> G[filter+map操作] --> H[Part1清洗后]</pre>
+
+<ul>
+<li><p><strong>Executor1 处理 Partition 0</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 输入</span><br><span class="line">[&quot;1,Alice,Beijing&quot;, &quot;2,Bob,Shanghai&quot;, ...]</span><br><span class="line"></span><br><span class="line"># 转换后</span><br><span class="line">[(&quot;Beijing&quot;,1), (&quot;Shanghai&quot;,1), (&quot;Beijing&quot;,1), ...]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Executor2 处理 Partition 1</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 输入</span><br><span class="line">[&quot;1001,David,Shanghai&quot;, &quot;1002,Eve,Shenzhen&quot;, ...]</span><br><span class="line"></span><br><span class="line"># 转换后</span><br><span class="line">[(&quot;Shanghai&quot;,1), (&quot;Shenzhen&quot;,1), ...]</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>这里我们其实可以发现一个特点，就是每个 Executor 都整好处理的是 自己机器上的 Partition数据。</p>
+<blockquote>
+<p>✅ <strong>关键特点</strong>：无需跨节点通信，各分区独立处理</p>
+</blockquote>
+<h3 id="阶段3：Shuffle操作（宽依赖-数据重组）"><a href="#阶段3：Shuffle操作（宽依赖-数据重组）" class="headerlink" title="阶段3：Shuffle操作（宽依赖 - 数据重组）"></a>阶段3：Shuffle操作（宽依赖 - 数据重组）</h3><h4 id="步骤-1-划分-Stage（Driver决策）"><a href="#步骤-1-划分-Stage（Driver决策）" class="headerlink" title="步骤 1: 划分 Stage（Driver决策）"></a>步骤 1: 划分 Stage（Driver决策）</h4><ul>
+<li>识别 <code>reduceByKey</code> 是宽依赖 → 创建新 Stage</li>
+<li><strong>Stage 0</strong>: 所有窄依赖操作（textFile → filter → map）</li>
+<li><strong>Stage 1</strong>: reduceByKey</li>
+</ul>
+<h4 id="步骤-2：Stage-0-执行（Shuffle-Write）"><a href="#步骤-2：Stage-0-执行（Shuffle-Write）" class="headerlink" title="步骤 2：Stage 0 执行（Shuffle Write）"></a>步骤 2：Stage 0 执行（Shuffle Write）</h4><pre class="mermaid">graph TB
+    F[Part0清洗后] --> I[按城市分区]
+    H[Part1清洗后] --> J[按城市分区]
+    I --> K[Executor1本地磁盘]
+    J --> L[Executor2本地磁盘]</pre>
+
+<ul>
+<li><p><strong>Shuffle 写操作</strong>：</p>
+<ul>
+<li><p>每个 Task 将自己的数据 <strong>按 Key（城市）分组</strong></p>
+</li>
+<li><p>根据默认分区器（<code>HashPartitioner</code>）计算目标分区</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Partition 0: Beijing, Shenzhen → Hash值%2=0</span><br><span class="line">Partition 1: Shanghai → Hash值%2=1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将数据写入 <strong>本地磁盘的 Shuffle 临时文件</strong>，并生成索引文件</p>
+</li>
+</ul>
+</li>
+<li><p><strong>Executor1 写入</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 文件：shuffle_0_temp_0.data (Partition <span class="number">0</span>)</span><br><span class="line">(<span class="string">&quot;Beijing&quot;</span>,<span class="number">1</span>), (<span class="string">&quot;Beijing&quot;</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"># 文件：shuffle_0_temp_1.data (Partition <span class="number">1</span>)</span><br><span class="line">(<span class="string">&quot;Shanghai&quot;</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Executor2 写入</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 文件：shuffle_1_temp_0.data (Partition <span class="number">0</span>)</span><br><span class="line">(<span class="string">&quot;Shenzhen&quot;</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"># 文件：shuffle_1_temp_1.data (Partition <span class="number">1</span>)</span><br><span class="line">(<span class="string">&quot;Shanghai&quot;</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="步骤-3-Stage-1-执行（Shuffle-Read）"><a href="#步骤-3-Stage-1-执行（Shuffle-Read）" class="headerlink" title="步骤 3: Stage 1 执行（Shuffle Read）"></a>步骤 3: Stage 1 执行（Shuffle Read）</h4><pre class="mermaid">graph LR
+    K[Shuffle文件] --> M[TaskA]
+    L[Shuffle文件] --> M
+    K --> N[TaskB]
+    L --> N</pre>
+
+<ul>
+<li><p><strong>Driver 创建新 Task</strong>：</p>
+<ul>
+<li>Task A：处理最终 RDD 的 Partition 0（Key: Beijing, Shenzhen）</li>
+<li>Task B：处理最终 RDD 的 Partition 1（Key: Shanghai）</li>
+</ul>
+</li>
+<li><p><strong>Shuffle 读操作</strong>：</p>
+<ul>
+<li><p>Task A 从 <strong>所有 Executor</strong> 拉取属于 Partition 0 的数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 从 Executor1 拉取：(&quot;Beijing&quot;,1), (&quot;Beijing&quot;,1)</span><br><span class="line"># 从 Executor2 拉取：(&quot;Shenzhen&quot;,1)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Task B 拉取 Partition 1 的数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 从 Executor1 拉取：(&quot;Shanghai&quot;,1)</span><br><span class="line"># 从 Executor2 拉取：(&quot;Shanghai&quot;,1)</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>聚合计算</strong>：</p>
+<ul>
+<li><p>Task A 执行 <code>reduceByKey</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Beijing: 1 + 1 = 2</span><br><span class="line">Shenzhen: 1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Task B 执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Shanghai: 1 + 1 = 2</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="阶段-4-结果收集"><a href="#阶段-4-结果收集" class="headerlink" title="阶段 4: 结果收集"></a>阶段 4: 结果收集</h3><pre class="mermaid">graph LR
+    M[TaskA结果] --> O[Driver]
+    N[TaskB结果] --> O</pre>
+
+<p>最终数据到达 Driver：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[(&quot;Beijing&quot;,2), (&quot;Shenzhen&quot;,1), (&quot;Shanghai&quot;,2)]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Shuffle-数据流全景"><a href="#Shuffle-数据流全景" class="headerlink" title="Shuffle 数据流全景"></a>Shuffle 数据流全景</h3><pre class="mermaid">flowchart LR
+    subgraph Stage 0
+        A[Executor1] -->|Shuffle Write| D[磁盘文件]
+        B[Executor2] -->|Shuffle Write| E[磁盘文件]
+    end
+    
+    subgraph Stage 1
+        D -->|Part0数据| F[TaskA]
+        E -->|Part0数据| F
+        D -->|Part1数据| G[TaskB]
+        E -->|Part1数据| G
+    end
+    
+    F --> H[最终结果]
+    G --> H</pre>
+
+<p>为什么需要 Shuffle？因为有些操作必须要将数据进行重新分区才好进行计算、统计。</p>
+<table>
+<thead>
+<tr>
+<th align="left">操作类型</th>
+<th align="left">数据移动</th>
+<th align="left">网络开销</th>
+<th align="left">典型操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>窄依赖</strong></td>
+<td align="left">数据不动 Task移动</td>
+<td align="left">低</td>
+<td align="left"><code>map</code>, <code>filter</code></td>
+</tr>
+<tr>
+<td align="left"><strong>宽依赖</strong></td>
+<td align="left">数据按Key重组 跨节点传输</td>
+<td align="left">高</td>
+<td align="left"><code>groupByKey</code>, <code>reduceByKey</code></td>
+</tr>
+</tbody></table>
+<p>通过这个完整示例，就可以看到：</p>
+<ol>
+<li><strong>分区</strong>如何从物理存储映射到计算单元</li>
+<li><strong>窄依赖</strong>如何实现零数据传输的流水线</li>
+<li><strong>宽依赖</strong>如何通过Shuffle重组数据</li>
+<li><strong>Stage划分</strong>如何驱动分布式计算</li>
+</ol>
+<p>这正是 RDD 抽象的核心价值——通过清晰的阶段划分和依赖关系，在分布式环境中高效执行复杂计算。不需要拘束于通过概念理解 RDD。</p>
+<h3 id="5-核心问题解答"><a href="#5-核心问题解答" class="headerlink" title="5. 核心问题解答"></a><strong>5. 核心问题解答</strong></h3><h4 id="Q1：分区数据存储在哪里？"><a href="#Q1：分区数据存储在哪里？" class="headerlink" title="Q1：分区数据存储在哪里？"></a><strong>Q1：分区数据存储在哪里？</strong></h4><ul>
+<li><strong>原始数据：</strong> 物理存储在 HDFS DataNode（如 <code>Node1</code>, <code>Node2</code>, <code>Node3</code>, <code>Node4</code>）。</li>
+<li><strong>RDD 处理时：</strong> <ul>
+<li>计算中：数据加载到 <strong>Executor 的 JVM 堆内存</strong>。</li>
+<li>持久化后：可缓存到 Executor 内存&#x2F;磁盘（通过 <code>rdd.persist()</code>）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="Q2：会多获取数据吗？"><a href="#Q2：会多获取数据吗？" class="headerlink" title="Q2：会多获取数据吗？"></a><strong>Q2：会多获取数据吗？</strong></h4><ul>
+<li><p><strong>绝对不会！</strong> 每个 Task 只读取<strong>自己分区映射的 HDFS Block 范围</strong>。</p>
+</li>
+<li><p><strong>优化机制：</strong></p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>位置感知调度</td>
+<td>Task 优先在存有数据的节点执行</td>
+</tr>
+<tr>
+<td>HDFS 块定位</td>
+<td>Executor 直接读取本地或邻近节点的数据块</td>
+</tr>
+<tr>
+<td>精确的字节范围读取</td>
+<td>每个 Task 只读取分配给它的连续字节区间</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<hr>
+<h3 id="6-总结："><a href="#6-总结：" class="headerlink" title="6. 总结："></a><strong>6. 总结：</strong></h3><pre class="mermaid">sequenceDiagram
+    participant Driver
+    participant Executor
+    participant HDFS
+    participant LocalDisk
+    participant OtherExecutor
+
+    Note over Driver: 初始化阶段
+    Driver->>Driver: 1. 创建SparkContext
+    Driver->>Driver: 2. 构建RDD依赖图 (DAG)
+    Driver->>Driver: 3. 划分Stage (根据Shuffle边界)
+    Driver->>Driver: 4. 计算分区/任务列表（构建DAG）
+
+    Note over Driver,Executor: Stage 0 执行 (ShuffleMapStage)
+    Driver->>Executor: 5. 发送Stage0任务（含分区计算逻辑）
+    Executor->>HDFS: 6. 读取指定数据块
+    Executor->>Executor: 7. 执行流水线操作：<br/>- Map<br/>- Filter<br/>- Partitioning
+    Executor->>Executor: 8. 将结果写入内存缓冲区
+    Executor->>LocalDisk: 9. Shuffle Write：<br/>- 排序<br/>- 按分区写入本地磁盘文件
+    Executor->>Driver: 10. 汇报状态和Shuffle元数据
+
+    Note over Driver,Executor: Stage 1 执行 (ResultStage)
+    Driver->>Executor: 11. 发送Stage1任务（含聚合逻辑）
+    Executor->>OtherExecutor: 12. Shuffle Read：<br/>- 根据元数据拉取对应分区的数据
+    Executor->>Executor: 13. 合并数据（可能溢写到磁盘）
+    Executor->>Executor: 14. 执行聚合操作：<br/>- reduceByKey<br/>- combine
+    Executor->>Driver: 15. 返回最终结果分区数据
+    Driver->>Driver: 16. 汇总所有分区的结果</pre>
+
+<p><strong>关键原则：</strong></p>
+<ol>
+<li><p><strong>移动计算，而非数据</strong>：将 Task 发送到数据所在的节点。简而言之就是让计算尽量贴近数据。我们可能习惯于将数据传输到计算端进行处理，比如查询mysql、es、mongo。但是对于大数据处理来说，计算逻辑好移动，而数据难移动。</p>
+</li>
+<li><p><strong>分而治之</strong>：大文件被划分成小分区，并行处理。这其实就是类似于后端常用的多线程，大文件划区之后，并行处理，那么整体速度就得到极大提升。</p>
+</li>
+<li><p><strong>精准映射</strong>：RDD 分区与 HDFS Block 一一对应，无重复读取。不光HDFS天然分块，其实很多分布式文件系统都是有分块机制的，比如S3。对于不天然支持分块的数据源，比如mysql 是可以人工分区的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 并行读取 MySQL (按照分区键进行划分区，此处就是1-1000000是分区0，1000001-2000000是分区1 以此类推...)</span></span><br><span class="line"><span class="type">val</span> <span class="variable">jdbcDF</span> <span class="operator">=</span> spark.read</span><br><span class="line">  .format(<span class="string">&quot;jdbc&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;url&quot;</span>, <span class="string">&quot;jdbc:mysql://host:3306/db&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;dbtable&quot;</span>, <span class="string">&quot;orders&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;partitionColumn&quot;</span>, <span class="string">&quot;order_id&quot;</span>)   <span class="comment">// 分区键</span></span><br><span class="line">  .option(<span class="string">&quot;lowerBound&quot;</span>, <span class="number">1</span>)                <span class="comment">// 最小值</span></span><br><span class="line">  .option(<span class="string">&quot;upperBound&quot;</span>, <span class="number">1000000</span>)          <span class="comment">// 最大值</span></span><br><span class="line">  .option(<span class="string">&quot;numPartitions&quot;</span>, <span class="number">10</span>)            <span class="comment">// 分区数</span></span><br><span class="line">  .load()</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>通过这种设计，Spark 能高效处理远大于内存的分布式文件，而开发者只需写几行代码。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/')">从 CSV文件的加载、分区和处理 来理解 RDD</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=从 CSV文件的加载、分区和处理 来理解 RDD&amp;url=http://example.com/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/HDFS/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>HDFS<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/Spark/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Spark<span class="tagsPageCount">6</span></a><a class="post-meta__box__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>大数据<span class="tagsPageCount">4</span></a><a class="post-meta__box__tags" href="/tags/RDD/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>RDD<span class="tagsPageCount">2</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">浅尝 Spring AI</div></div></a></div><div class="next-post pull-right"><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/06/18/hadoop-ecosystem-explained/" title="Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250619194740317.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-18</div><div class="title">Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？</div></div></a></div><div><a href="/2025/07/08/Spark%E4%B8%93%E6%A0%8F%E6%95%B4%E4%BD%93%E6%96%87%E7%AB%A0%E5%A4%A7%E7%BA%B2/" title="Spark专栏整体文章大纲"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-08</div><div class="title">Spark专栏整体文章大纲</div></div></a></div><div><a href="/2025/07/10/Spark%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%87%92%E6%83%B0%E8%AE%A1%E7%AE%97/" title="Spark核心概念与懒惰计算[未修订完]"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-10</div><div class="title">Spark核心概念与懒惰计算[未修订完]</div></div></a></div><div><a href="/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/" title="Spark集群架构与组件详解：从Driver到Executor的深度解析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-01-15</div><div class="title">Spark集群架构与组件详解：从Driver到Executor的深度解析</div></div></a></div><div><a href="/2025/06/25/HDFS%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3%EF%BC%9A%E6%9E%B6%E6%9E%84%E3%80%81%E5%AD%98%E5%82%A8%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6/" title="HDFS技术详解：架构、存储与数据安全机制"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-25</div><div class="title">HDFS技术详解：架构、存储与数据安全机制</div></div></a></div><div><a href="/2025/07/09/Spark3.x%E6%A0%B8%E5%BF%83%E7%AE%97%E5%AD%90%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%B5%81%E8%BD%AC%E4%B8%8EShuffle%E6%9C%BA%E5%88%B6/" title="Spark3.x核心算子原理解析：数据流转与Shuffle机制[后面会拆分]"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250703143549645.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-09</div><div class="title">Spark3.x核心算子原理解析：数据流转与Shuffle机制[后面会拆分]</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%8E-CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86-%E6%9D%A5%E7%90%86%E8%A7%A3-RDD"><span class="toc-number">1.</span> <span class="toc-text">从 CSV文件的加载、分区和处理 来理解 RDD</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-HDFS-%E5%AD%98%E5%82%A8%E5%B1%82%E9%9D%A2%EF%BC%9A%E7%89%A9%E7%90%86%E5%88%86%E5%9D%97"><span class="toc-number">1.1.</span> <span class="toc-text">1. HDFS 存储层面：物理分块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Spark-%E8%AF%BB%E5%8F%96%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%88%9D%E5%A7%8B-RDD-textFile"><span class="toc-number">1.2.</span> <span class="toc-text">2. Spark 读取：创建初始 RDD (textFile)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#a-%E7%A1%AE%E5%AE%9A-RDD-%E7%9A%84%E5%88%86%E5%8C%BA%E6%95%B0"><span class="toc-number">1.2.0.1.</span> <span class="toc-text">a) 确定 RDD 的分区数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#b-%E5%88%86%E5%8C%BA%E4%B8%8E-HDFS-Block-%E7%9A%84%E6%98%A0%E5%B0%84"><span class="toc-number">1.2.0.2.</span> <span class="toc-text">b) 分区与 HDFS Block 的映射</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE%EF%BC%9A%E8%BF%90%E8%A1%8C%E6%97%B6%E8%BF%87%E7%A8%8B"><span class="toc-number">1.3.</span> <span class="toc-text">3. 数据存储位置：运行时过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E9%98%B6%E6%AE%B5%EF%BC%9A"><span class="toc-number">1.3.0.1.</span> <span class="toc-text">执行阶段：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%88%86%E5%8C%BA%E6%95%B0%E6%8D%AE%E5%86%85%E5%AE%B9"><span class="toc-number">1.4.</span> <span class="toc-text">4. 分区数据内容</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E8%AF%A6%E7%BB%86%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">5.详细执行过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B51%EF%BC%9A%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%88%86%E5%8C%BA%EF%BC%88%E7%AA%84%E4%BE%9D%E8%B5%96%EF%BC%89"><span class="toc-number">1.5.1.</span> <span class="toc-text">阶段1：加载与初始分区（窄依赖）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B52%EF%BC%9A%E8%BD%AC%E6%8D%A2%E6%93%8D%E4%BD%9C%EF%BC%88%E7%AA%84%E4%BE%9D%E8%B5%96-%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%89%A7%E8%A1%8C%EF%BC%89"><span class="toc-number">1.5.2.</span> <span class="toc-text">阶段2：转换操作（窄依赖 - 流水线执行）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B53%EF%BC%9AShuffle%E6%93%8D%E4%BD%9C%EF%BC%88%E5%AE%BD%E4%BE%9D%E8%B5%96-%E6%95%B0%E6%8D%AE%E9%87%8D%E7%BB%84%EF%BC%89"><span class="toc-number">1.5.3.</span> <span class="toc-text">阶段3：Shuffle操作（宽依赖 - 数据重组）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1-%E5%88%92%E5%88%86-Stage%EF%BC%88Driver%E5%86%B3%E7%AD%96%EF%BC%89"><span class="toc-number">1.5.3.1.</span> <span class="toc-text">步骤 1: 划分 Stage（Driver决策）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9AStage-0-%E6%89%A7%E8%A1%8C%EF%BC%88Shuffle-Write%EF%BC%89"><span class="toc-number">1.5.3.2.</span> <span class="toc-text">步骤 2：Stage 0 执行（Shuffle Write）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3-Stage-1-%E6%89%A7%E8%A1%8C%EF%BC%88Shuffle-Read%EF%BC%89"><span class="toc-number">1.5.3.3.</span> <span class="toc-text">步骤 3: Stage 1 执行（Shuffle Read）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-4-%E7%BB%93%E6%9E%9C%E6%94%B6%E9%9B%86"><span class="toc-number">1.5.4.</span> <span class="toc-text">阶段 4: 结果收集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Shuffle-%E6%95%B0%E6%8D%AE%E6%B5%81%E5%85%A8%E6%99%AF"><span class="toc-number">1.5.5.</span> <span class="toc-text">Shuffle 数据流全景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%94"><span class="toc-number">1.5.6.</span> <span class="toc-text">5. 核心问题解答</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Q1%EF%BC%9A%E5%88%86%E5%8C%BA%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="toc-number">1.5.6.1.</span> <span class="toc-text">Q1：分区数据存储在哪里？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Q2%EF%BC%9A%E4%BC%9A%E5%A4%9A%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%90%97%EF%BC%9F"><span class="toc-number">1.5.6.2.</span> <span class="toc-text">Q2：会多获取数据吗？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">1.5.7.</span> <span class="toc-text">6. 总结：</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave启动和初始化流程"/></a><div class="content"><a class="title" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程">HyperEnclave启动和初始化流程</a><time datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"/></a><div class="content"><a class="title" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</a><time datetime="2025-07-20T14:00:00.000Z" title="发表于 2025-07-20 22:00:00">2025-07-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从 CSV文件的加载、分区和处理 来理解 RDD"/></a><div class="content"><a class="title" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD">从 CSV文件的加载、分区和处理 来理解 RDD</a><time datetime="2025-07-15T11:00:00.000Z" title="发表于 2025-07-15 19:00:00">2025-07-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅尝 Spring AI"/></a><div class="content"><a class="title" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI">浅尝 Spring AI</a><time datetime="2025-07-11T12:00:00.000Z" title="发表于 2025-07-11 20:00:00">2025-07-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/10/Spark%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%87%92%E6%83%B0%E8%AE%A1%E7%AE%97/" title="Spark核心概念与懒惰计算[未修订完]">Spark核心概念与懒惰计算[未修订完]</a><time datetime="2025-07-10T03:00:00.000Z" title="发表于 2025-07-10 11:00:00">2025-07-10</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">44</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">57</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">6</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 0.88rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 0.88rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 0.88rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

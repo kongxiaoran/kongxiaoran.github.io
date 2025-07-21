@@ -1,0 +1,808 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>HyperEnclave启动和初始化流程 | 凌霄的博客</title><meta name="keywords" content="HyperEnclave,启动流程,初始化,虚拟化,机密计算"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="HyperEnclave启动和初始化流程"><meta name="application-name" content="HyperEnclave启动和初始化流程"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="HyperEnclave启动和初始化流程"><meta property="og:url" content="http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="深入分析蚂蚁开源的HyperEnclave项目启动和初始化流程，结合源码详细解析其实现原理和底层机制。"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png"><meta name="description" content="深入分析蚂蚁开源的HyperEnclave项目启动和初始化流程，结合源码详细解析其实现原理和底层机制。"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'HyperEnclave启动和初始化流程',
+  postAI: '',
+  pageFillDescription: '概述, 启动整体流程图, 核心函数分析, Entry函数 - 系统入口点, 关键点：, 参数说明, Main函数 - 核心初始化逻辑, 参数说明：, 第一步：CPU数据获取和同步, 第二步：早期初始化阶段, 第三步：CPU初始化, 第四步：晚期初始化阶段, 第五步：激活VMM, 底层实现机制, 为什么看起来那么简单, CPU状态获取和同步操作, 原子操作 - CPU计数, CPU ID获取, 内存映射和页表操作, 内存映射设置, 栈切换操作, 寄存器保存和恢复操作, Linux上下文保存, 控制寄存器操作, VMCS（Virtual Machine Control Structure）设置, VMCS初始化, Host状态设置, Guest状态设置, 虚拟化启动操作, VCPU激活, 中断和异常处理设置, 中断描述符表设置, 状态恢复操作, 寄存器恢复, 底层实现依赖总结, x86架构指令集, Intel VMX虚拟化指令, 原子操作指令, 内存管理指令, 中断和异常处理概述项目源码最近在看蚂蚁的很好奇它是怎么实现的其实源码量并不多非常方便我们去分析学习本文将结合源码分析的启动和初始化流程启动整体流程图内核驱动函数函数激活调用调用第一步同步和角色确定获取数据获取在线数量确定等待所有进入第二步早期初始化阶段初始化日志系统检查数量限制打印系统配置信息初始化内存回收模块初始化内存管理初始化内存单元管理标记初始化完成等待初始化完成第三步初始化初始化打印初始化完成信息递增已初始化计数等待所有初始化完成第四步晚期初始化阶段初始化日志版本检查版本不匹配返回错误版本匹配打印版本信息初始化初始化和加密模块初始化失败返回错误初始化成功标记初始化完成等待初始化完成第五步激活初始化成功切换到模式返回成功代码初始化失败任何步骤失败返回错误代码返回状态代码成功返回失败返回错误代码的入口是文件中的函数核心函数分析函数系统入口点关键点这是的入口点由内核驱动调用参数和栈指针错误处理如果失败记录错误代码状态恢复如果失败还会调用恢复状态关闭等硬件资源参数说明标识符含义物理核心的标识符表示当前正在启动的核心编号通常从开始到系统核心数在中用途用于标识每个的结构在多系统中进行协调和同步确定哪个是栈指针含义内核栈指针保存内核在调用时的栈指针位置上下文保存用于保存的执行上下文以便后续恢复栈切换需要切换到自己的栈但需要记住的栈位置用途保存的执行上下文确保退出时能正确恢复状态函数确保了能够安全地接管控制权同时也是安全退出机制的关键组成部分确保了即使在启动失败的情况下系统也能安全地恢复到状态函数核心初始化逻辑参数说明核心标识符栈指针用于保存执行上下文返回值成功为失败为第一步数据获取和同步第步获取数据和系统信息详细分析获取当前的数据结构每个都有独立的实例获取系统中在线的总数用于后续的同步等待原子操作递增已进入的计数第一个进入的返回被标记为其他被标记为等待所有都进入确保多同步启动第二步早期初始化阶段第步早期初始化阶段执行初始化日志系统检查数量限制打印系统配置信息配置信息初始化内存回收模块初始化内存管理初始化内存单元管理标记早期初始化完成等待早期初始化完成第三步初始化第步初始化详细分析初始化当前的结构设置状态保存上下文初始化内存映射和原子递增已初始化的计数等待所有都完成初始化第四步晚期初始化阶段第步晚期初始化阶段函数分析初始化日志系统版本检查初始化初始化和加密模块标记晚期初始化完成第五步激活第步激活的作用激活虚拟化硬件或切换到模式开始处理虚拟化事件底层实现机制为什么看起来那么简单我刚看的时候感觉还是挺疑惑的代码就这样就可以操作了其实刚刚我们看的代码只是胶水层实际上是有代码帮我们封装了汇编指令与一些硬件虚拟化指令下面详细说下我们函数入口涉及的到的各种操作底层是如何实现的状态获取和同步操作原子操作计数底层实现原子操作底层是的前缀指令展开为类似获取底层实现全局数组指针内存映射和页表操作内存映射设置底层实现涉及页表操作最终会执行读取寄存器获取页表基址修改页表项刷新读取页表基址刷新栈切换操作底层实现直接操作栈指针寄存器寄存器保存和恢复操作上下文保存获取读取底层实现读取寄存器读取段寄存器读取段寄存器读取段寄存器读取控制寄存器操作底层实现读取控制寄存器读取读取读取设置初始化清除加载设置状态设置状态设置控制字段底层实现指令清除加载状态设置其他寄存器设置底层实现读取寄存器读取控制寄存器写入字段状态设置段寄存器设置底层实现写入字段设置段寄存器展开为字段写入虚拟化启动操作激活关键指令底层实现设置寄存器其他寄存器设置栈指针恢复寄存器从栈上其他寄存器启动虚拟化指令启动虚拟化中断和异常处理设置中断描述符表设置底层实现加载加载段寄存器加载状态恢复操作寄存器恢复恢复寄存器其他恢复控制寄存器恢复段寄存器恢复段基址底层实现写入寄存器写入控制寄存器加载段寄存器底层实现依赖总结架构指令集操作指令控制寄存器等段寄存器等页表操作等虚拟化指令操作虚拟化启动虚拟化退出原子操作指令前缀等内存屏障内存管理指令页表操作刷新内存访问直接内存读写操作中断和异常处理描述符表指令中断控制指令这些操作都依赖于架构的硬件支持通过的宏直接执行汇编指令来实现对的底层控制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-21 21:30:15',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 1.05rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 1.05rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 1.05rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/" itemprop="url">技术研究</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/HyperEnclave/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>HyperEnclave</span></a><a class="article-meta__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>机密计算</span></a><a class="article-meta__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>虚拟化</span></a></span></div></div><h1 class="post-title" itemprop="name headline">HyperEnclave启动和初始化流程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-21T13:30:15.129Z" title="更新于 2025-07-21 21:30:15">2025-07-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="HyperEnclave启动和初始化流程"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/"><header><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6/" itemprop="url">技术研究</a><a href="/tags/HyperEnclave/" tabindex="-1" itemprop="url">HyperEnclave</a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url">机密计算</a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url">虚拟化</a><h1 id="CrawlerTitle" itemprop="name headline">HyperEnclave启动和初始化流程</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time><time itemprop="dateCreated datePublished" datetime="2025-07-21T13:30:15.129Z" title="更新于 2025-07-21 21:30:15">2025-07-21</time></header><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><blockquote>
+<p>项目源码：<a target="_blank" rel="noopener" href="https://github.com/asterinas/hyperenclave">https://github.com/asterinas/hyperenclave</a></p>
+</blockquote>
+<p>最近在看蚂蚁的HyperEnclave，很好奇它是怎么实现的。其实HyperEnclave源码量并不多，非常方便我们去分析、学习。</p>
+<p>本文将结合源码，分析HyperEnclave的启动和初始化流程。</p>
+<h2 id="启动整体流程图"><a href="#启动整体流程图" class="headerlink" title="启动整体流程图"></a>启动整体流程图</h2><pre class="mermaid">sequenceDiagram
+    participant Driver as 内核驱动
+    participant Entry as entry函数
+    participant Main as main函数
+    participant Primary as Primary CPU
+    participant Secondary as Secondary CPU
+    participant VMM as VMM激活
+
+    Driver->>Entry: 调用entry(cpu_id, linux_sp)
+    Entry->>Main: 调用main(cpu_id, linux_sp)
+    
+    Note over Main: 第一步：CPU同步和角色确定
+    Main->>Main: 获取CPU数据 PerCpu::from_id_mut(cpu_id)
+    Main->>Main: 获取在线CPU数量 HvHeader::get().online_cpus
+    Main->>Main: 确定Primary CPU ENTERED_CPUS.fetch_add(1)
+    Main->>Main: 等待所有CPU进入 wait_for_other_completed
+    
+    Note over Main: 第二步：早期初始化阶段
+    alt Primary CPU
+        Main->>Primary: primary_init_early()
+        Primary->>Primary: 初始化日志系统 logging::init()
+        Primary->>Primary: 检查CPU数量限制 cpumask::check_max_cpus()
+        Primary->>Primary: 打印系统配置信息
+        Primary->>Primary: 初始化内存回收模块 reclaim::init()
+        Primary->>Primary: 初始化内存管理 memory::init()
+        Primary->>Primary: 初始化内存单元管理 cell::init()
+        Primary->>Primary: 标记early初始化完成 INIT_EARLY_OK.store(1)
+    else Secondary CPU
+        Main->>Secondary: 等待early初始化完成 wait_for_other_completed(&INIT_EARLY_OK, 1)
+    end
+    
+    Note over Main: 第三步：CPU初始化
+    Main->>Main: CPU初始化 cpu_data.init(cpu_id, linux_sp, &cell::ROOT_CELL)
+    Main->>Main: 打印CPU初始化完成信息
+    Main->>Main: 递增已初始化CPU计数 INITED_CPUS.fetch_add(1)
+    Main->>Main: 等待所有CPU初始化完成 wait_for_other_completed(&INITED_CPUS, online_cpus)
+    
+    Note over Main: 第四步：晚期初始化阶段
+    alt Primary CPU
+        Main->>Primary: primary_init_late()
+        Primary->>Primary: 初始化hypervisor日志 logging::hhbox_init()
+        Primary->>Primary: 版本检查 LIBTPM_VERSION vs RUST_HYPERVISOR_VERSION
+        alt 版本不匹配
+            Primary-->>Main: 返回EINVAL错误
+        else 版本匹配
+            Primary->>Primary: 打印版本信息
+            Primary->>Primary: 初始化IOMMU iommu::init()
+            Primary->>Primary: 初始化TPM和加密模块 tc::tc_init()
+            alt TPM初始化失败
+                Primary-->>Main: 返回EIO错误
+            else TPM初始化成功
+                Primary->>Primary: 标记late初始化完成 INIT_LATE_OK.store(1)
+            end
+        end
+    else Secondary CPU
+        Main->>Secondary: 等待late初始化完成 wait_for_other_completed(&INIT_LATE_OK, 1)
+    end
+    
+    Note over Main: 第五步：激活VMM
+    alt 初始化成功
+        Main->>VMM: activate_vmm()
+        VMM->>VMM: 切换到hypervisor模式
+        VMM-->>Entry: 返回成功代码(0)
+    else 初始化失败
+        Note over Main: 任何步骤失败
+        Main-->>Entry: 返回错误代码
+    end
+    
+    Entry->>Entry: restore_states(cpu_id)
+    Entry-->>Driver: 返回状态代码
+    Note over Driver: 成功返回0，失败返回错误代码</pre>
+
+<p>HyperEnclave的入口是 main.rs文件中的entry函数。</p>
+<h2 id="核心函数分析"><a href="#核心函数分析" class="headerlink" title="核心函数分析"></a>核心函数分析</h2><h3 id="Entry函数-系统入口点"><a href="#Entry函数-系统入口点" class="headerlink" title="Entry函数 - 系统入口点"></a>Entry函数 - 系统入口点</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="string">&quot;sysv64&quot;</span> <span class="keyword">fn</span> <span class="title function_">entry</span>(cpu_id: <span class="type">usize</span>, linux_sp: <span class="type">usize</span>) <span class="punctuation">-&gt;</span> <span class="type">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">code</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> <span class="variable">Err</span>(e) = <span class="title function_ invoke__">main</span>(cpu_id, linux_sp) &#123;</span><br><span class="line">        error!(<span class="string">&quot;&#123;:?&#125;&quot;</span>, e);</span><br><span class="line">        ERROR_NUM.<span class="title function_ invoke__">store</span>(e.<span class="title function_ invoke__">code</span>(), Ordering::Release);</span><br><span class="line">        code = e.<span class="title function_ invoke__">code</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_ invoke__">restore_states</span>(cpu_id);</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;CPU &#123;&#125; return back to driver with code &#123;&#125;.&quot;</span>, cpu_id, code);</span><br><span class="line">    code</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="关键点："><a href="#关键点：" class="headerlink" title="关键点："></a>关键点：</h4><ul>
+<li><p>这是hypervisor的入口点，由内核驱动调用</p>
+</li>
+<li><p>参数：cpu_id（CPU ID）和linux_sp（Linux栈指针）</p>
+</li>
+<li><p>错误处理：如果main失败，记录错误代码</p>
+</li>
+<li><p>状态恢复：如果main失败，还会调用restore_states，恢复Linux状态（关闭IOMMU等硬件资源）</p>
+</li>
+</ul>
+<h4 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h4><p><strong>cpu_id - CPU标识符</strong></p>
+<p>含义：物理CPU核心的标识符，表示当前正在启动hypervisor的CPU核心编号。通常从0开始，到系统CPU核心数-1</p>
+<p>在hypervisor中用途：</p>
+<ul>
+<li><p>用于标识每个CPU的PerCpu结构</p>
+</li>
+<li><p>在多CPU系统中进行协调和同步</p>
+</li>
+<li><p>确定哪个CPU是Primary CPU</p>
+</li>
+</ul>
+<p><strong>linux_sp - Linux栈指针</strong></p>
+<p>含义：</p>
+<ul>
+<li><p>Linux内核栈指针：保存Linux内核在调用hypervisor时的栈指针位置</p>
+</li>
+<li><p>上下文保存：用于保存Linux的执行上下文，以便后续恢复</p>
+</li>
+<li><p>栈切换：hypervisor需要切换到自己的栈，但需要记住Linux的栈位置</p>
+</li>
+</ul>
+<p>用途：保存Linux的执行上下文，确保hypervisor退出时能正确恢复Linux状态。</p>
+<p>entry函数，确保了hypervisor能够安全地接管CPU控制权，同时也是hypervisor安全退出机制的关键组成部分，确保了即使在启动失败的情况下，系统也能安全地恢复到Linux状态。</p>
+<h3 id="Main函数-核心初始化逻辑"><a href="#Main函数-核心初始化逻辑" class="headerlink" title="Main函数 - 核心初始化逻辑"></a>Main函数 - 核心初始化逻辑</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>(cpu_id: <span class="type">usize</span>, linux_sp: <span class="type">usize</span>) <span class="punctuation">-&gt;</span> HvResult</span><br></pre></td></tr></table></figure>
+
+<h4 id="参数说明："><a href="#参数说明：" class="headerlink" title="参数说明："></a>参数说明：</h4><ul>
+<li><p>cpu_id: CPU核心标识符</p>
+</li>
+<li><p>linux_sp: Linux栈指针，用于保存Linux执行上下文</p>
+</li>
+<li><p>返回值：HvResult（成功为Ok(())，失败为Err(HvError)）</p>
+</li>
+</ul>
+<h4 id="第一步：CPU数据获取和同步"><a href="#第一步：CPU数据获取和同步" class="headerlink" title="第一步：CPU数据获取和同步"></a>第一步：CPU数据获取和同步</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第1步：获取CPU数据和系统信息</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">cpu_data</span> = PerCpu::<span class="title function_ invoke__">from_id_mut</span>(cpu_id);</span><br><span class="line"><span class="keyword">let</span> <span class="variable">online_cpus</span> = HvHeader::<span class="title function_ invoke__">get</span>().online_cpus <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">is_primary</span> = ENTERED_CPUS.<span class="title function_ invoke__">fetch_add</span>(<span class="number">1</span>, Ordering::SeqCst) == <span class="number">0</span>;</span><br><span class="line"><span class="title function_ invoke__">wait_for_other_completed</span>(&amp;ENTERED_CPUS, online_cpus)?;</span><br></pre></td></tr></table></figure>
+
+<p><strong>详细分析：</strong></p>
+<ol>
+<li>PerCpu::from_id_mut(cpu_id)</li>
+</ol>
+<ul>
+<li><p>获取当前CPU的PerCpu数据结构</p>
+</li>
+<li><p>每个CPU都有独立的PerCpu实例</p>
+</li>
+</ul>
+<ol start="2">
+<li>HvHeader::get().online_cpus</li>
+</ol>
+<ul>
+<li><p>获取系统中在线CPU的总数</p>
+</li>
+<li><p>用于后续的同步等待</p>
+</li>
+</ul>
+<ol start="3">
+<li>ENTERED_CPUS.fetch_add(1, Ordering::SeqCst) &#x3D;&#x3D; 0</li>
+</ol>
+<ul>
+<li><p>原子操作，递增已进入的CPU计数</p>
+</li>
+<li><p>第一个进入的CPU（返回0）被标记为Primary CPU</p>
+</li>
+<li><p>其他CPU被标记为Secondary CPU</p>
+</li>
+</ul>
+<ol start="4">
+<li>wait_for_other_completed(&amp;ENTERED_CPUS, online_cpus)</li>
+</ol>
+<ul>
+<li><p>等待所有CPU都进入hypervisor</p>
+</li>
+<li><p>确保多CPU同步启动</p>
+</li>
+</ul>
+<h4 id="第二步：早期初始化阶段"><a href="#第二步：早期初始化阶段" class="headerlink" title="第二步：早期初始化阶段"></a>第二步：早期初始化阶段</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第2步：早期初始化阶段</span></span><br><span class="line"><span class="keyword">if</span> is_primary &#123;</span><br><span class="line">    <span class="title function_ invoke__">primary_init_early</span>()?;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">wait_for_other_completed</span>(&amp;INIT_EARLY_OK, <span class="number">1</span>)?;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Primary CPU执行primary_init_early()</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">fn primary_init_early() -&gt; HvResult &#123;</span><br><span class="line">    logging::init();                    // 1. 初始化日志系统</span><br><span class="line">    info!(&quot;Primary CPU init early...&quot;);</span><br><span class="line">    cpumask::check_max_cpus()?;        // 2. 检查CPU数量限制</span><br><span class="line"></span><br><span class="line">    // 3. 打印系统配置信息</span><br><span class="line">    let system_config = HvSystemConfig::get();</span><br><span class="line">    println!(&quot;Initializing hypervisor...\n\</span><br><span class="line">        build_mode = &#123;&#125;\n\</span><br><span class="line">        log_level = &#123;&#125;\n\</span><br><span class="line">        arch = &#123;&#125;\n\</span><br><span class="line">        vendor = &#123;&#125;\n\</span><br><span class="line">        stats = &#123;&#125;\n\</span><br><span class="line">        sme = &#123;&#125;\n\</span><br><span class="line">        epc = &#123;&#125;\n&quot;,</span><br><span class="line">        // ... 配置信息</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    info!(&quot;Hypervisor header: &#123;:#x?&#125;&quot;, HvHeader::get());</span><br><span class="line">    debug!(&quot;System config: &#123;:#x?&#125;&quot;, system_config);</span><br><span class="line"></span><br><span class="line">    reclaim::init();    // 4. 初始化内存回收模块</span><br><span class="line">    memory::init()?;    // 5. 初始化内存管理</span><br><span class="line">    cell::init()?;      // 6. 初始化内存单元管理</span><br><span class="line"></span><br><span class="line">    INIT_EARLY_OK.store(1, Ordering::Release);  // 7. 标记早期初始化完成</span><br><span class="line">    Ok(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Secondary CPU等待早期初始化完成</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">wait_for_other_completed</span>(&amp;INIT_EARLY_OK, <span class="number">1</span>)?</span><br></pre></td></tr></table></figure>
+
+<h4 id="第三步：CPU初始化"><a href="#第三步：CPU初始化" class="headerlink" title="第三步：CPU初始化"></a>第三步：CPU初始化</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第3步：CPU初始化</span></span><br><span class="line">cpu_data.<span class="title function_ invoke__">init</span>(cpu_id, linux_sp, &amp;cell::ROOT_CELL)?;</span><br><span class="line"><span class="built_in">println!</span>(<span class="string">&quot;CPU &#123;&#125; init OK.&quot;</span>, cpu_id);</span><br><span class="line">INITED_CPUS.<span class="title function_ invoke__">fetch_add</span>(<span class="number">1</span>, Ordering::SeqCst);</span><br><span class="line"><span class="title function_ invoke__">wait_for_other_completed</span>(&amp;INITED_CPUS, online_cpus)?;</span><br></pre></td></tr></table></figure>
+
+<p><strong>详细分析：</strong></p>
+<ol>
+<li>cpu_data.init(cpu_id, linux_sp, &amp;cell::ROOT_CELL)</li>
+</ol>
+<ul>
+<li><p>初始化当前CPU的PerCpu结构</p>
+</li>
+<li><p>设置CPU状态、保存Linux上下文</p>
+</li>
+<li><p>初始化内存映射和VCPU</p>
+</li>
+</ul>
+<ol start="2">
+<li>INITED_CPUS.fetch_add(1, Ordering::SeqCst)</li>
+</ol>
+<ul>
+<li>原子递增已初始化的CPU计数</li>
+</ul>
+<ol start="3">
+<li>wait_for_other_completed(&amp;INITED_CPUS, online_cpus)</li>
+</ol>
+<ul>
+<li>等待所有CPU都完成初始化</li>
+</ul>
+<h4 id="第四步：晚期初始化阶段"><a href="#第四步：晚期初始化阶段" class="headerlink" title="第四步：晚期初始化阶段"></a>第四步：晚期初始化阶段</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第4步：晚期初始化阶段</span></span><br><span class="line"><span class="keyword">if</span> is_primary &#123;</span><br><span class="line">    <span class="title function_ invoke__">primary_init_late</span>()?;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    wa</span><br></pre></td></tr></table></figure>
+
+<p><strong>primary_init_late()函数分析：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">fn primary_init_late() -&gt; HvResult &#123;</span><br><span class="line">    info!(&quot;Primary CPU init late...&quot;);</span><br><span class="line"></span><br><span class="line">    logging::hhbox_init()?;  // 1. 初始化hypervisor日志系统</span><br><span class="line"></span><br><span class="line">    let (ra, rb, rc) = to_subversion(RUST_HYPERVISOR_VERSION);</span><br><span class="line"></span><br><span class="line">    // 2. 版本检查</span><br><span class="line">    unsafe &#123;</span><br><span class="line">        if LIBTPM_VERSION != RUST_HYPERVISOR_VERSION &#123;</span><br><span class="line">            let (ta, tb, tc) = to_subversion(LIBTPM_VERSION);</span><br><span class="line">            error!(&quot;Version mismatch. libtpm v&#123;&#125;.&#123;&#125;.&#123;&#125; v rust-hypervisor v&#123;&#125;.&#123;&#125;.&#123;&#125; &quot;,</span><br><span class="line">                ta, tb, tc, ra, rb, rc);</span><br><span class="line">            return hv_result_err!(EINVAL);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    println!(&quot;Rust-hypervisor (libtpm) version v&#123;&#125;.&#123;&#125;.&#123;&#125;&quot;, ra, rb, rc);</span><br><span class="line"></span><br><span class="line">    iommu::init()?;  // 3. 初始化IOMMU</span><br><span class="line">    if !tc::tc_init() &#123;  // 4. 初始化TPM和加密模块</span><br><span class="line">        println!(&quot;HyperEnclave: tpm or cyrpto module initialization failed&quot;);</span><br><span class="line">        return hv_result_err!(EIO);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    INIT_LATE_OK.store(1, Ordering::Release);  // 5. 标记晚期初始化完成</span><br><span class="line">    Ok(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="第五步：激活VMM"><a href="#第五步：激活VMM" class="headerlink" title="第五步：激活VMM"></a>第五步：激活VMM</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第5步：激活VMM</span></span><br><span class="line">cpu_data.<span class="title function_ invoke__">activate_vmm</span>()</span><br></pre></td></tr></table></figure>
+
+<p><strong>activate_vmm()的作用：</strong></p>
+<ul>
+<li><p>激活虚拟化硬件（Intel VMX或AMD SVM）</p>
+</li>
+<li><p>切换到hypervisor模式</p>
+</li>
+<li><p>开始处理虚拟化事件</p>
+</li>
+</ul>
+<h2 id="底层实现机制"><a href="#底层实现机制" class="headerlink" title="底层实现机制"></a>底层实现机制</h2><h3 id="为什么看起来那么简单"><a href="#为什么看起来那么简单" class="headerlink" title="为什么看起来那么简单"></a>为什么看起来那么简单</h3><p>我刚看的时候，感觉还是挺疑惑的，rust代码就这样就可以操作CPU了？其实刚刚我们看的Rust代码只是”胶水层”。实际上是有Rust代码，帮我们封装了 汇编指令与一些硬件虚拟化指令。</p>
+<p>下面详细说下我们main函数入口，涉及的到的各种CPU操作底层是如何实现的。</p>
+<h3 id="CPU状态获取和同步操作"><a href="#CPU状态获取和同步操作" class="headerlink" title="CPU状态获取和同步操作"></a>CPU状态获取和同步操作</h3><h4 id="原子操作-CPU计数"><a href="#原子操作-CPU计数" class="headerlink" title="原子操作 - CPU计数"></a>原子操作 - CPU计数</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/main.rs:171-172</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">is_primary</span> = ENTERED_CPUS.<span class="title function_ invoke__">fetch_add</span>(<span class="number">1</span>, Ordering::SeqCst) == <span class="number">0</span>;</span><br><span class="line"><span class="title function_ invoke__">wait_for_other_completed</span>(&amp;ENTERED_CPUS, online_cpus)?;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原子操作底层是CPU的LOCK前缀指令</span></span><br><span class="line"><span class="comment">// fetch_add 展开为类似：</span></span><br><span class="line">asm!(<span class="string">&quot;lock add &#123;&#125;, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) value, <span class="title function_ invoke__">in</span>(reg) addr);</span><br></pre></td></tr></table></figure>
+
+<h4 id="CPU-ID获取"><a href="#CPU-ID获取" class="headerlink" title="CPU ID获取"></a>CPU ID获取</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/main.rs:169</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">cpu_data</span> = PerCpu::<span class="title function_ invoke__">from_id_mut</span>(cpu_id);</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/percpu.rs:65-72</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">from_id_mut</span>&lt;<span class="string">&#x27;a&gt;(cpu_id: usize) -&gt; &amp;&#x27;</span>a <span class="keyword">mut</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        &amp;<span class="keyword">mut</span> core::slice::<span class="title function_ invoke__">from_raw_parts_mut</span>(</span><br><span class="line">            PER_CPU_ARRAY_PTR,  <span class="comment">// 全局PerCpu数组指针</span></span><br><span class="line">            HvHeader::<span class="title function_ invoke__">get</span>().max_cpus <span class="keyword">as</span> <span class="type">usize</span>,</span><br><span class="line">        )[cpu_id]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="内存映射和页表操作"><a href="#内存映射和页表操作" class="headerlink" title="内存映射和页表操作"></a>内存映射和页表操作</h3><h4 id="内存映射设置"><a href="#内存映射设置" class="headerlink" title="内存映射设置"></a>内存映射设置</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/percpu.rs:100-115</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">vaddr</span> = <span class="keyword">self</span> <span class="keyword">as</span> *<span class="keyword">const</span> _ <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">paddr</span> = <span class="title function_ invoke__">virt_to_phys</span>(vaddr);</span><br><span class="line">hvm.<span class="title function_ invoke__">insert</span>(MemoryRegion::<span class="title function_ invoke__">new_with_offset_mapper</span>(</span><br><span class="line">    vaddr,</span><br><span class="line">    paddr,</span><br><span class="line">    PER_CPU_SIZE,</span><br><span class="line">    MemFlags::READ | MemFlags::WRITE | MemFlags::ENCRYPTED,</span><br><span class="line">))?;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 涉及页表操作，最终会执行：</span></span><br><span class="line"><span class="comment">// 1. 读取CR3寄存器获取页表基址</span></span><br><span class="line"><span class="comment">// 2. 修改页表项</span></span><br><span class="line"><span class="comment">// 3. 刷新TLB</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr3&quot;</span>);  <span class="comment">// 读取页表基址</span></span><br><span class="line">asm!(<span class="string">&quot;invlpg [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) addr);  <span class="comment">// 刷新TLB</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="栈切换操作"><a href="#栈切换操作" class="headerlink" title="栈切换操作"></a>栈切换操作</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/percpu.rs:152</span></span><br><span class="line"><span class="keyword">unsafe</span> &#123; asm!(<span class="string">&quot;add rsp, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) LOCAL_PER_CPU_BASE - old_percpu_vaddr) &#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 直接操作栈指针寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;add rsp, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) offset);</span><br></pre></td></tr></table></figure>
+
+<h3 id="寄存器保存和恢复操作"><a href="#寄存器保存和恢复操作" class="headerlink" title="寄存器保存和恢复操作"></a>寄存器保存和恢复操作</h3><h4 id="Linux上下文保存"><a href="#Linux上下文保存" class="headerlink" title="Linux上下文保存"></a>Linux上下文保存</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/context.rs:128-135</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">load_from</span>(linux_sp: <span class="type">usize</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">regs</span> = <span class="keyword">unsafe</span> &#123; core::slice::<span class="title function_ invoke__">from_raw_parts</span>(linux_sp <span class="keyword">as</span> *<span class="keyword">const</span> <span class="type">u64</span>, SAVED_LINUX_REGS) &#125;;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">gdt</span> = GDTStruct::<span class="title function_ invoke__">sgdt</span>();  <span class="comment">// 获取GDT</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">fs</span> = Segment::<span class="title function_ invoke__">from_selector</span>(segmentation::<span class="title function_ invoke__">fs</span>(), &amp;gdt);</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">gs</span> = Segment::<span class="title function_ invoke__">from_selector</span>(segmentation::<span class="title function_ invoke__">gs</span>(), &amp;gdt);</span><br><span class="line">    fs.base = Msr::IA32_FS_BASE.<span class="title function_ invoke__">read</span>();  <span class="comment">// 读取MSR</span></span><br><span class="line">    gs.base = Msr::IA32_GS_BASE.<span class="title function_ invoke__">read</span>();</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 读取MSR寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;rdmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0xc0000100</span>, <span class="title function_ invoke__">out</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">out</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_FS_BASE</span></span><br><span class="line">asm!(<span class="string">&quot;rdmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0xc0000101</span>, <span class="title function_ invoke__">out</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">out</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_GS_BASE</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取段寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, fs&quot;</span>);  <span class="comment">// 读取FS段寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, gs&quot;</span>);  <span class="comment">// 读取GS段寄存器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取GDT</span></span><br><span class="line">asm!(<span class="string">&quot;sgdt [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) &amp;gdt_ptr);</span><br></pre></td></tr></table></figure>
+
+<h4 id="控制寄存器操作"><a href="#控制寄存器操作" class="headerlink" title="控制寄存器操作"></a>控制寄存器操作</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/context.rs:152-154</span></span><br><span class="line">cr0: Cr0::<span class="title function_ invoke__">read</span>(),</span><br><span class="line">cr3: Cr3::<span class="title function_ invoke__">read</span>().<span class="number">0</span>.<span class="title function_ invoke__">start_address</span>().<span class="title function_ invoke__">as_u64</span>(),</span><br><span class="line">cr4: Cr4::<span class="title function_ invoke__">read</span>(),</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 读取控制寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr0&quot;</span>);  <span class="comment">// 读取CR0</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr3&quot;</span>);  <span class="comment">// 读取CR3</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr4&quot;</span>);  <span class="comment">// 读取CR4</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="VMCS（Virtual-Machine-Control-Structure）设置"><a href="#VMCS（Virtual-Machine-Control-Structure）设置" class="headerlink" title="VMCS（Virtual Machine Control Structure）设置"></a>VMCS（Virtual Machine Control Structure）设置</h3><h4 id="VMCS初始化"><a href="#VMCS初始化" class="headerlink" title="VMCS初始化"></a>VMCS初始化</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/intel/vcpu.rs:198-205</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">vmcs_setup</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, linux: &amp;LinuxContext, cell: &amp;Cell) <span class="punctuation">-&gt;</span> HvResult &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">paddr</span> = <span class="keyword">self</span>.vmcs_region.<span class="title function_ invoke__">paddr</span>();</span><br><span class="line">    Vmcs::<span class="title function_ invoke__">clear</span>(paddr)?;    <span class="comment">// 清除VMCS</span></span><br><span class="line">    Vmcs::<span class="title function_ invoke__">load</span>(paddr)?;     <span class="comment">// 加载VMCS</span></span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">setup_vmcs_host</span>()?;   <span class="comment">// 设置Host状态</span></span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">setup_vmcs_guest</span>(linux)?;  <span class="comment">// 设置Guest状态</span></span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">setup_vmcs_control</span>(cell)?; <span class="comment">// 设置控制字段</span></span><br><span class="line">    <span class="title function_ invoke__">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Intel VMX指令</span></span><br><span class="line">asm!(<span class="string">&quot;vmclear [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) paddr);  <span class="comment">// 清除VMCS</span></span><br><span class="line">asm!(<span class="string">&quot;vmptrld [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) paddr);  <span class="comment">// 加载VMCS</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Host状态设置"><a href="#Host状态设置" class="headerlink" title="Host状态设置"></a>Host状态设置</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/intel/vcpu.rs:207-235</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">setup_vmcs_host</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>) <span class="punctuation">-&gt;</span> HvResult &#123;</span><br><span class="line">    VmcsField64Host::IA32_PAT.<span class="title function_ invoke__">write</span>(Msr::IA32_PAT.<span class="title function_ invoke__">read</span>())?;</span><br><span class="line">    VmcsField64Host::IA32_EFER.<span class="title function_ invoke__">write</span>(Msr::IA32_EFER.<span class="title function_ invoke__">read</span>())?;</span><br><span class="line">    VmcsField64Host::CR0.<span class="title function_ invoke__">write</span>(Cr0::<span class="title function_ invoke__">read_raw</span>())?;</span><br><span class="line">    VmcsField64Host::CR3.<span class="title function_ invoke__">write</span>(Cr3::<span class="title function_ invoke__">read</span>().<span class="number">0</span>.<span class="title function_ invoke__">start_address</span>().<span class="title function_ invoke__">as_u64</span>())?;</span><br><span class="line">    VmcsField64Host::CR4.<span class="title function_ invoke__">write</span>(Cr4::<span class="title function_ invoke__">read_raw</span>())?;</span><br><span class="line">    <span class="comment">// ... 其他寄存器设置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 读取MSR寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;rdmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0x277</span>, <span class="title function_ invoke__">out</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">out</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_PAT</span></span><br><span class="line">asm!(<span class="string">&quot;rdmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0xc0000080</span>, <span class="title function_ invoke__">out</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">out</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_EFER</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取控制寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr0&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr3&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;mov rax, cr4&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 写入VMCS字段</span></span><br><span class="line">asm!(<span class="string">&quot;vmwrite &#123;&#125;, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) field_id, <span class="title function_ invoke__">in</span>(reg) value);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Guest状态设置"><a href="#Guest状态设置" class="headerlink" title="Guest状态设置"></a>Guest状态设置</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/intel/vcpu.rs:247-289</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">setup_vmcs_guest</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, linux: &amp;LinuxContext) <span class="punctuation">-&gt;</span> HvResult &#123;</span><br><span class="line">    VmcsField64Guest::IA32_PAT.<span class="title function_ invoke__">write</span>(linux.pat)?;</span><br><span class="line">    VmcsField64Guest::IA32_EFER.<span class="title function_ invoke__">write</span>(linux.efer)?;</span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">set_cr</span>(<span class="number">0</span>, linux.cr0.<span class="title function_ invoke__">bits</span>());</span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">set_cr</span>(<span class="number">4</span>, linux.cr4.<span class="title function_ invoke__">bits</span>());</span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">set_cr</span>(<span class="number">3</span>, linux.cr3);</span><br><span class="line">    <span class="comment">// ... 段寄存器设置</span></span><br><span class="line">    VmcsField64Guest::RSP.<span class="title function_ invoke__">write</span>(linux.rsp)?;</span><br><span class="line">    VmcsField64Guest::RIP.<span class="title function_ invoke__">write</span>(linux.rip)?;</span><br><span class="line">    VmcsField64Guest::RFLAGS.<span class="title function_ invoke__">write</span>(<span class="number">0x2</span>)?;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 写入VMCS Guest字段</span></span><br><span class="line">asm!(<span class="string">&quot;vmwrite &#123;&#125;, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) field_id, <span class="title function_ invoke__">in</span>(reg) value);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置段寄存器</span></span><br><span class="line">set_guest_segment!(linux.cs, CS);  <span class="comment">// 展开为VMCS字段写入</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="虚拟化启动操作"><a href="#虚拟化启动操作" class="headerlink" title="虚拟化启动操作"></a>虚拟化启动操作</h3><h4 id="VCPU激活"><a href="#VCPU激活" class="headerlink" title="VCPU激活"></a>VCPU激活</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/intel/vcpu.rs:136-155</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">activate_vmm</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, linux: &amp;LinuxContext) <span class="punctuation">-&gt;</span> HvResult &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">regs</span> = <span class="keyword">self</span>.<span class="title function_ invoke__">regs_mut</span>();</span><br><span class="line">    regs.rax = <span class="number">0</span>;</span><br><span class="line">    regs.rbx = linux.rbx;</span><br><span class="line">    regs.rbp = linux.rbp;</span><br><span class="line">    regs.r12 = linux.r12;</span><br><span class="line">    regs.r13 = linux.r13;</span><br><span class="line">    regs.r14 = linux.r14;</span><br><span class="line">    regs.r15 = linux.r15;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        asm!(</span><br><span class="line">            <span class="string">&quot;mov rsp, &#123;0&#125;&quot;</span>,</span><br><span class="line">            restore_regs_from_stack!(),</span><br><span class="line">            <span class="string">&quot;vmlaunch&quot;</span>,  <span class="comment">// 关键：Intel VMX指令</span></span><br><span class="line">            <span class="title function_ invoke__">in</span>(reg) &amp;<span class="keyword">self</span>.guest_regs <span class="keyword">as</span> *<span class="keyword">const</span> _ <span class="keyword">as</span> <span class="type">usize</span>,</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov rax, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) <span class="number">0</span>);</span><br><span class="line">asm!(<span class="string">&quot;mov rbx, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) linux.rbx);</span><br><span class="line">asm!(<span class="string">&quot;mov rbp, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) linux.rbp);</span><br><span class="line"><span class="comment">// ... 其他寄存器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置栈指针</span></span><br><span class="line">asm!(<span class="string">&quot;mov rsp, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) stack_ptr);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 恢复寄存器（从栈上）</span></span><br><span class="line">asm!(<span class="string">&quot;pop rax&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;pop rcx&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;pop rdx&quot;</span>);</span><br><span class="line"><span class="comment">// ... 其他寄存器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动虚拟化</span></span><br><span class="line">asm!(<span class="string">&quot;vmlaunch&quot;</span>);  <span class="comment">// Intel VMX指令，启动虚拟化</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="中断和异常处理设置"><a href="#中断和异常处理设置" class="headerlink" title="中断和异常处理设置"></a>中断和异常处理设置</h3><h4 id="中断描述符表设置"><a href="#中断描述符表设置" class="headerlink" title="中断描述符表设置"></a>中断描述符表设置</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/context.rs:168-171</span></span><br><span class="line">GDT.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">load</span>();</span><br><span class="line"><span class="keyword">unsafe</span> &#123;</span><br><span class="line">    segmentation::<span class="title function_ invoke__">load_cs</span>(GDTStruct::KCODE_SELECTOR);</span><br><span class="line">    segmentation::<span class="title function_ invoke__">load_ds</span>(SegmentSelector::<span class="title function_ invoke__">from_raw</span>(<span class="number">0</span>));</span><br><span class="line">    segmentation::<span class="title function_ invoke__">load_es</span>(SegmentSelector::<span class="title function_ invoke__">from_raw</span>(<span class="number">0</span>));</span><br><span class="line">    segmentation::<span class="title function_ invoke__">load_ss</span>(SegmentSelector::<span class="title function_ invoke__">from_raw</span>(<span class="number">0</span>));</span><br><span class="line">&#125;</span><br><span class="line">IDT.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">load</span>();</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 加载GDT</span></span><br><span class="line">asm!(<span class="string">&quot;lgdt [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) &amp;gdt_ptr);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加载段寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov cs, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov ds, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov es, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov ss, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加载IDT</span></span><br><span class="line">asm!(<span class="string">&quot;lidt [&#123;&#125;]&quot;</span>, <span class="title function_ invoke__">in</span>(reg) &amp;idt_ptr);</span><br></pre></td></tr></table></figure>
+
+<h3 id="状态恢复操作"><a href="#状态恢复操作" class="headerlink" title="状态恢复操作"></a>状态恢复操作</h3><h4 id="寄存器恢复"><a href="#寄存器恢复" class="headerlink" title="寄存器恢复"></a>寄存器恢复</h4><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/arch/x86_64/context.rs:175-225</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">restore</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        <span class="comment">// 恢复MSR寄存器</span></span><br><span class="line">        Msr::IA32_PAT.<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.pat);</span><br><span class="line">        Msr::IA32_EFER.<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.efer);</span><br><span class="line">        Msr::IA32_KERNEL_GSBASE.<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.kernel_gsbase);</span><br><span class="line">        <span class="comment">// ... 其他MSR</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 恢复控制寄存器</span></span><br><span class="line">        Cr0::<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.cr0);</span><br><span class="line">        Cr4::<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.cr4);</span><br><span class="line">        Cr3::<span class="title function_ invoke__">write</span>(PhysFrame::<span class="title function_ invoke__">containing_address</span>(PhysAddr::<span class="title function_ invoke__">new</span>(<span class="keyword">self</span>.cr3)), Cr3Flags::<span class="title function_ invoke__">empty</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 恢复段寄存器</span></span><br><span class="line">        segmentation::<span class="title function_ invoke__">load_cs</span>(<span class="keyword">self</span>.cs.selector);</span><br><span class="line">        segmentation::<span class="title function_ invoke__">load_ds</span>(<span class="keyword">self</span>.ds.selector);</span><br><span class="line">        segmentation::<span class="title function_ invoke__">load_es</span>(<span class="keyword">self</span>.es.selector);</span><br><span class="line">        segmentation::<span class="title function_ invoke__">load_fs</span>(<span class="keyword">self</span>.fs.selector);</span><br><span class="line">        segmentation::<span class="title function_ invoke__">load_gs</span>(<span class="keyword">self</span>.gs.selector);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 恢复段基址</span></span><br><span class="line">        Msr::IA32_FS_BASE.<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.fs.base);</span><br><span class="line">        Msr::IA32_GS_BASE.<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.gs.base);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>底层实现：</strong></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 写入MSR寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;wrmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0x277</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">in</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_PAT</span></span><br><span class="line">asm!(<span class="string">&quot;wrmsr&quot;</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="number">0xc0000080</span>, <span class="title function_ invoke__">in</span>(<span class="string">&quot;eax&quot;</span>) low, <span class="title function_ invoke__">in</span>(<span class="string">&quot;edx&quot;</span>) high);  <span class="comment">// IA32_EFER</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 写入控制寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov cr0, rax&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;mov cr4, rax&quot;</span>);</span><br><span class="line">asm!(<span class="string">&quot;mov cr3, rax&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加载段寄存器</span></span><br><span class="line">asm!(<span class="string">&quot;mov cs, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov ds, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov es, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov fs, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br><span class="line">asm!(<span class="string">&quot;mov gs, &#123;&#125;&quot;</span>, <span class="title function_ invoke__">in</span>(reg) selector);</span><br></pre></td></tr></table></figure>
+
+<h2 id="底层实现依赖总结"><a href="#底层实现依赖总结" class="headerlink" title="底层实现依赖总结"></a>底层实现依赖总结</h2><h3 id="x86架构指令集"><a href="#x86架构指令集" class="headerlink" title="x86架构指令集"></a>x86架构指令集</h3><ul>
+<li><strong>MSR操作</strong>：<code>rdmsr</code>&#x2F;<code>wrmsr</code> 指令</li>
+<li><strong>控制寄存器</strong>：<code>mov rax, cr0</code>&#x2F;<code>mov cr0, rax</code> 等</li>
+<li><strong>段寄存器</strong>：<code>mov cs, selector</code> 等</li>
+<li><strong>页表操作</strong>：<code>mov rax, cr3</code>、<code>invlpg</code> 等</li>
+</ul>
+<h3 id="Intel-VMX虚拟化指令"><a href="#Intel-VMX虚拟化指令" class="headerlink" title="Intel VMX虚拟化指令"></a>Intel VMX虚拟化指令</h3><ul>
+<li><strong>VMCS操作</strong>：<code>vmclear</code>、<code>vmptrld</code>、<code>vmwrite</code>、<code>vmread</code></li>
+<li><strong>虚拟化启动</strong>：<code>vmlaunch</code>、<code>vmresume</code></li>
+<li><strong>虚拟化退出</strong>：<code>vmxoff</code></li>
+</ul>
+<h3 id="原子操作指令"><a href="#原子操作指令" class="headerlink" title="原子操作指令"></a>原子操作指令</h3><ul>
+<li><strong>LOCK前缀</strong>：<code>lock add</code>、<code>lock xchg</code> 等</li>
+<li><strong>内存屏障</strong>：<code>mfence</code>、<code>sfence</code>、<code>lfence</code></li>
+</ul>
+<h3 id="内存管理指令"><a href="#内存管理指令" class="headerlink" title="内存管理指令"></a>内存管理指令</h3><ul>
+<li><strong>页表操作</strong>：<code>invlpg</code>（刷新TLB）</li>
+<li><strong>内存访问</strong>：直接内存读写操作</li>
+</ul>
+<h3 id="中断和异常处理"><a href="#中断和异常处理" class="headerlink" title="中断和异常处理"></a>中断和异常处理</h3><ul>
+<li><strong>描述符表</strong>：<code>lgdt</code>、<code>lidt</code> 指令</li>
+<li><strong>中断控制</strong>：<code>cli</code>、<code>sti</code> 指令</li>
+</ul>
+<p>这些操作都依赖于Intel x86架构的硬件支持，通过Rust的<code>asm!</code>宏直接执行汇编指令来实现对CPU的底层控制。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/')">HyperEnclave启动和初始化流程</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=HyperEnclave启动和初始化流程&amp;url=http://example.com/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/HyperEnclave/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>HyperEnclave<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>机密计算<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>虚拟化<span class="tagsPageCount">2</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-20</div><div class="title">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">2.</span> <span class="toc-text">启动整体流程图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">核心函数分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Entry%E5%87%BD%E6%95%B0-%E7%B3%BB%E7%BB%9F%E5%85%A5%E5%8F%A3%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">Entry函数 - 系统入口点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%82%B9%EF%BC%9A"><span class="toc-number">3.1.1.</span> <span class="toc-text">关键点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-number">3.1.2.</span> <span class="toc-text">参数说明</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Main%E5%87%BD%E6%95%B0-%E6%A0%B8%E5%BF%83%E5%88%9D%E5%A7%8B%E5%8C%96%E9%80%BB%E8%BE%91"><span class="toc-number">3.2.</span> <span class="toc-text">Main函数 - 核心初始化逻辑</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">3.2.1.</span> <span class="toc-text">参数说明：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9ACPU%E6%95%B0%E6%8D%AE%E8%8E%B7%E5%8F%96%E5%92%8C%E5%90%8C%E6%AD%A5"><span class="toc-number">3.2.2.</span> <span class="toc-text">第一步：CPU数据获取和同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%97%A9%E6%9C%9F%E5%88%9D%E5%A7%8B%E5%8C%96%E9%98%B6%E6%AE%B5"><span class="toc-number">3.2.3.</span> <span class="toc-text">第二步：早期初始化阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9ACPU%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">3.2.4.</span> <span class="toc-text">第三步：CPU初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%99%9A%E6%9C%9F%E5%88%9D%E5%A7%8B%E5%8C%96%E9%98%B6%E6%AE%B5"><span class="toc-number">3.2.5.</span> <span class="toc-text">第四步：晚期初始化阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E6%BF%80%E6%B4%BBVMM"><span class="toc-number">3.2.6.</span> <span class="toc-text">第五步：激活VMM</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">底层实现机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%9C%8B%E8%B5%B7%E6%9D%A5%E9%82%A3%E4%B9%88%E7%AE%80%E5%8D%95"><span class="toc-number">4.1.</span> <span class="toc-text">为什么看起来那么简单</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU%E7%8A%B6%E6%80%81%E8%8E%B7%E5%8F%96%E5%92%8C%E5%90%8C%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="toc-number">4.2.</span> <span class="toc-text">CPU状态获取和同步操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C-CPU%E8%AE%A1%E6%95%B0"><span class="toc-number">4.2.1.</span> <span class="toc-text">原子操作 - CPU计数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CPU-ID%E8%8E%B7%E5%8F%96"><span class="toc-number">4.2.2.</span> <span class="toc-text">CPU ID获取</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E5%92%8C%E9%A1%B5%E8%A1%A8%E6%93%8D%E4%BD%9C"><span class="toc-number">4.3.</span> <span class="toc-text">内存映射和页表操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.3.1.</span> <span class="toc-text">内存映射设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%88%E5%88%87%E6%8D%A2%E6%93%8D%E4%BD%9C"><span class="toc-number">4.3.2.</span> <span class="toc-text">栈切换操作</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E4%BF%9D%E5%AD%98%E5%92%8C%E6%81%A2%E5%A4%8D%E6%93%8D%E4%BD%9C"><span class="toc-number">4.4.</span> <span class="toc-text">寄存器保存和恢复操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Linux%E4%B8%8A%E4%B8%8B%E6%96%87%E4%BF%9D%E5%AD%98"><span class="toc-number">4.4.1.</span> <span class="toc-text">Linux上下文保存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8%E6%93%8D%E4%BD%9C"><span class="toc-number">4.4.2.</span> <span class="toc-text">控制寄存器操作</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#VMCS%EF%BC%88Virtual-Machine-Control-Structure%EF%BC%89%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.5.</span> <span class="toc-text">VMCS（Virtual Machine Control Structure）设置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VMCS%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">4.5.1.</span> <span class="toc-text">VMCS初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Host%E7%8A%B6%E6%80%81%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.5.2.</span> <span class="toc-text">Host状态设置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Guest%E7%8A%B6%E6%80%81%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.5.3.</span> <span class="toc-text">Guest状态设置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E5%90%AF%E5%8A%A8%E6%93%8D%E4%BD%9C"><span class="toc-number">4.6.</span> <span class="toc-text">虚拟化启动操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VCPU%E6%BF%80%E6%B4%BB"><span class="toc-number">4.6.1.</span> <span class="toc-text">VCPU激活</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.7.</span> <span class="toc-text">中断和异常处理设置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8%E8%AE%BE%E7%BD%AE"><span class="toc-number">4.7.1.</span> <span class="toc-text">中断描述符表设置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D%E6%93%8D%E4%BD%9C"><span class="toc-number">4.8.</span> <span class="toc-text">状态恢复操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E6%81%A2%E5%A4%8D"><span class="toc-number">4.8.1.</span> <span class="toc-text">寄存器恢复</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E4%BE%9D%E8%B5%96%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">底层实现依赖总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#x86%E6%9E%B6%E6%9E%84%E6%8C%87%E4%BB%A4%E9%9B%86"><span class="toc-number">5.1.</span> <span class="toc-text">x86架构指令集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Intel-VMX%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8C%87%E4%BB%A4"><span class="toc-number">5.2.</span> <span class="toc-text">Intel VMX虚拟化指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4"><span class="toc-number">5.3.</span> <span class="toc-text">原子操作指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%8C%87%E4%BB%A4"><span class="toc-number">5.4.</span> <span class="toc-text">内存管理指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">5.5.</span> <span class="toc-text">中断和异常处理</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave启动和初始化流程"/></a><div class="content"><a class="title" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程">HyperEnclave启动和初始化流程</a><time datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"/></a><div class="content"><a class="title" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</a><time datetime="2025-07-20T14:00:00.000Z" title="发表于 2025-07-20 22:00:00">2025-07-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从 CSV文件的加载、分区和处理 来理解 RDD"/></a><div class="content"><a class="title" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD">从 CSV文件的加载、分区和处理 来理解 RDD</a><time datetime="2025-07-15T11:00:00.000Z" title="发表于 2025-07-15 19:00:00">2025-07-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅尝 Spring AI"/></a><div class="content"><a class="title" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI">浅尝 Spring AI</a><time datetime="2025-07-11T12:00:00.000Z" title="发表于 2025-07-11 20:00:00">2025-07-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/10/Spark%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%87%92%E6%83%B0%E8%AE%A1%E7%AE%97/" title="Spark核心概念与懒惰计算[未修订完]">Spark核心概念与懒惰计算[未修订完]</a><time datetime="2025-07-10T03:00:00.000Z" title="发表于 2025-07-10 11:00:00">2025-07-10</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">44</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">57</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">6</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 0.88rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 0.88rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 0.88rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

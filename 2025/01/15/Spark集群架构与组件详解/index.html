@@ -1,0 +1,949 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>Spark集群架构与组件详解：从Driver到Executor的深度解析 | 凌霄的博客</title><meta name="keywords" content="Spark,大数据,分布式计算,集群架构"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="Spark集群架构与组件详解：从Driver到Executor的深度解析"><meta name="application-name" content="Spark集群架构与组件详解：从Driver到Executor的深度解析"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="Spark集群架构与组件详解：从Driver到Executor的深度解析"><meta property="og:url" content="http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="Spark集群架构与组件详解：从Driver到Executor的解析引言在分布式计算的世界里，Spark以其优雅的架构设计和强大的计算能力脱颖而出。当我们谈论Spark集群时，实际上是在讨论一个由多个组件协同工作的复杂系统。这些组件各司其职，却又紧密配合，共同完成大规模数据处理任务。 本文将深入剖析"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="Spark集群架构与组件详解：从Driver到Executor的解析引言在分布式计算的世界里，Spark以其优雅的架构设计和强大的计算能力脱颖而出。当我们谈论Spark集群时，实际上是在讨论一个由多个组件协同工作的复杂系统。这些组件各司其职，却又紧密配合，共同完成大规模数据处理任务。 本文将深入剖析"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'Spark集群架构与组件详解：从Driver到Executor的深度解析',
+  postAI: '',
+  pageFillDescription: 'Spark集群架构与组件详解：从Driver到Executor的解析, 引言, Spark集群架构概览, 整体架构设计, Driver：应用的大脑, Driver的核心职责, SparkContext：Driver的核心组件, DAG Scheduler：任务规划师, Stage：执行计划的核心单元, Stage的划分原理, Stage的类型, Stage的依赖关系, Stage的执行流程, Stage的并行度与优化, Stage的容错机制, Stage监控与调试, Task Scheduler：任务调度器, Executor：计算的执行者, Executor的生命周期, Executor的内部结构, 内存管理机制, 任务执行流程, Worker：资源的提供者, Worker的角色定位, Worker的资源分配策略, Worker的容错机制, 集群管理器：资源的协调者, 三种集群管理器对比, 1. Standalone模式, 2. YARN模式, 3. Kubernetes模式, 集群管理器的选择策略, 资源调度与任务分配机制, 资源调度流程, 任务分配策略, 资源调度优化, 集群部署与配置最佳实践, 硬件配置建议, CPU配置, 内存配置, 存储配置, 网络配置, 网络带宽, 网络优化, 配置参数调优, 核心配置参数, 配置调优原则, 监控与运维, 监控指标, 运维工具, 实际案例分析, 案例一：电商数据分析平台, 案例二：实时推荐系统, 案例三：复杂数据处理中的Stage分析, 常见问题与解决方案, 问题一：Executor内存不足, 问题二：数据倾斜, 问题三：网络传输瓶颈, 总结集群架构与组件详解从到的解析引言在分布式计算的世界里以其优雅的架构设计和强大的计算能力脱颖而出当我们谈论集群时实际上是在讨论一个由多个组件协同工作的复杂系统这些组件各司其职却又紧密配合共同完成大规模数据处理任务本文将深入剖析集群的架构设计从程序的启动到的执行从资源调度到任务分配我们将逐一揭开这些组件的神秘面纱这不是一篇官方文档的翻译而是基于实际开发经验的深度技术解析集群架构概览整体架构设计集群采用了经典的架构但这种架构在中有着独特的实现方式整个集群由以下几个核心组件构成这个架构的核心思想是将计算逻辑与资源管理分离负责应用逻辑和任务调度负责资源分配负责实际的计算执行这种设计使得能够灵活地运行在不同的集群环境中应用的大脑的核心职责是应用的入口点它不仅仅是一个简单的启动器而是整个应用的控制中心当我们运行一个应用时实际上是在启动一个进程的主要职责包括应用逻辑执行运行用户编写的代码任务规划将用户代码转换为有向无环图资源申请向集群管理器申请计算资源任务调度将任务分配给执行状态监控监控整个应用的执行状态的核心组件是中最重要的组件它是与集群交互的主要接口当我们创建时实际上是在建立与集群的连接这段代码背后发生了什么让我们深入看看配置验证检查配置参数的有效性集群连接建立与集群管理器的连接资源申请向集群申请资源组件初始化初始化调度器存储管理器等组件任务规划师是中的另一个关键组件它负责将用户的操作转换为可执行的任务当我们调用的转换操作时会构建一个图这段代码会被转换为如下的的工作流程阶段划分根据操作将划分为多个任务生成为每个生成具体的依赖管理管理之间的依赖关系容错处理处理失败的任务和执行计划的核心单元是执行模型中的核心概念它是被划分为可并行执行的任务单元理解对于性能优化和问题排查至关重要的划分原理的划分基于一个关键概念操作每当遇到操作时就会创建一个新的在这个例子中和操作在同一个中因为它们之间没有会触发因此创建了新的的类型包含操作的任务需要将数据写入磁盘供下游读取例如等最终的计算结果通常包含等行动操作不需要为下游提供数据的依赖关系之间的依赖关系决定了执行顺序窄依赖父的每个分区最多被一个子分区使用不需要可以在同一个中执行例如宽依赖父的每个分区可能被多个子分区使用需要会创建新的例如的执行流程构建划分生成提交执行结果收集还有是否应用完成详细执行过程构建根据的转换操作构建有向无环图划分根据操作将划分为多个生成为每个生成具体的提交按顺序提交到集群执行执行并行执行中的结果收集收集的执行结果依赖等待当前完成后执行下一个的并行度与优化并行度决定因素分区数的分区数决定了的数量资源可用性集群中可用的数量数据本地性数据分布在不同节点上并行度优化示例设置的分区数设置默认并行度优化策略减少数量避免不必要的操作优化前会产生额外的优化后减少数量优化内部操作使用更高效的算子使用减少函数调用开销批量处理逻辑的容错机制任务重试单个失败时只重试失败的不会影响整个的其他重试如果中失败的过多会重试整个通过配置重试次数数据持久化数据会持久化到磁盘支持从失败点恢复无需重新计算监控与调试查看在中可以查看的执行情况包括执行时间数量失败情况等日志分析启用详细日志性能分析查看的执行计划任务调度器负责将生成的任务分配给执行它需要考虑数据本地性资源可用性负载均衡等多个因素的调度策略数据本地性优先优先将任务分配给数据所在的节点资源匹配确保有足够的资源执行任务负载均衡避免某些节点过载容错机制处理失败的情况计算的执行者的生命周期是实际执行计算任务的组件它在节点上运行一个节点可以运行多个每个运行在独立的进程中的生命周期启动注册接收任务执行任务返回结果等待新任务关闭的内部结构每个内部包含多个组件实际执行任务的线程管理内存和磁盘上的数据块处理操作管理内存分配和回收内存管理机制的内存管理是性能优化的关键将的内存分为几个区域系统保留内存用于内部数据结构用户代码和数据结构使用的内存用于缓存和广播变量用于等操作的临时数据任务执行流程当接收到任务时执行流程如下任务反序列化将任务从网络传输的字节流反序列化为对象依赖下载下载任务所需的依赖包和文件任务执行在线程中执行任务结果返回将执行结果返回给资源清理清理任务执行过程中产生的临时数据资源的提供者的角色定位是集群中的计算节点它负责资源管理管理节点的内存等计算资源管理启动监控停止进程心跳报告定期向报告节点状态故障处理处理和节点级别的故障的资源分配策略需要合理分配资源给不同的资源分配考虑的因素可用资源节点的核心数和可用内存应用需求不同应用对资源的需求资源隔离确保不同应用之间的资源隔离动态调整根据负载情况动态调整资源分配的容错机制节点可能因为硬件故障网络问题等原因失效提供了多层容错机制心跳检测定期检测节点状态任务重试失败的任务可以在其他节点重试数据备份重要数据在多个节点备份快速恢复从故障中快速恢复服务集群管理器资源的协调者三种集群管理器对比支持三种主要的集群管理器每种都有其特点和适用场景模式是自带的集群管理器适合中小规模集群优势部署简单无需额外组件资源利用率高适合学习和测试环境劣势功能相对简单缺乏高级调度特性不适合大规模生产环境架构特点资源调度启动应用管理资源监控故障处理心跳报告模式是生态系统的资源管理器适合大规模生产环境优势成熟的资源管理与生态深度集成支持多租户和资源隔离适合大规模集群劣势部署复杂度较高需要环境资源调度延迟相对较高架构特点容器管理全局资源调度资源监控应用生命周期任务执行模式是云原生的容器编排平台适合云环境部署优势云原生架构弹性伸缩能力强容器化部署丰富的生态系统劣势学习曲线陡峭需要环境资源调度开销较大架构特点管理资源调度容器生命周期服务发现资源监控集群管理器的选择策略选择合适的集群管理器需要考虑以下因素集群规模小规模选择大规模选择或现有基础设施如果已有环境选择如果使用云服务选择运维能力团队的技术栈和运维经验成本考虑不同方案的部署和维护成本资源调度与任务分配机制资源调度流程的资源调度是一个复杂的过程涉及多个组件之间的协作申请资源分配资源启动注册分配任务返回结果任务分配策略的任务分配遵循以下策略数据本地性优先优先将任务分配给数据所在的节点资源匹配确保有足够的资源执行任务负载均衡避免某些节点过载容错考虑考虑节点和的可靠性资源调度优化为了提高资源利用率提供了多种优化策略动态资源分配根据负载动态调整资源分配资源预留为重要应用预留资源资源隔离不同应用之间的资源隔离资源监控实时监控资源使用情况集群部署与配置最佳实践硬件配置建议配置个核心个核心个核心内存配置内存内存内存存储配置本地存储优先用于和缓存网络存储用于持久化数据存储容量根据数据量确定网络配置网络带宽节点间通信或更高网络延迟尽量降低节点间延迟网络拓扑避免网络瓶颈网络优化调优优化参数网络隔离不同应用间的网络隔离网络监控监控网络性能配置参数调优核心配置参数应用配置资源配置性能调优容错配置配置调优原则资源合理分配根据应用需求合理分配资源参数平衡在性能和稳定性之间找到平衡监控验证通过监控验证配置效果渐进调优逐步调整参数观察效果监控与运维监控指标应用级别任务执行时间成功率资源使用率集群级别节点状态资源利用率网络性能业务级别数据处理量处理延迟数据质量运维工具内置的界面查看应用状态系统级监控现代化的监控方案日志收集和分析实际案例分析案例一电商数据分析平台场景描述一个电商平台需要分析用户行为数据处理级别的数据架构设计电商数据分析架构应用集群用户行为收集实时处理数据预处理批量分析结果展示机器学习配置优化使用作为集群管理器配置动态资源分配优化参数使用序列化案例二实时推荐系统场景描述需要实时处理用户行为生成个性化推荐架构设计实时推荐系统架构用户行为流实时处理事件收集状态管理推荐结果缓存技术要点使用配置状态存储优化窗口操作实现容错机制案例三复杂数据处理中的分析场景描述分析一个包含多个操作的复杂数据处理流程展示的划分和执行数据处理流程划分分析数据读取与预处理读取日志文件过滤错误日志解析日志格式转换为格式分组聚合按服务分组转换为列表格式计算统计信息排序按错误数量排序结果收集获取前个结果性能优化策略减少使用替代优化分区根据数据分布调整分区数缓存中间结果对频繁使用的进行缓存数据本地性确保数据在合适的节点上处理常见问题与解决方案问题一内存不足症状频繁出现任务失败率高解决方案增加内存配置优化数据结构减少内存使用调整缓存策略使用广播变量减少数据传输问题二数据倾斜症状某些任务执行时间过长整体性能下降解决方案使用自定义分区器对倾斜数据进行预处理使用两阶段聚合调整并行度问题三网络传输瓶颈症状阶段耗时过长网络利用率低解决方案优化网络配置使用数据本地性调整参数使用压缩减少传输量总结集群架构的设计体现了分布式系统设计的精髓职责分离松耦合高可用每个组件都有明确的职责通过标准化的接口进行协作这种设计使得能够灵活地适应不同的部署环境在实际应用中理解这些组件的职责和协作机制对于性能调优和问题排查至关重要通过合理的配置和优化我们可以充分发挥集群的计算能力处理大规模数据支撑复杂的业务需求记住技术架构不是一成不变的随着业务需求的变化和技术的发展我们需要不断地调整和优化只有深入理解原理才能在变化中保持竞争力本文是技术专栏的一部分后续将继续深入探讨的其他核心特性如果你对某个特定方面感兴趣欢迎在评论区讨论',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-13 09:19:47',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 1.05rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 1.05rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 1.05rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Spark/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Spark</span></a><a class="article-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>大数据</span></a><a class="article-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>分布式计算</span></a><a class="article-meta__tags" href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>集群架构</span></a></span></div></div><h1 class="post-title" itemprop="name headline">Spark集群架构与组件详解：从Driver到Executor的深度解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-01-15T02:00:00.000Z" title="发表于 2025-01-15 10:00:00">2025-01-15</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-13T01:19:47.362Z" title="更新于 2025-07-13 09:19:47">2025-07-13</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="Spark集群架构与组件详解：从Driver到Executor的深度解析"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/"><header><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a><a href="/tags/Spark/" tabindex="-1" itemprop="url">Spark</a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url">大数据</a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url">分布式计算</a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" tabindex="-1" itemprop="url">集群架构</a><h1 id="CrawlerTitle" itemprop="name headline">Spark集群架构与组件详解：从Driver到Executor的深度解析</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-01-15T02:00:00.000Z" title="发表于 2025-01-15 10:00:00">2025-01-15</time><time itemprop="dateCreated datePublished" datetime="2025-07-13T01:19:47.362Z" title="更新于 2025-07-13 09:19:47">2025-07-13</time></header><h1 id="Spark集群架构与组件详解：从Driver到Executor的解析"><a href="#Spark集群架构与组件详解：从Driver到Executor的解析" class="headerlink" title="Spark集群架构与组件详解：从Driver到Executor的解析"></a>Spark集群架构与组件详解：从Driver到Executor的解析</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在分布式计算的世界里，Spark以其优雅的架构设计和强大的计算能力脱颖而出。当我们谈论Spark集群时，实际上是在讨论一个由多个组件协同工作的复杂系统。这些组件各司其职，却又紧密配合，共同完成大规模数据处理任务。</p>
+<p>本文将深入剖析Spark集群的架构设计，从Driver程序的启动到Executor的执行，从资源调度到任务分配，我们将逐一揭开这些组件的神秘面纱。这不是一篇官方文档的翻译，而是基于实际开发经验的深度技术解析。</p>
+<h2 id="Spark集群架构概览"><a href="#Spark集群架构概览" class="headerlink" title="Spark集群架构概览"></a>Spark集群架构概览</h2><h3 id="整体架构设计"><a href="#整体架构设计" class="headerlink" title="整体架构设计"></a>整体架构设计</h3><p>Spark集群采用了经典的Master-Slave架构，但这种架构在Spark中有着独特的实现方式。整个集群由以下几个核心组件构成：</p>
+<pre class="mermaid">graph TB
+    subgraph "Driver Program"
+        D[Driver]
+        D --> D1[SparkContext]
+        D --> D2[DAG Scheduler]
+        D --> D3[Task Scheduler]
+    end
+    
+    subgraph "Cluster Manager"
+        CM[Cluster Manager]
+        CM --> CM1[Standalone]
+        CM --> CM2[YARN]
+        CM --> CM3[Kubernetes]
+    end
+    
+    subgraph "Worker Nodes"
+        W1[Worker Node 1]
+        W2[Worker Node 2]
+        W3[Worker Node N]
+        
+        W1 --> E1[Executor 1]
+        W1 --> E2[Executor 2]
+        W2 --> E3[Executor 3]
+        W2 --> E4[Executor 4]
+        W3 --> E5[Executor N]
+    end
+    
+    D --> CM
+    CM --> W1
+    CM --> W2
+    CM --> W3</pre>
+
+<p>这个架构的核心思想是：<strong>将计算逻辑与资源管理分离</strong>。Driver负责应用逻辑和任务调度，Cluster Manager负责资源分配，Executor负责实际的计算执行。这种设计使得Spark能够灵活地运行在不同的集群环境中。</p>
+<h2 id="Driver：应用的大脑"><a href="#Driver：应用的大脑" class="headerlink" title="Driver：应用的大脑"></a>Driver：应用的大脑</h2><h3 id="Driver的核心职责"><a href="#Driver的核心职责" class="headerlink" title="Driver的核心职责"></a>Driver的核心职责</h3><p>Driver是Spark应用的入口点，它不仅仅是一个简单的启动器，而是整个应用的控制中心。当我们运行一个Spark应用时，实际上是在启动一个Driver进程。</p>
+<p>Driver的主要职责包括：</p>
+<ol>
+<li><strong>应用逻辑执行</strong>：运行用户编写的Spark代码</li>
+<li><strong>任务规划</strong>：将用户代码转换为DAG（有向无环图）</li>
+<li><strong>资源申请</strong>：向集群管理器申请计算资源</li>
+<li><strong>任务调度</strong>：将任务分配给Executor执行</li>
+<li><strong>状态监控</strong>：监控整个应用的执行状态</li>
+</ol>
+<h3 id="SparkContext：Driver的核心组件"><a href="#SparkContext：Driver的核心组件" class="headerlink" title="SparkContext：Driver的核心组件"></a>SparkContext：Driver的核心组件</h3><p>SparkContext是Driver中最重要的组件，它是与Spark集群交互的主要接口。当我们创建SparkContext时，实际上是在建立与集群的连接。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>()</span><br><span class="line">  .setAppName(<span class="string">&quot;MySparkApp&quot;</span>)</span><br><span class="line">  .setMaster(<span class="string">&quot;spark://master:7077&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br></pre></td></tr></table></figure>
+
+<p>这段代码背后发生了什么？让我们深入看看：</p>
+<ol>
+<li><strong>配置验证</strong>：检查配置参数的有效性</li>
+<li><strong>集群连接</strong>：建立与集群管理器的连接</li>
+<li><strong>资源申请</strong>：向集群申请Executor资源</li>
+<li><strong>组件初始化</strong>：初始化调度器、存储管理器等组件</li>
+</ol>
+<h3 id="DAG-Scheduler：任务规划师"><a href="#DAG-Scheduler：任务规划师" class="headerlink" title="DAG Scheduler：任务规划师"></a>DAG Scheduler：任务规划师</h3><p>DAG Scheduler是Driver中的另一个关键组件，它负责将用户的操作转换为可执行的任务。当我们调用RDD的转换操作时，DAG Scheduler会构建一个DAG图。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = sc.textFile(<span class="string">&quot;hdfs://path/to/data&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> words = data.flatMap(_.split(<span class="string">&quot; &quot;</span>))</span><br><span class="line"><span class="keyword">val</span> wordCounts = words.map((_, <span class="number">1</span>)).reduceByKey(_ + _)</span><br></pre></td></tr></table></figure>
+
+<p>这段代码会被DAG Scheduler转换为如下的DAG：</p>
+<pre class="mermaid">graph LR
+    A[textFile] --> B[flatMap]
+    B --> C[map]
+    C --> D[reduceByKey]
+    D --> E[Result]</pre>
+
+<p>DAG Scheduler的工作流程：</p>
+<ol>
+<li><strong>阶段划分</strong>：根据Shuffle操作将DAG划分为多个Stage</li>
+<li><strong>任务生成</strong>：为每个Stage生成具体的Task</li>
+<li><strong>依赖管理</strong>：管理Stage之间的依赖关系</li>
+<li><strong>容错处理</strong>：处理失败的任务和Stage</li>
+</ol>
+<h3 id="Stage：执行计划的核心单元"><a href="#Stage：执行计划的核心单元" class="headerlink" title="Stage：执行计划的核心单元"></a>Stage：执行计划的核心单元</h3><p>Stage是Spark执行模型中的核心概念，它是DAG被划分为可并行执行的任务单元。理解Stage对于性能优化和问题排查至关重要。</p>
+<h4 id="Stage的划分原理"><a href="#Stage的划分原理" class="headerlink" title="Stage的划分原理"></a>Stage的划分原理</h4><p>Stage的划分基于一个关键概念：<strong>Shuffle操作</strong>。每当遇到Shuffle操作时，Spark就会创建一个新的Stage。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = sc.textFile(<span class="string">&quot;hdfs://path/to/data&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> words = data.flatMap(_.split(<span class="string">&quot; &quot;</span>))           <span class="comment">// Stage 0</span></span><br><span class="line"><span class="keyword">val</span> wordCounts = words.map((_, <span class="number">1</span>))               <span class="comment">// Stage 0</span></span><br><span class="line"><span class="keyword">val</span> result = wordCounts.reduceByKey(_ + _)       <span class="comment">// Stage 1 (Shuffle)</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中：</p>
+<ul>
+<li><code>flatMap</code>和<code>map</code>操作在同一个Stage中，因为它们之间没有Shuffle</li>
+<li><code>reduceByKey</code>会触发Shuffle，因此创建了新的Stage</li>
+</ul>
+<h4 id="Stage的类型"><a href="#Stage的类型" class="headerlink" title="Stage的类型"></a>Stage的类型</h4><p><strong>1. ShuffleMapStage</strong></p>
+<ul>
+<li>包含Shuffle操作的任务</li>
+<li>需要将数据写入磁盘，供下游Stage读取</li>
+<li>例如：<code>reduceByKey</code>、<code>groupByKey</code>、<code>sortByKey</code>等</li>
+</ul>
+<p><strong>2. ResultStage</strong></p>
+<ul>
+<li>最终的计算结果</li>
+<li>通常包含<code>collect</code>、<code>count</code>等行动操作</li>
+<li>不需要为下游Stage提供数据</li>
+</ul>
+<h4 id="Stage的依赖关系"><a href="#Stage的依赖关系" class="headerlink" title="Stage的依赖关系"></a>Stage的依赖关系</h4><p>Stage之间的依赖关系决定了执行顺序：</p>
+<p><strong>1. 窄依赖（Narrow Dependency）</strong></p>
+<ul>
+<li>父RDD的每个分区最多被一个子RDD分区使用</li>
+<li>不需要Shuffle，可以在同一个Stage中执行</li>
+<li>例如：<code>map</code>、<code>filter</code>、<code>flatMap</code></li>
+</ul>
+<p><strong>2. 宽依赖（Wide Dependency）</strong></p>
+<ul>
+<li>父RDD的每个分区可能被多个子RDD分区使用</li>
+<li>需要Shuffle，会创建新的Stage</li>
+<li>例如：<code>reduceByKey</code>、<code>groupByKey</code>、<code>join</code></li>
+</ul>
+<pre class="mermaid">graph LR
+    subgraph "Stage 0"
+        A[RDD A] --> B[map]
+        B --> C[RDD B]
+    end
+    
+    subgraph "Stage 1"
+        C --> D[reduceByKey]
+        D --> E[RDD C]
+    end
+    
+    C -.->|Shuffle| D</pre>
+
+<h4 id="Stage的执行流程"><a href="#Stage的执行流程" class="headerlink" title="Stage的执行流程"></a>Stage的执行流程</h4><pre class="mermaid">graph TD
+    A[DAG构建] --> B[Stage划分]
+    B --> C[Task生成]
+    C --> D[Stage提交]
+    D --> E[Task执行]
+    E --> F[结果收集]
+    F --> G{还有Stage?}
+    G -->|是| D
+    G -->|否| H[应用完成]</pre>
+
+<p><strong>详细执行过程：</strong></p>
+<ol>
+<li><strong>DAG构建</strong>：根据RDD的转换操作构建有向无环图</li>
+<li><strong>Stage划分</strong>：根据Shuffle操作将DAG划分为多个Stage</li>
+<li><strong>Task生成</strong>：为每个Stage生成具体的Task</li>
+<li><strong>Stage提交</strong>：按顺序提交Stage到集群执行</li>
+<li><strong>Task执行</strong>：Executor并行执行Stage中的Task</li>
+<li><strong>结果收集</strong>：收集Task的执行结果</li>
+<li><strong>Stage依赖</strong>：等待当前Stage完成后，执行下一个Stage</li>
+</ol>
+<h4 id="Stage的并行度与优化"><a href="#Stage的并行度与优化" class="headerlink" title="Stage的并行度与优化"></a>Stage的并行度与优化</h4><p><strong>并行度决定因素：</strong></p>
+<ul>
+<li><strong>分区数</strong>：RDD的分区数决定了Task的数量</li>
+<li><strong>资源可用性</strong>：集群中可用的Executor数量</li>
+<li><strong>数据本地性</strong>：数据分布在不同节点上</li>
+</ul>
+<p><strong>并行度优化示例：</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置RDD的分区数</span></span><br><span class="line"><span class="keyword">val</span> rdd = sc.textFile(<span class="string">&quot;data.txt&quot;</span>).repartition(<span class="number">100</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置默认并行度</span></span><br><span class="line"><span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>()</span><br><span class="line">  .set(<span class="string">&quot;spark.default.parallelism&quot;</span>, <span class="string">&quot;100&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>Stage优化策略：</strong></p>
+<ol>
+<li><p><strong>减少Stage数量</strong>：避免不必要的Shuffle操作</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化前：会产生额外的Stage</span></span><br><span class="line"><span class="keyword">val</span> mapped = data.map((_, <span class="number">1</span>))</span><br><span class="line"><span class="keyword">val</span> result = mapped.reduceByKey(_ + _)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 优化后：减少Stage数量</span></span><br><span class="line"><span class="keyword">val</span> result = data.map((_, <span class="number">1</span>)).reduceByKey(_ + _)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>优化Stage内部操作</strong>：使用更高效的算子</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用mapPartitions减少函数调用开销</span></span><br><span class="line"><span class="keyword">val</span> result = data.mapPartitions(iter =&gt; &#123;</span><br><span class="line">  <span class="comment">// 批量处理逻辑</span></span><br><span class="line">  iter.map(process)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="Stage的容错机制"><a href="#Stage的容错机制" class="headerlink" title="Stage的容错机制"></a>Stage的容错机制</h4><p><strong>1. 任务重试</strong></p>
+<ul>
+<li>单个Task失败时，只重试失败的Task</li>
+<li>不会影响整个Stage的其他Task</li>
+</ul>
+<p><strong>2. Stage重试</strong></p>
+<ul>
+<li>如果Stage中失败的Task过多，会重试整个Stage</li>
+<li>通过<code>spark.stage.maxAttempts</code>配置重试次数</li>
+</ul>
+<p><strong>3. 数据持久化</strong></p>
+<ul>
+<li>Shuffle数据会持久化到磁盘</li>
+<li>支持从失败点恢复，无需重新计算</li>
+</ul>
+<h4 id="Stage监控与调试"><a href="#Stage监控与调试" class="headerlink" title="Stage监控与调试"></a>Stage监控与调试</h4><p><strong>1. Spark UI查看</strong></p>
+<ul>
+<li>在Spark UI中可以查看Stage的执行情况</li>
+<li>包括执行时间、Task数量、失败情况等</li>
+</ul>
+<p><strong>2. 日志分析</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 启用详细日志</span></span><br><span class="line">spark.conf.set(<span class="string">&quot;spark.eventLog.enabled&quot;</span>, <span class="string">&quot;true&quot;</span>)</span><br><span class="line">spark.conf.set(<span class="string">&quot;spark.eventLog.dir&quot;</span>, <span class="string">&quot;/tmp/spark-events&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 性能分析</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查看Stage的执行计划</span></span><br><span class="line"><span class="keyword">val</span> plan = df.queryExecution.executedPlan</span><br><span class="line">println(plan)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Task-Scheduler：任务调度器"><a href="#Task-Scheduler：任务调度器" class="headerlink" title="Task Scheduler：任务调度器"></a>Task Scheduler：任务调度器</h3><p>Task Scheduler负责将DAG Scheduler生成的任务分配给Executor执行。它需要考虑数据本地性、资源可用性、负载均衡等多个因素。</p>
+<p>Task Scheduler的调度策略：</p>
+<ol>
+<li><strong>数据本地性优先</strong>：优先将任务分配给数据所在的节点</li>
+<li><strong>资源匹配</strong>：确保Executor有足够的资源执行任务</li>
+<li><strong>负载均衡</strong>：避免某些节点过载</li>
+<li><strong>容错机制</strong>：处理Executor失败的情况</li>
+</ol>
+<h2 id="Executor：计算的执行者"><a href="#Executor：计算的执行者" class="headerlink" title="Executor：计算的执行者"></a>Executor：计算的执行者</h2><h3 id="Executor的生命周期"><a href="#Executor的生命周期" class="headerlink" title="Executor的生命周期"></a>Executor的生命周期</h3><p>Executor是实际执行计算任务的组件，它在Worker节点上运行。一个Worker节点可以运行多个Executor，每个Executor运行在独立的JVM进程中。</p>
+<p>Executor的生命周期：</p>
+<pre class="mermaid">graph LR
+    A[启动] --> B[注册]
+    B --> C[接收任务]
+    C --> D[执行任务]
+    D --> E[返回结果]
+    E --> F[等待新任务]
+    F --> C
+    F --> G[关闭]</pre>
+
+<h3 id="Executor的内部结构"><a href="#Executor的内部结构" class="headerlink" title="Executor的内部结构"></a>Executor的内部结构</h3><p>每个Executor内部包含多个组件：</p>
+<ol>
+<li><strong>Task Runner</strong>：实际执行任务的线程</li>
+<li><strong>Block Manager</strong>：管理内存和磁盘上的数据块</li>
+<li><strong>Shuffle Manager</strong>：处理Shuffle操作</li>
+<li><strong>Memory Manager</strong>：管理内存分配和回收</li>
+</ol>
+<h3 id="内存管理机制"><a href="#内存管理机制" class="headerlink" title="内存管理机制"></a>内存管理机制</h3><p>Executor的内存管理是Spark性能优化的关键。Spark将Executor的内存分为几个区域：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Executor Memory Layout:</span><br><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│  Reserved Memory (300MB)           │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│  User Memory (25% of heap)         │</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│  Spark Memory (75% of heap)        │</span><br><span class="line">│  ├─ Storage Memory (50% of Spark)  │</span><br><span class="line">│  └─ Execution Memory (50% of Spark)│</span><br><span class="line">└─────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Reserved Memory</strong>：系统保留内存，用于Spark内部数据结构</li>
+<li><strong>User Memory</strong>：用户代码和数据结构使用的内存</li>
+<li><strong>Storage Memory</strong>：用于缓存RDD和广播变量</li>
+<li><strong>Execution Memory</strong>：用于Shuffle、Join等操作的临时数据</li>
+</ul>
+<h3 id="任务执行流程"><a href="#任务执行流程" class="headerlink" title="任务执行流程"></a>任务执行流程</h3><p>当Executor接收到任务时，执行流程如下：</p>
+<ol>
+<li><strong>任务反序列化</strong>：将任务从网络传输的字节流反序列化为对象</li>
+<li><strong>依赖下载</strong>：下载任务所需的依赖JAR包和文件</li>
+<li><strong>任务执行</strong>：在Task Runner线程中执行任务</li>
+<li><strong>结果返回</strong>：将执行结果返回给Driver</li>
+<li><strong>资源清理</strong>：清理任务执行过程中产生的临时数据</li>
+</ol>
+<h2 id="Worker：资源的提供者"><a href="#Worker：资源的提供者" class="headerlink" title="Worker：资源的提供者"></a>Worker：资源的提供者</h2><h3 id="Worker的角色定位"><a href="#Worker的角色定位" class="headerlink" title="Worker的角色定位"></a>Worker的角色定位</h3><p>Worker是集群中的计算节点，它负责：</p>
+<ol>
+<li><strong>资源管理</strong>：管理节点的CPU、内存等计算资源</li>
+<li><strong>Executor管理</strong>：启动、监控、停止Executor进程</li>
+<li><strong>心跳报告</strong>：定期向Master报告节点状态</li>
+<li><strong>故障处理</strong>：处理Executor和节点级别的故障</li>
+</ol>
+<h3 id="Worker的资源分配策略"><a href="#Worker的资源分配策略" class="headerlink" title="Worker的资源分配策略"></a>Worker的资源分配策略</h3><p>Worker需要合理分配资源给不同的Executor。资源分配考虑的因素：</p>
+<ol>
+<li><strong>可用资源</strong>：节点的CPU核心数和可用内存</li>
+<li><strong>应用需求</strong>：不同应用对资源的需求</li>
+<li><strong>资源隔离</strong>：确保不同应用之间的资源隔离</li>
+<li><strong>动态调整</strong>：根据负载情况动态调整资源分配</li>
+</ol>
+<h3 id="Worker的容错机制"><a href="#Worker的容错机制" class="headerlink" title="Worker的容错机制"></a>Worker的容错机制</h3><p>Worker节点可能因为硬件故障、网络问题等原因失效。Spark提供了多层容错机制：</p>
+<ol>
+<li><strong>心跳检测</strong>：定期检测Worker节点状态</li>
+<li><strong>任务重试</strong>：失败的任务可以在其他节点重试</li>
+<li><strong>数据备份</strong>：重要数据在多个节点备份</li>
+<li><strong>快速恢复</strong>：从故障中快速恢复服务</li>
+</ol>
+<h2 id="集群管理器：资源的协调者"><a href="#集群管理器：资源的协调者" class="headerlink" title="集群管理器：资源的协调者"></a>集群管理器：资源的协调者</h2><h3 id="三种集群管理器对比"><a href="#三种集群管理器对比" class="headerlink" title="三种集群管理器对比"></a>三种集群管理器对比</h3><p>Spark支持三种主要的集群管理器，每种都有其特点和适用场景：</p>
+<h4 id="1-Standalone模式"><a href="#1-Standalone模式" class="headerlink" title="1. Standalone模式"></a>1. Standalone模式</h4><p>Standalone是Spark自带的集群管理器，适合中小规模集群。</p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>部署简单，无需额外组件</li>
+<li>资源利用率高</li>
+<li>适合学习和测试环境</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>功能相对简单</li>
+<li>缺乏高级调度特性</li>
+<li>不适合大规模生产环境</li>
+</ul>
+<p><strong>架构特点：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Standalone Architecture:</span><br><span class="line">┌─────────────────┐    ┌─────────────────┐</span><br><span class="line">│   Master        │    │   Worker        │</span><br><span class="line">│                 │    │                 │</span><br><span class="line">│ - 资源调度      │    │ - 启动Executor  │</span><br><span class="line">│ - 应用管理      │    │ - 资源监控      │</span><br><span class="line">│ - 故障处理      │    │ - 心跳报告      │</span><br><span class="line">└─────────────────┘    └─────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-YARN模式"><a href="#2-YARN模式" class="headerlink" title="2. YARN模式"></a>2. YARN模式</h4><p>YARN是Hadoop生态系统的资源管理器，适合大规模生产环境。</p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>成熟的资源管理</li>
+<li>与Hadoop生态深度集成</li>
+<li>支持多租户和资源隔离</li>
+<li>适合大规模集群</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>部署复杂度较高</li>
+<li>需要Hadoop环境</li>
+<li>资源调度延迟相对较高</li>
+</ul>
+<p><strong>架构特点：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">YARN Architecture:</span><br><span class="line">┌─────────────────┐    ┌─────────────────┐</span><br><span class="line">│   Resource      │    │   NodeManager   │</span><br><span class="line">│   Manager       │    │                 │</span><br><span class="line">│                 │    │ - 容器管理      │</span><br><span class="line">│ - 全局资源调度  │    │ - 资源监控      │</span><br><span class="line">│ - 应用生命周期  │    │ - 任务执行      │</span><br><span class="line">└─────────────────┘    └─────────────────┘</span><br><span class="line">        │                       │</span><br><span class="line">        └───────────────────────┘</span><br><span class="line">                YARN</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Kubernetes模式"><a href="#3-Kubernetes模式" class="headerlink" title="3. Kubernetes模式"></a>3. Kubernetes模式</h4><p>Kubernetes是云原生的容器编排平台，适合云环境部署。</p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>云原生架构</li>
+<li>弹性伸缩能力强</li>
+<li>容器化部署</li>
+<li>丰富的生态系统</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>学习曲线陡峭</li>
+<li>需要Kubernetes环境</li>
+<li>资源调度开销较大</li>
+</ul>
+<p><strong>架构特点：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Kubernetes Architecture:</span><br><span class="line">┌─────────────────┐    ┌─────────────────┐</span><br><span class="line">│   K8s API       │    │   Kubelet       │</span><br><span class="line">│   Server        │    │                 │</span><br><span class="line">│                 │    │ - Pod管理       │</span><br><span class="line">│ - 资源调度      │    │ - 容器生命周期  │</span><br><span class="line">│ - 服务发现      │    │ - 资源监控      │</span><br><span class="line">└─────────────────┘    └─────────────────┘</span><br><span class="line">        │                       │</span><br><span class="line">        └───────────────────────┘</span><br><span class="line">            Kubernetes</span><br></pre></td></tr></table></figure>
+
+<h3 id="集群管理器的选择策略"><a href="#集群管理器的选择策略" class="headerlink" title="集群管理器的选择策略"></a>集群管理器的选择策略</h3><p>选择合适的集群管理器需要考虑以下因素：</p>
+<ol>
+<li><strong>集群规模</strong>：小规模选择Standalone，大规模选择YARN或Kubernetes</li>
+<li><strong>现有基础设施</strong>：如果已有Hadoop环境，选择YARN；如果使用云服务，选择Kubernetes</li>
+<li><strong>运维能力</strong>：团队的技术栈和运维经验</li>
+<li><strong>成本考虑</strong>：不同方案的部署和维护成本</li>
+</ol>
+<h2 id="资源调度与任务分配机制"><a href="#资源调度与任务分配机制" class="headerlink" title="资源调度与任务分配机制"></a>资源调度与任务分配机制</h2><h3 id="资源调度流程"><a href="#资源调度流程" class="headerlink" title="资源调度流程"></a>资源调度流程</h3><p>Spark的资源调度是一个复杂的过程，涉及多个组件之间的协作：</p>
+<pre class="mermaid">sequenceDiagram
+    participant D as Driver
+    participant CM as Cluster Manager
+    participant W as Worker
+    participant E as Executor
+    
+    D->>CM: 申请资源
+    CM->>W: 分配资源
+    W->>E: 启动Executor
+    E->>D: 注册Executor
+    D->>E: 分配任务
+    E->>D: 返回结果</pre>
+
+<h3 id="任务分配策略"><a href="#任务分配策略" class="headerlink" title="任务分配策略"></a>任务分配策略</h3><p>Spark的任务分配遵循以下策略：</p>
+<ol>
+<li><strong>数据本地性优先</strong>：优先将任务分配给数据所在的节点</li>
+<li><strong>资源匹配</strong>：确保Executor有足够的资源执行任务</li>
+<li><strong>负载均衡</strong>：避免某些节点过载</li>
+<li><strong>容错考虑</strong>：考虑节点和Executor的可靠性</li>
+</ol>
+<h3 id="资源调度优化"><a href="#资源调度优化" class="headerlink" title="资源调度优化"></a>资源调度优化</h3><p>为了提高资源利用率，Spark提供了多种优化策略：</p>
+<ol>
+<li><strong>动态资源分配</strong>：根据负载动态调整资源分配</li>
+<li><strong>资源预留</strong>：为重要应用预留资源</li>
+<li><strong>资源隔离</strong>：不同应用之间的资源隔离</li>
+<li><strong>资源监控</strong>：实时监控资源使用情况</li>
+</ol>
+<h2 id="集群部署与配置最佳实践"><a href="#集群部署与配置最佳实践" class="headerlink" title="集群部署与配置最佳实践"></a>集群部署与配置最佳实践</h2><h3 id="硬件配置建议"><a href="#硬件配置建议" class="headerlink" title="硬件配置建议"></a>硬件配置建议</h3><h4 id="CPU配置"><a href="#CPU配置" class="headerlink" title="CPU配置"></a>CPU配置</h4><ul>
+<li><strong>Driver</strong>：2-4个CPU核心</li>
+<li><strong>Executor</strong>：4-8个CPU核心</li>
+<li><strong>Worker</strong>：16-32个CPU核心</li>
+</ul>
+<h4 id="内存配置"><a href="#内存配置" class="headerlink" title="内存配置"></a>内存配置</h4><ul>
+<li><strong>Driver</strong>：4-8GB内存</li>
+<li><strong>Executor</strong>：8-32GB内存</li>
+<li><strong>Worker</strong>：64-256GB内存</li>
+</ul>
+<h4 id="存储配置"><a href="#存储配置" class="headerlink" title="存储配置"></a>存储配置</h4><ul>
+<li><strong>本地存储</strong>：SSD优先，用于Shuffle和缓存</li>
+<li><strong>网络存储</strong>：用于持久化数据</li>
+<li><strong>存储容量</strong>：根据数据量确定</li>
+</ul>
+<h3 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h3><h4 id="网络带宽"><a href="#网络带宽" class="headerlink" title="网络带宽"></a>网络带宽</h4><ul>
+<li><strong>节点间通信</strong>：10Gbps或更高</li>
+<li><strong>网络延迟</strong>：尽量降低节点间延迟</li>
+<li><strong>网络拓扑</strong>：避免网络瓶颈</li>
+</ul>
+<h4 id="网络优化"><a href="#网络优化" class="headerlink" title="网络优化"></a>网络优化</h4><ul>
+<li><strong>TCP调优</strong>：优化TCP参数</li>
+<li><strong>网络隔离</strong>：不同应用间的网络隔离</li>
+<li><strong>网络监控</strong>：监控网络性能</li>
+</ul>
+<h3 id="配置参数调优"><a href="#配置参数调优" class="headerlink" title="配置参数调优"></a>配置参数调优</h3><h4 id="核心配置参数"><a href="#核心配置参数" class="headerlink" title="核心配置参数"></a>核心配置参数</h4><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 应用配置</span></span><br><span class="line"><span class="attr">spark.app.name</span>=<span class="string">MySparkApp</span></span><br><span class="line"><span class="attr">spark.master</span>=<span class="string">spark://master:7077</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># 资源配置</span></span><br><span class="line"><span class="attr">spark.executor.memory</span>=<span class="string">8g</span></span><br><span class="line"><span class="attr">spark.executor.cores</span>=<span class="string">4</span></span><br><span class="line"><span class="attr">spark.executor.instances</span>=<span class="string">10</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># 性能调优</span></span><br><span class="line"><span class="attr">spark.serializer</span>=<span class="string">org.apache.spark.serializer.KryoSerializer</span></span><br><span class="line"><span class="attr">spark.sql.adaptive.enabled</span>=<span class="string">true</span></span><br><span class="line"><span class="attr">spark.sql.adaptive.coalescePartitions.enabled</span>=<span class="string">true</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># 容错配置</span></span><br><span class="line"><span class="attr">spark.task.maxFailures</span>=<span class="string">4</span></span><br><span class="line"><span class="attr">spark.stage.maxAttempts</span>=<span class="string">4</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置调优原则"><a href="#配置调优原则" class="headerlink" title="配置调优原则"></a>配置调优原则</h4><ol>
+<li><strong>资源合理分配</strong>：根据应用需求合理分配资源</li>
+<li><strong>参数平衡</strong>：在性能和稳定性之间找到平衡</li>
+<li><strong>监控验证</strong>：通过监控验证配置效果</li>
+<li><strong>渐进调优</strong>：逐步调整参数，观察效果</li>
+</ol>
+<h3 id="监控与运维"><a href="#监控与运维" class="headerlink" title="监控与运维"></a>监控与运维</h3><h4 id="监控指标"><a href="#监控指标" class="headerlink" title="监控指标"></a>监控指标</h4><ol>
+<li><strong>应用级别</strong>：任务执行时间、成功率、资源使用率</li>
+<li><strong>集群级别</strong>：节点状态、资源利用率、网络性能</li>
+<li><strong>业务级别</strong>：数据处理量、处理延迟、数据质量</li>
+</ol>
+<h4 id="运维工具"><a href="#运维工具" class="headerlink" title="运维工具"></a>运维工具</h4><ol>
+<li><strong>Spark UI</strong>：内置的Web界面，查看应用状态</li>
+<li><strong>Ganglia&#x2F;Nagios</strong>：系统级监控</li>
+<li><strong>Prometheus + Grafana</strong>：现代化的监控方案</li>
+<li><strong>ELK Stack</strong>：日志收集和分析</li>
+</ol>
+<h2 id="实际案例分析"><a href="#实际案例分析" class="headerlink" title="实际案例分析"></a>实际案例分析</h2><h3 id="案例一：电商数据分析平台"><a href="#案例一：电商数据分析平台" class="headerlink" title="案例一：电商数据分析平台"></a>案例一：电商数据分析平台</h3><p><strong>场景描述</strong>：一个电商平台需要分析用户行为数据，处理TB级别的数据。</p>
+<p><strong>架构设计</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">电商数据分析架构:</span><br><span class="line">┌─────────────────┐    ┌─────────────────┐</span><br><span class="line">│   Web应用       │    │   Spark集群     │</span><br><span class="line">│                 │    │                 │</span><br><span class="line">│ - 用户行为收集  │───▶│ - 实时处理      │</span><br><span class="line">│ - 数据预处理    │    │ - 批量分析      │</span><br><span class="line">│ - 结果展示      │◀───│ - 机器学习      │</span><br><span class="line">└─────────────────┘    └─────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置优化</strong>：</p>
+<ul>
+<li>使用YARN作为集群管理器</li>
+<li>配置动态资源分配</li>
+<li>优化Shuffle参数</li>
+<li>使用Kryo序列化</li>
+</ul>
+<h3 id="案例二：实时推荐系统"><a href="#案例二：实时推荐系统" class="headerlink" title="案例二：实时推荐系统"></a>案例二：实时推荐系统</h3><p><strong>场景描述</strong>：需要实时处理用户行为，生成个性化推荐。</p>
+<p><strong>架构设计</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">实时推荐系统架构:</span><br><span class="line">┌─────────────────┐    ┌─────────────────┐</span><br><span class="line">│   Kafka         │    │   Spark         │</span><br><span class="line">│                 │    │   Streaming     │</span><br><span class="line">│ - 用户行为流    │───▶│ - 实时处理      │</span><br><span class="line">│ - 事件收集      │    │ - 状态管理      │</span><br><span class="line">└─────────────────┘    └─────────────────┘</span><br><span class="line">        │                       │</span><br><span class="line">        └───────────────────────┘</span><br><span class="line">                Redis</span><br><span class="line">                - 推荐结果缓存</span><br></pre></td></tr></table></figure>
+
+<p><strong>技术要点</strong>：</p>
+<ul>
+<li>使用Structured Streaming</li>
+<li>配置状态存储</li>
+<li>优化窗口操作</li>
+<li>实现容错机制</li>
+</ul>
+<h3 id="案例三：复杂数据处理中的Stage分析"><a href="#案例三：复杂数据处理中的Stage分析" class="headerlink" title="案例三：复杂数据处理中的Stage分析"></a>案例三：复杂数据处理中的Stage分析</h3><p><strong>场景描述</strong>：分析一个包含多个Shuffle操作的复杂数据处理流程，展示Stage的划分和执行。</p>
+<p><strong>数据处理流程</strong>：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> logs = sc.textFile(<span class="string">&quot;logs&quot;</span>)</span><br><span class="line">  .filter(_.contains(<span class="string">&quot;ERROR&quot;</span>))                    <span class="comment">// Stage 0</span></span><br><span class="line">  .map(parseLog)                                  <span class="comment">// Stage 0</span></span><br><span class="line">  .map(log =&gt; (log.service, log))                <span class="comment">// Stage 0</span></span><br><span class="line">  .groupByKey()                                   <span class="comment">// Stage 1 (Shuffle)</span></span><br><span class="line">  .mapValues(_.toList)                           <span class="comment">// Stage 1</span></span><br><span class="line">  .map &#123; <span class="keyword">case</span> (service, logs) =&gt;                 <span class="comment">// Stage 1</span></span><br><span class="line">    (service, logs.size, logs.map(_.timestamp).max)</span><br><span class="line">  &#125;</span><br><span class="line">  .sortBy(_._2, <span class="literal">false</span>)                           <span class="comment">// Stage 2 (Shuffle)</span></span><br><span class="line">  .take(<span class="number">10</span>)                                      <span class="comment">// Stage 3 (Result)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Stage划分分析</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Stage 0: 数据读取与预处理</span><br><span class="line">├── textFile: 读取日志文件</span><br><span class="line">├── filter: 过滤错误日志</span><br><span class="line">├── map(parseLog): 解析日志格式</span><br><span class="line">└── map: 转换为(service, log)格式</span><br><span class="line"></span><br><span class="line">Stage 1: 分组聚合</span><br><span class="line">├── groupByKey: 按服务分组 (Shuffle)</span><br><span class="line">├── mapValues: 转换为列表格式</span><br><span class="line">└── map: 计算统计信息</span><br><span class="line"></span><br><span class="line">Stage 2: 排序</span><br><span class="line">└── sortBy: 按错误数量排序 (Shuffle)</span><br><span class="line"></span><br><span class="line">Stage 3: 结果收集</span><br><span class="line">└── take: 获取前10个结果</span><br></pre></td></tr></table></figure>
+
+<p><strong>性能优化策略</strong>：</p>
+<ol>
+<li><strong>减少Shuffle</strong>：使用<code>reduceByKey</code>替代<code>groupByKey</code></li>
+<li><strong>优化分区</strong>：根据数据分布调整分区数</li>
+<li><strong>缓存中间结果</strong>：对频繁使用的RDD进行缓存</li>
+<li><strong>数据本地性</strong>：确保数据在合适的节点上处理</li>
+</ol>
+<h2 id="常见问题与解决方案"><a href="#常见问题与解决方案" class="headerlink" title="常见问题与解决方案"></a>常见问题与解决方案</h2><h3 id="问题一：Executor内存不足"><a href="#问题一：Executor内存不足" class="headerlink" title="问题一：Executor内存不足"></a>问题一：Executor内存不足</h3><p><strong>症状</strong>：频繁出现OutOfMemoryError，任务失败率高。</p>
+<p><strong>解决方案</strong>：</p>
+<ol>
+<li>增加Executor内存配置</li>
+<li>优化数据结构，减少内存使用</li>
+<li>调整缓存策略</li>
+<li>使用广播变量减少数据传输</li>
+</ol>
+<h3 id="问题二：数据倾斜"><a href="#问题二：数据倾斜" class="headerlink" title="问题二：数据倾斜"></a>问题二：数据倾斜</h3><p><strong>症状</strong>：某些任务执行时间过长，整体性能下降。</p>
+<p><strong>解决方案</strong>：</p>
+<ol>
+<li>使用自定义分区器</li>
+<li>对倾斜数据进行预处理</li>
+<li>使用两阶段聚合</li>
+<li>调整并行度</li>
+</ol>
+<h3 id="问题三：网络传输瓶颈"><a href="#问题三：网络传输瓶颈" class="headerlink" title="问题三：网络传输瓶颈"></a>问题三：网络传输瓶颈</h3><p><strong>症状</strong>：Shuffle阶段耗时过长，网络利用率低。</p>
+<p><strong>解决方案</strong>：</p>
+<ol>
+<li>优化网络配置</li>
+<li>使用数据本地性</li>
+<li>调整Shuffle参数</li>
+<li>使用压缩减少传输量</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spark集群架构的设计体现了分布式系统设计的精髓：<strong>职责分离、松耦合、高可用</strong>。每个组件都有明确的职责，通过标准化的接口进行协作，这种设计使得Spark能够灵活地适应不同的部署环境。</p>
+<p>在实际应用中，理解这些组件的职责和协作机制，对于性能调优和问题排查至关重要。通过合理的配置和优化，我们可以充分发挥Spark集群的计算能力，处理大规模数据，支撑复杂的业务需求。</p>
+<p>记住，技术架构不是一成不变的，随着业务需求的变化和技术的发展，我们需要不断地调整和优化。只有深入理解原理，才能在变化中保持竞争力。</p>
+<hr>
+<p><em>本文是Spark技术专栏的一部分，后续将继续深入探讨Spark的其他核心特性。如果你对某个特定方面感兴趣，欢迎在评论区讨论。</em> </p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/')">Spark集群架构与组件详解：从Driver到Executor的深度解析</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=Spark集群架构与组件详解：从Driver到Executor的深度解析&amp;url=http://example.com/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Spark/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Spark<span class="tagsPageCount">6</span></a><a class="post-meta__box__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>大数据<span class="tagsPageCount">4</span></a><a class="post-meta__box__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>分布式计算<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>集群架构<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/12/23/%E8%B6%85%E7%BB%9D%E6%8F%92%E5%9B%BE%E7%BD%91%E7%AB%99%E6%8E%A8%E8%8D%90/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350520.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">超绝插图网站推荐</div></div></a></div><div class="next-post pull-right"><a href="/2025/06/07/%E6%96%B0%E7%94%9F%E4%BB%A3%E5%8F%AA%E6%9C%89%E4%B8%80%E4%B8%AAEden+S0%20%E5%8F%AF%E4%BB%A5%E5%90%97/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250608162900884.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">JVM新生代只有一个Eden+S0 可以吗</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/07/08/Spark%E4%B8%93%E6%A0%8F%E6%95%B4%E4%BD%93%E6%96%87%E7%AB%A0%E5%A4%A7%E7%BA%B2/" title="Spark专栏整体文章大纲"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-08</div><div class="title">Spark专栏整体文章大纲</div></div></a></div><div><a href="/2025/07/10/Spark%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%87%92%E6%83%B0%E8%AE%A1%E7%AE%97/" title="Spark核心概念与懒惰计算[未修订完]"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-10</div><div class="title">Spark核心概念与懒惰计算[未修订完]</div></div></a></div><div><a href="/2025/06/18/hadoop-ecosystem-explained/" title="Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250619194740317.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-18</div><div class="title">Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？</div></div></a></div><div><a href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-15</div><div class="title">从 CSV文件的加载、分区和处理 来理解 RDD</div></div></a></div><div><a href="/2025/07/09/Spark3.x%E6%A0%B8%E5%BF%83%E7%AE%97%E5%AD%90%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%B5%81%E8%BD%AC%E4%B8%8EShuffle%E6%9C%BA%E5%88%B6/" title="Spark3.x核心算子原理解析：数据流转与Shuffle机制[后面会拆分]"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250703143549645.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-09</div><div class="title">Spark3.x核心算子原理解析：数据流转与Shuffle机制[后面会拆分]</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3%EF%BC%9A%E4%BB%8EDriver%E5%88%B0Executor%E7%9A%84%E8%A7%A3%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">Spark集群架构与组件详解：从Driver到Executor的解析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88"><span class="toc-number">1.2.</span> <span class="toc-text">Spark集群架构概览</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.2.1.</span> <span class="toc-text">整体架构设计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Driver%EF%BC%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%A4%A7%E8%84%91"><span class="toc-number">1.3.</span> <span class="toc-text">Driver：应用的大脑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Driver%E7%9A%84%E6%A0%B8%E5%BF%83%E8%81%8C%E8%B4%A3"><span class="toc-number">1.3.1.</span> <span class="toc-text">Driver的核心职责</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SparkContext%EF%BC%9ADriver%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.3.2.</span> <span class="toc-text">SparkContext：Driver的核心组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DAG-Scheduler%EF%BC%9A%E4%BB%BB%E5%8A%A1%E8%A7%84%E5%88%92%E5%B8%88"><span class="toc-number">1.3.3.</span> <span class="toc-text">DAG Scheduler：任务规划师</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Stage%EF%BC%9A%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8D%95%E5%85%83"><span class="toc-number">1.3.4.</span> <span class="toc-text">Stage：执行计划的核心单元</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E5%88%92%E5%88%86%E5%8E%9F%E7%90%86"><span class="toc-number">1.3.4.1.</span> <span class="toc-text">Stage的划分原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.3.4.2.</span> <span class="toc-text">Stage的类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB"><span class="toc-number">1.3.4.3.</span> <span class="toc-text">Stage的依赖关系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.4.4.</span> <span class="toc-text">Stage的执行流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%BA%A6%E4%B8%8E%E4%BC%98%E5%8C%96"><span class="toc-number">1.3.4.5.</span> <span class="toc-text">Stage的并行度与优化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9A%84%E5%AE%B9%E9%94%99%E6%9C%BA%E5%88%B6"><span class="toc-number">1.3.4.6.</span> <span class="toc-text">Stage的容错机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Stage%E7%9B%91%E6%8E%A7%E4%B8%8E%E8%B0%83%E8%AF%95"><span class="toc-number">1.3.4.7.</span> <span class="toc-text">Stage监控与调试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-Scheduler%EF%BC%9A%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-number">1.3.5.</span> <span class="toc-text">Task Scheduler：任务调度器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Executor%EF%BC%9A%E8%AE%A1%E7%AE%97%E7%9A%84%E6%89%A7%E8%A1%8C%E8%80%85"><span class="toc-number">1.4.</span> <span class="toc-text">Executor：计算的执行者</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Executor%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">1.4.1.</span> <span class="toc-text">Executor的生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Executor%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="toc-number">1.4.2.</span> <span class="toc-text">Executor的内部结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="toc-number">1.4.3.</span> <span class="toc-text">内存管理机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.4.</span> <span class="toc-text">任务执行流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Worker%EF%BC%9A%E8%B5%84%E6%BA%90%E7%9A%84%E6%8F%90%E4%BE%9B%E8%80%85"><span class="toc-number">1.5.</span> <span class="toc-text">Worker：资源的提供者</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Worker%E7%9A%84%E8%A7%92%E8%89%B2%E5%AE%9A%E4%BD%8D"><span class="toc-number">1.5.1.</span> <span class="toc-text">Worker的角色定位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Worker%E7%9A%84%E8%B5%84%E6%BA%90%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-number">1.5.2.</span> <span class="toc-text">Worker的资源分配策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Worker%E7%9A%84%E5%AE%B9%E9%94%99%E6%9C%BA%E5%88%B6"><span class="toc-number">1.5.3.</span> <span class="toc-text">Worker的容错机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%99%A8%EF%BC%9A%E8%B5%84%E6%BA%90%E7%9A%84%E5%8D%8F%E8%B0%83%E8%80%85"><span class="toc-number">1.6.</span> <span class="toc-text">集群管理器：资源的协调者</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%99%A8%E5%AF%B9%E6%AF%94"><span class="toc-number">1.6.1.</span> <span class="toc-text">三种集群管理器对比</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Standalone%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.6.1.1.</span> <span class="toc-text">1. Standalone模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-YARN%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.6.1.2.</span> <span class="toc-text">2. YARN模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-Kubernetes%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.6.1.3.</span> <span class="toc-text">3. Kubernetes模式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%99%A8%E7%9A%84%E9%80%89%E6%8B%A9%E7%AD%96%E7%95%A5"><span class="toc-number">1.6.2.</span> <span class="toc-text">集群管理器的选择策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6%E4%B8%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6"><span class="toc-number">1.7.</span> <span class="toc-text">资源调度与任务分配机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6%E6%B5%81%E7%A8%8B"><span class="toc-number">1.7.1.</span> <span class="toc-text">资源调度流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-number">1.7.2.</span> <span class="toc-text">任务分配策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96"><span class="toc-number">1.7.3.</span> <span class="toc-text">资源调度优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2%E4%B8%8E%E9%85%8D%E7%BD%AE%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.8.</span> <span class="toc-text">集群部署与配置最佳实践</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.8.1.</span> <span class="toc-text">硬件配置建议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#CPU%E9%85%8D%E7%BD%AE"><span class="toc-number">1.8.1.1.</span> <span class="toc-text">CPU配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="toc-number">1.8.1.2.</span> <span class="toc-text">内存配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE"><span class="toc-number">1.8.1.3.</span> <span class="toc-text">存储配置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="toc-number">1.8.2.</span> <span class="toc-text">网络配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%B8%A6%E5%AE%BD"><span class="toc-number">1.8.2.1.</span> <span class="toc-text">网络带宽</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96"><span class="toc-number">1.8.2.2.</span> <span class="toc-text">网络优化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98"><span class="toc-number">1.8.3.</span> <span class="toc-text">配置参数调优</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0"><span class="toc-number">1.8.3.1.</span> <span class="toc-text">核心配置参数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E8%B0%83%E4%BC%98%E5%8E%9F%E5%88%99"><span class="toc-number">1.8.3.2.</span> <span class="toc-text">配置调优原则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E4%B8%8E%E8%BF%90%E7%BB%B4"><span class="toc-number">1.8.4.</span> <span class="toc-text">监控与运维</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87"><span class="toc-number">1.8.4.1.</span> <span class="toc-text">监控指标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7"><span class="toc-number">1.8.4.2.</span> <span class="toc-text">运维工具</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-number">1.9.</span> <span class="toc-text">实际案例分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%94%B5%E5%95%86%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%B9%B3%E5%8F%B0"><span class="toc-number">1.9.1.</span> <span class="toc-text">案例一：电商数据分析平台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9A%E5%AE%9E%E6%97%B6%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.9.2.</span> <span class="toc-text">案例二：实时推荐系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%89%EF%BC%9A%E5%A4%8D%E6%9D%82%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%AD%E7%9A%84Stage%E5%88%86%E6%9E%90"><span class="toc-number">1.9.3.</span> <span class="toc-text">案例三：复杂数据处理中的Stage分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.10.</span> <span class="toc-text">常见问题与解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%B8%80%EF%BC%9AExecutor%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3"><span class="toc-number">1.10.1.</span> <span class="toc-text">问题一：Executor内存不足</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%BA%8C%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C"><span class="toc-number">1.10.2.</span> <span class="toc-text">问题二：数据倾斜</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%B8%89%EF%BC%9A%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E7%93%B6%E9%A2%88"><span class="toc-number">1.10.3.</span> <span class="toc-text">问题三：网络传输瓶颈</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.11.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave启动和初始化流程"/></a><div class="content"><a class="title" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程">HyperEnclave启动和初始化流程</a><time datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"/></a><div class="content"><a class="title" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</a><time datetime="2025-07-20T14:00:00.000Z" title="发表于 2025-07-20 22:00:00">2025-07-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从 CSV文件的加载、分区和处理 来理解 RDD"/></a><div class="content"><a class="title" href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD">从 CSV文件的加载、分区和处理 来理解 RDD</a><time datetime="2025-07-15T11:00:00.000Z" title="发表于 2025-07-15 19:00:00">2025-07-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅尝 Spring AI"/></a><div class="content"><a class="title" href="/2025/07/11/%E6%B5%85%E5%B0%9D%20Spring%20AI/" title="浅尝 Spring AI">浅尝 Spring AI</a><time datetime="2025-07-11T12:00:00.000Z" title="发表于 2025-07-11 20:00:00">2025-07-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/10/Spark%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%87%92%E6%83%B0%E8%AE%A1%E7%AE%97/" title="Spark核心概念与懒惰计算[未修订完]">Spark核心概念与懒惰计算[未修订完]</a><time datetime="2025-07-10T03:00:00.000Z" title="发表于 2025-07-10 11:00:00">2025-07-10</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">44</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">57</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">6</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 0.88rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 0.88rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>3</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">并发<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F/" style="font-size: 0.88rem;">系统<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>2</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
