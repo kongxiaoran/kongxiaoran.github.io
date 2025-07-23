@@ -13,7 +13,7 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
@@ -22,7 +22,7 @@
             
             <tag> HyperEnclave </tag>
             
-            <tag> 机密计算 </tag>
+            <tag> TEE </tag>
             
             <tag> 内存管理 </tag>
             
@@ -42,14 +42,16 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 机密计算 </tag>
+            <tag> TEE </tag>
+            
+            <tag> 隐私计算 </tag>
             
             <tag> 虚拟化 </tag>
             
@@ -73,7 +75,7 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
@@ -82,7 +84,7 @@
             
             <tag> HyperEnclave </tag>
             
-            <tag> 机密计算 </tag>
+            <tag> TEE </tag>
             
             <tag> 虚拟化 </tag>
             
@@ -102,7 +104,7 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
@@ -110,8 +112,6 @@
         <tags>
             
             <tag> HyperEnclave </tag>
-            
-            <tag> 机密计算 </tag>
             
             <tag> TEE </tag>
             
@@ -133,7 +133,7 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
@@ -166,7 +166,7 @@
       
       <categories>
           
-          <category> 机密计算 </category>
+          <category> 隐私计算 </category>
           
       </categories>
       
@@ -175,9 +175,9 @@
             
             <tag> HyperEnclave </tag>
             
-            <tag> 机密计算 </tag>
-            
             <tag> 学习路线 </tag>
+            
+            <tag> TEE </tag>
             
         </tags>
       
