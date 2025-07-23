@@ -1,0 +1,844 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>Hypervisor技术解析：传统虚拟化技术与HyperEnclave | 凌霄的博客</title><meta name="keywords" content="机密计算,虚拟化,Hypervisor,KVM"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><meta name="application-name" content="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><meta property="og:url" content="http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="1. Hypervisor 是什么？在深入技术细节之前，我们首先要理解 Hypervisor 到底是什么 简单来说，Hypervisor，又称为**虚拟机监视器 (Virtual Machine Monitor, VMM)**，是一种软件、固件或硬件，它能够创建并运行虚拟机 (Virtual Mac"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg"><meta name="description" content="1. Hypervisor 是什么？在深入技术细节之前，我们首先要理解 Hypervisor 到底是什么 简单来说，Hypervisor，又称为**虚拟机监视器 (Virtual Machine Monitor, VMM)**，是一种软件、固件或硬件，它能够创建并运行虚拟机 (Virtual Mac"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'Hypervisor技术解析：传统虚拟化技术与HyperEnclave',
+  postAI: '',
+  pageFillDescription: '1. Hypervisor 是什么？, 2. Hypervisor 的体系架构：两大分类, Type 1 裸金属 Hypervisor (Bare-metal), Type 2 宿主型 Hypervisor (Hosted), 3. Hypervisor 的启动与初始化, 3.1 计算机的通用启动流程, 3.2 不同 Hypervisor 的登场方式, 3.3 从传统虚拟化到机密计算：HyperEnclave 的创新, 机密计算的技术演进, HyperEnclave 的真实机制：一个动态加载的独立 Hypervisor, 1. 加载与跳转, 2. 保存与接管, 3. 独立初始化, 4. 启动机密VM, 4. 内部核心原理与机制, CPU 虚拟化, 内存虚拟化, Ix2FO 虚拟化, 5. 上下游交互与协作, 6. Hypervisor 能做什么？(应用场景), 7. 主流 Hypervisor 对比, 8. 总结与未来展望是什么在深入技术细节之前我们首先要理解到底是什么简单来说又称为虚拟机监视器是一种软件固件或硬件它能够创建并运行虚拟机它是一个元操作系统允许多个操作系统称为客户机操作系统共享同一套物理硬件资源的核心使命是虚拟化即为每个虚拟机创建一个虚拟的独立的硬件平台包括虚拟的内存硬盘和网络接口等这使得虚拟机中的操作系统认为自己独占了一整台计算机而实际上它们只是在的协调下共享使用底层真实的物理硬件这种技术是云计算数据中心现代化和软件开发测试等领域的基石的体系架构两大分类根据的运行方式和所处的位置我们通常将其分为两大类和裸金属直接安装在物理硬件即裸金属之上它本身就是一个精简的操作系统所有的客户机操作系统都运行在之上这种架构性能高延迟低因为客户机操作系统和硬件之间的中间层最少常见例子架构图物理硬件内存存储网络虚拟机虚拟机客户机操作系统应用虚拟机客户机操作系统应用虚拟机客户机操作系统应用管理硬件管理硬件管理硬件管理硬件创建和运行创建和运行创建和运行优点性能高安全性好稳定性强缺点通常需要专门的管理硬件配置相对复杂宿主型像普通应用程序一样运行在一个完整的宿主操作系统之上它依赖宿主操作系统来管理硬件资源常见例子架构图物理硬件内存存储网络宿主操作系统管理管理管理管理用户空间进程应用运行虚拟机虚拟机客户机操作系统应用虚拟机客户机操作系统应用创建和运行创建和运行优点安装简单易于使用非常适合个人桌面和开发环境缺点性能开销较大因为多了一层宿主操作系统的特殊性比较特殊它将内核本身转变成了一个当模块加载后内核就可以直接管理和运行虚拟机因此它具备的性能和架构但又保留了完整操作系统的功能的启动与初始化了解的架构后一个自然而然的问题是它是如何启动的它在计算机的启动流程中扮演什么角色计算机的通用启动流程我们可以将计算机的启动过程想象成一个接力赛第一棒固件按下电源后主板上的固件程序首先被激活它会进行硬件自检然后根据预设的启动顺序寻找下一个接力者引导加载程序第二棒引导加载程序固件将控制权交给存储设备上的引导加载程序如它的任务是找到操作系统的内核文件并将其加载到内存中第三棒操作系统内核内核被加载后开始接管计算机它会初始化所有核心组件如进程管理内存管理并加载驱动程序来管理硬件最终它会启动用户空间的程序完成整个系统的启动不同的登场方式不同类型的在这个接力赛中登场的时机各不相同集成型并不是一个独立于内核的软件它本身就是内核的一部分当内核在第三棒启动时它会加载等内核模块一旦模块加载内核自身就被赋予了的能力因此启动内核的过程本身就在启动这个独立型这类本身就是一个精简的专用的操作系统在接力赛的第二棒引导加载程序加载的不是通用内核而是自己的内核启动后物理机就直接成为一台专用的虚拟化主机宿主型这种的启动最简单它完全错开了系统启动流程用户先正常启动一个完整的宿主操作系统如或然后像打开普通软件一样通过双击图标来运行程序启动流程图按下电源按钮主板固件启动硬件自检寻找启动设备引导加载程序加载内核到内存内核启动初始化加载模块加载模块内核此时已成为启动用户服务系统完全启动等待指令用户通过等工具请求创建虚拟机执行虚拟化操作从传统虚拟化到机密计算的创新在了解了传统的启动机制后我们来看一个更加前沿的应用场景随着云计算和边缘计算的普及数据安全和隐私保护成为了越来越重要的需求传统的虚拟化技术虽然提供了资源隔离但在面对恶意或操作系统攻击时仍然存在安全风险正是在这样的背景下机密计算技术应运而生它通过硬件级的安全隔离确保即使底层系统被攻破敏感数据也能得到保护而作为这一领域的创新者展示了如何将传统的技术与现代安全需求相结合机密计算的技术演进机密计算技术经历了从应用级隔离到虚拟机级隔离的演进过程第一代应用级以为代表在运行的应用程序进程中通过硬件技术隔离出一块加密的内存安全区用于保护核心代码和数据它隔离的是进程的一部分第二代虚拟机级以和为代表将隔离的单位提升到了整个虚拟机它保护的是一个完整的虚拟机使其能够抵抗来自宿主或操作系统的攻击技术对比硬件级可信执行环境直接在中实现内存加密和隔离基于硬件虚拟化的机密计算将整个虚拟机作为可信执行环境基于硬件虚拟化的机密计算通过内存加密保护虚拟机软件实现的兼容层通过虚拟化技术模拟功能支持多种平台的真实机制一个动态加载的独立的实现不依赖它本身就是一个用编写的完整的独立的它创造性地使用了一个正在运行的系统作为跳板来启动自己一旦运行它就完全接管硬件虚拟化的控制权其精确的启动和工作流程如下加载与跳转用户通过一个特制的内核驱动来加载的二进制程序该驱动随后会在所有在线的核心上执行指令跳转到的入口点从而将的完全控制权交给保存与接管接管后第一件事是保存好内核的完整执行上下文寄存器状态栈指针等这是为了确保将来可以安全地退出并返回到独立初始化接下来作为一个全新的开始进行彻底的初始化它不依赖的任何服务而是建立自己的内存管理页表中断描述符表并为即将运行的机密虚拟机配置虚拟机控制结构启动机密所有初始化完成后根据架构执行相应的虚拟化指令平台执行指令启动虚拟机平台执行指令启动虚拟机从此刻起所有虚拟化相关的事件都由自行处理与内核或毫无关系总结和是平级的二选一的只是利用内核驱动完成了一次热部署实现了从一个通用操作系统到专用的变身启动流程图系统用户应用程序系统调用内核驱动加载二进制文件到内存代码在每个上跳转到函数硬件控制层接管保存状态并完全接管硬件作为自我初始化内存等执行或启动机密虚拟机机密客户虚拟机虚拟机退出例如处理退出并恢复虚拟机内部核心原理与机制的魔力在于它如何巧妙地欺骗客户机操作系统让其相信自己拥有硬件这主要通过虚拟化内存和设备来实现虚拟化虚拟化是核心现代有不同的特权级如架构的操作系统内核运行在最高特权级而应用程序在问题是客户机操作系统也认为自己应该在运行但物理的已经被占用了早期的解决方案是二进制翻译动态地翻译客户机操作系统的敏感指令但这种方式效率低下现代的解决方案是硬件辅助虚拟化即的和的技术核心思想引入了一种新的操作模式称为根模式和非根模式运行在根模式下拥有最高权限虚拟机运行在非根模式下即使在其权限也受限制当客户机操作系统执行敏感指令时会自动触发一次将控制权交还给根模式下的处理完敏感操作后再执行将控制权返还给虚拟机这个过程虽然有切换开销但远比软件模拟高效和简单内存虚拟化客户机操作系统管理的是客户机物理地址但需要将其映射到真正的主机物理地址上传统方法影子页表为每个虚拟机维护一套影子页表这套页表直接将客户机的虚拟地址映射到主机物理地址当客户机修改自己的页表时会捕获该操作并同步更新影子页表开销很大硬件辅助方法二级地址翻译的和的技术的内存管理单元硬件本身支持两级页表第一级由客户机操作系统管理第二级由管理地址翻译完全由硬件完成只需维护好第二级页表即可极大提升了内存虚拟化性能内存翻译流程图客户机操作系统客户机虚拟地址客户机物理地址客户机页表主机物理地址二级地址翻译硬件内存管理单元访问虚拟化虚拟化是最复杂的因为它涉及种类繁多的外部设备主要有三种方式全模拟模拟一个真实的具体的硬件设备例如一个网卡或一个控制器优点客户机操作系统无需任何特殊驱动兼容性好缺点效率极低每一次操作都需要介入翻译和模拟开销巨大经常用于此目的半虚拟化这是一种协作模式客户机操作系统知道自己运行在虚拟环境中并安装专门的半虚拟化驱动也提供一个高效的后端驱动两者通过一个优化的通信接口如共享内存环形缓冲区直接交换数据就是一个标准的半虚拟化接口规范优点性能远高于全模拟接近原生性能缺点需要在客户机中安装特定驱动设备直通利用或技术将一个物理设备如网卡直接分配给一个虚拟机该虚拟机可以像在物理机上一样直接操作这个硬件无需介入过程优点能够达到几乎的原生性能适用于高性能计算等场景缺点该设备无法被其他虚拟机共享虚拟化方案对比图客户机操作系统请求层硬件物理设备虚拟化方法全模拟半虚拟化设备直通慢速路径优化路径直接访问上下游交互与协作位于一个复杂生态的中心与上下游系统紧密协作与硬件下游的交互在启动时会检测所有物理硬件内存存储网络并取得它们的控制权它通过硬件虚拟化扩展等来调度和内存资源它管理物理设备的访问要么通过模拟要么通过半虚拟化后端要么通过进行设备分配与客户机操作系统上游的交互向客户机呈现一个标准化的虚拟硬件平台客户机操作系统使用自己的标准驱动程序与这些虚拟设备交互为了获得更好的性能可以在客户机中安装或驱动实现与的高效半虚拟化通信与管理平台上游的交互单个的能力有限通常由一个更高级的管理平台来编排是一个开源的和工具集它提供了一个统一的中立的接口来管理不同种类的如就是它附带的命令行工具在云环境中像或这样的云管平台会通过或专用来自动化地创建迁移监控和销毁成千上万的虚拟机能做什么应用场景服务器整合将多台负载较低的物理服务器整合到一台或少数几台服务器上降低硬件成本电力和空间消耗开发与测试为开发人员和测试人员快速提供干净隔离的可随时销毁和重建的实验环境云计算是的核心云服务商利用它将庞大的物理资源池切分成可供租用的虚拟机桌面虚拟化在数据中心运行桌面操作系统如用户通过网络远程访问实现集中管理和数据安全安全隔离与沙箱利用虚拟机的强隔离性来运行不可信的软件或者分析恶意软件即使软件崩溃或被攻击也不会影响到宿主机和其他虚拟机主流对比特性类型集成于内核微内核架构独立内核集成于架构宏内核微内核独立内核微内核化虚拟化硬件辅助半虚拟化硬件辅助硬件辅助硬件辅助开源性开源开源闭源有免费版闭源随生态系统极强强大非常成熟企业级市场领导者强大生态管理工具总结与未来展望是现代计算技术的中流砥柱它通过在软件层面抽象硬件实现了资源的灵活调度高效利用和强力隔离从最初的服务器整合到今天支撑整个云计算的重要性不言而喻未来技术仍在不断演进轻量化随着容器技术的发展出现了像这样的微型它们专为无服务器计算和容器设计启动速度极快开销极小与容器融合项目如尝试将虚拟机的安全隔离优势与容器的轻便快捷相结合嵌套虚拟化在虚拟机内部再运行一个这为云中云虚拟化培训等场景提供了可能理解不仅是理解虚拟化更是理解现代基础设施如何工作的关键一步',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-23 14:54:19',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>4</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>1</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>6</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>2</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">13</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" itemprop="url">机密计算</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>机密计算</span></a><a class="article-meta__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>虚拟化</span></a><a class="article-meta__tags" href="/tags/Hypervisor/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Hypervisor</span></a><a class="article-meta__tags" href="/tags/KVM/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>KVM</span></a></span></div></div><h1 class="post-title" itemprop="name headline">Hypervisor技术解析：传统虚拟化技术与HyperEnclave</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-23T06:54:19.719Z" title="更新于 2025-07-23 14:54:19">2025-07-23</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/"><header><a class="post-meta-categories" href="/categories/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" itemprop="url">机密计算</a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url">机密计算</a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url">虚拟化</a><a href="/tags/Hypervisor/" tabindex="-1" itemprop="url">Hypervisor</a><a href="/tags/KVM/" tabindex="-1" itemprop="url">KVM</a><h1 id="CrawlerTitle" itemprop="name headline">Hypervisor技术解析：传统虚拟化技术与HyperEnclave</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time><time itemprop="dateCreated datePublished" datetime="2025-07-23T06:54:19.719Z" title="更新于 2025-07-23 14:54:19">2025-07-23</time></header><h2 id="1-Hypervisor-是什么？"><a href="#1-Hypervisor-是什么？" class="headerlink" title="1. Hypervisor 是什么？"></a>1. Hypervisor 是什么？</h2><p>在深入技术细节之前，我们首先要理解 Hypervisor 到底是什么</p>
+<p>简单来说，<strong>Hypervisor</strong>，又称为**虚拟机监视器 (Virtual Machine Monitor, VMM)**，是一种软件、固件或硬件，它能够创建并运行虚拟机 (Virtual Machines, VMs)。它是一个“元操作系统”，允许多个操作系统（称为客户机操作系统，Guest OS）共享同一套物理硬件资源。</p>
+<p>Hypervisor 的核心使命是<strong>虚拟化</strong>——即为每个虚拟机创建一个虚拟的、独立的硬件平台，包括虚拟的 CPU、内存、硬盘和网络接口等。这使得虚拟机中的操作系统认为自己独占了一整台计算机，而实际上它们只是在 Hypervisor 的协调下，共享使用底层真实的物理硬件。</p>
+<p>这种技术是云计算、数据中心现代化和软件开发测试等领域的基石。</p>
+<h2 id="2-Hypervisor-的体系架构：两大分类"><a href="#2-Hypervisor-的体系架构：两大分类" class="headerlink" title="2. Hypervisor 的体系架构：两大分类"></a>2. Hypervisor 的体系架构：两大分类</h2><p>根据 Hypervisor 的运行方式和所处的位置，我们通常将其分为两大类：Type 1 和 Type 2。</p>
+<h3 id="Type-1-裸金属-Hypervisor-Bare-metal"><a href="#Type-1-裸金属-Hypervisor-Bare-metal" class="headerlink" title="Type 1: 裸金属 Hypervisor (Bare-metal)"></a>Type 1: 裸金属 Hypervisor (Bare-metal)</h3><p>Type 1 Hypervisor 直接安装在物理硬件（即“裸金属”）之上，它本身就是一个精简的操作系统。所有的客户机操作系统都运行在 Hypervisor 之上。这种架构性能高、延迟低，因为客户机操作系统和硬件之间的中间层最少。</p>
+<p><strong>常见例子</strong>: VMware ESXi, Microsoft Hyper-V, KVM (Kernel-based Virtual Machine), Xen。</p>
+<p><strong>架构图</strong>:</p>
+<pre class="mermaid">graph TD;
+    subgraph "物理硬件"
+      CPU["CPU"]
+      Memory["内存"]
+      Storage["存储"]
+      Network["网络"]
+    end
+
+    subgraph "虚拟机"
+      VM1["虚拟机 1 (客户机操作系统 + 应用)"]
+      VM2["虚拟机 2 (客户机操作系统 + 应用)"]
+      VM3["虚拟机 3 (客户机操作系统 + 应用)"]
+    end
+
+    Hypervisor["Hypervisor"] -- "管理硬件" --> CPU;
+    Hypervisor -- "管理硬件" --> Memory;
+    Hypervisor -- "管理硬件" --> Storage;
+    Hypervisor -- "管理硬件" --> Network;
+
+    Hypervisor -- "创建和运行" --> VM1;
+    Hypervisor -- "创建和运行" --> VM2;
+    Hypervisor -- "创建和运行" --> VM3;</pre>
+
+<ul>
+<li><strong>优点</strong>: 性能高、安全性好、稳定性强。</li>
+<li><strong>缺点</strong>: 通常需要专门的管理硬件，配置相对复杂。</li>
+</ul>
+<h3 id="Type-2-宿主型-Hypervisor-Hosted"><a href="#Type-2-宿主型-Hypervisor-Hosted" class="headerlink" title="Type 2: 宿主型 Hypervisor (Hosted)"></a>Type 2: 宿主型 Hypervisor (Hosted)</h3><p>Type 2 Hypervisor 像普通应用程序一样，运行在一个完整的宿主操作系统 (Host OS) 之上。它依赖宿主操作系统来管理硬件资源。</p>
+<p><strong>常见例子</strong>: VMware Workstation, Oracle VirtualBox, QEMU。</p>
+<p><strong>架构图</strong>:</p>
+<pre class="mermaid">graph TD;
+    subgraph "物理硬件"
+        CPU["CPU"]
+        Memory["内存"]
+        Storage["存储"]
+        Network["网络"]
+    end
+
+    HostOS["宿主操作系统"] -- "管理" --> CPU
+    HostOS -- "管理" --> Memory
+    HostOS -- "管理" --> Storage
+    HostOS -- "管理" --> Network
+
+    subgraph "用户空间进程"
+      Hypervisor["Hypervisor 应用"]
+    end
+    
+    HostOS -- "运行" --> Hypervisor
+
+    subgraph "虚拟机"
+        VM1["虚拟机 1 (客户机操作系统 + 应用)"]
+        VM2["虚拟机 2 (客户机操作系统 + 应用)"]
+    end
+
+    Hypervisor -- "创建和运行" --> VM1;
+    Hypervisor -- "创建和运行" --> VM2;</pre>
+
+<ul>
+<li><strong>优点</strong>: 安装简单，易于使用，非常适合个人桌面和开发环境。</li>
+<li><strong>缺点</strong>: 性能开销较大，因为多了一层宿主操作系统。</li>
+</ul>
+<blockquote>
+<p><strong>KVM 的特殊性</strong>: KVM 比较特殊，它将 Linux 内核本身转变成了一个 Type 1 Hypervisor。当 KVM 模块加载后，Linux 内核就可以直接管理和运行虚拟机，因此它具备 Type 1 的性能和架构，但又保留了完整 Linux 操作系统的功能。</p>
+</blockquote>
+<h2 id="3-Hypervisor-的启动与初始化"><a href="#3-Hypervisor-的启动与初始化" class="headerlink" title="3. Hypervisor 的启动与初始化"></a>3. Hypervisor 的启动与初始化</h2><p>了解 Hypervisor 的架构后，一个自然而然的问题是：它是如何启动的？它在计算机的启动流程中扮演什么角色？</p>
+<h3 id="3-1-计算机的通用启动流程"><a href="#3-1-计算机的通用启动流程" class="headerlink" title="3.1 计算机的通用启动流程"></a>3.1 计算机的通用启动流程</h3><p>我们可以将计算机的启动过程想象成一个接力赛：</p>
+<ol>
+<li><strong>第一棒：BIOS&#x2F;UEFI 固件</strong>：按下电源后，主板上的固件程序首先被激活。它会进行硬件自检（POST），然后根据预设的启动顺序，寻找下一个“接力者”——引导加载程序。</li>
+<li>**第二棒：引导加载程序 (Bootloader)**：固件将控制权交给存储设备上的引导加载程序（如 GRUB）。它的任务是找到操作系统的内核文件，并将其加载到内存中。</li>
+<li>**第三棒：操作系统内核 (Kernel)**：内核被加载后，开始接管计算机。它会初始化所有核心组件（如进程管理、内存管理），并加载驱动程序来管理硬件。最终，它会启动用户空间的程序，完成整个系统的启动。</li>
+</ol>
+<h3 id="3-2-不同-Hypervisor-的“登场”方式"><a href="#3-2-不同-Hypervisor-的“登场”方式" class="headerlink" title="3.2 不同 Hypervisor 的“登场”方式"></a>3.2 不同 Hypervisor 的“登场”方式</h3><p>不同类型的 Hypervisor 在这个“接力赛”中登场的时机各不相同。</p>
+<ul>
+<li><p><strong>Type 1 (KVM - 集成型)</strong>:<br>KVM 并不是一个独立于内核的软件。它本身就是 Linux 内核的一部分。当 Linux 内核在第三棒启动时，它会加载 <code>kvm.ko</code> 等内核模块。一旦模块加载，内核自身就被赋予了 Hypervisor 的能力。因此，<strong>启动 Linux 内核的过程，本身就在启动 KVM 这个 Hypervisor</strong>。</p>
+</li>
+<li><p><strong>Type 1 (ESXi - 独立型)</strong>:<br>这类 Hypervisor 本身就是一个精简的、专用的操作系统。在接力赛的第二棒，引导加载程序加载的<strong>不是通用内核，而是 ESXi 自己的内核</strong>。启动后，物理机就直接成为一台专用的虚拟化主机。</p>
+</li>
+<li><p><strong>Type 2 (VirtualBox - 宿主型)</strong>:<br>这种 Hypervisor 的启动最简单。它完全错开了系统启动流程。用户先正常启动一个完整的宿主操作系统（如 Windows 或 macOS），然后像打开普通软件一样，<strong>通过双击图标来运行 VirtualBox 程序</strong>。</p>
+</li>
+</ul>
+<p><strong>KVM Hypervisor 启动流程图</strong>:</p>
+<pre class="mermaid">graph TD;
+    A["1. 按下电源按钮"] --> B["2. 主板固件启动 (BIOS/UEFI)"];
+    B -- "硬件自检, 寻找启动设备" --> C["3. 引导加载程序 (GRUB)"];
+    C -- "加载内核到内存" --> D["4. Linux 内核启动初始化"];
+    D -- "加载模块" --> E["5. 加载KVM模块 (kvm.ko)"];
+    E --> F["<b>Linux内核此时已成为Type 1 Hypervisor</b>"];
+    F -- "启动用户服务" --> G["6. 系统完全启动, 等待指令"];
+    G --> H["7. 用户通过QEMU等工具<br>请求创建虚拟机"];
+    F -- "执行虚拟化操作" --> H;</pre>
+
+<h3 id="3-3-从传统虚拟化到机密计算：HyperEnclave-的创新"><a href="#3-3-从传统虚拟化到机密计算：HyperEnclave-的创新" class="headerlink" title="3.3 从传统虚拟化到机密计算：HyperEnclave 的创新"></a>3.3 从传统虚拟化到机密计算：HyperEnclave 的创新</h3><p>在了解了传统 Hypervisor 的启动机制后，我们来看一个更加前沿的应用场景。随着云计算和边缘计算的普及，<strong>数据安全</strong>和<strong>隐私保护</strong>成为了越来越重要的需求。传统的虚拟化技术虽然提供了资源隔离，但在面对恶意 Hypervisor 或操作系统攻击时，仍然存在安全风险。</p>
+<p>正是在这样的背景下，<strong>机密计算 (Confidential Computing)</strong> 技术应运而生。它通过硬件级的安全隔离，确保即使底层系统被攻破，敏感数据也能得到保护。而 HyperEnclave 作为这一领域的创新者，展示了如何将传统的 Hypervisor 技术与现代安全需求相结合。</p>
+<h4 id="机密计算的技术演进"><a href="#机密计算的技术演进" class="headerlink" title="机密计算的技术演进"></a>机密计算的技术演进</h4><p>机密计算技术经历了从<strong>应用级隔离</strong>到<strong>虚拟机级隔离</strong>的演进过程：</p>
+<p><strong>第一代：应用级 Enclave</strong><br>以 <strong>Intel SGX</strong> 为代表，在运行的应用程序进程中，通过硬件技术隔离出一块加密的内存”安全区”（Enclave），用于保护核心代码和数据。它隔离的是<strong>进程的一部分</strong>。</p>
+<p><strong>第二代：虚拟机级 Enclave</strong><br>以 <strong>Intel TDX</strong> &#x2F; <strong>AMD SEV</strong> 和 <strong>HyperEnclave</strong> 为代表，将隔离的单位提升到了整个虚拟机。它保护的是<strong>一个完整的虚拟机</strong>，使其能够抵抗来自宿主 Hypervisor 或操作系统的攻击。</p>
+<p><strong>技术对比</strong>:</p>
+<ul>
+<li><strong>Intel SGX</strong>: 硬件级可信执行环境，直接在 CPU 中实现内存加密和隔离</li>
+<li><strong>Intel TDX</strong>: 基于 VMX 硬件虚拟化的机密计算，将整个虚拟机作为可信执行环境</li>
+<li><strong>AMD SEV</strong>: 基于 SVM 硬件虚拟化的机密计算，通过内存加密保护虚拟机</li>
+<li><strong>HyperEnclave</strong>: 软件实现的 SGX 兼容层，通过虚拟化技术模拟 SGX 功能，支持多种 CPU 平台</li>
+</ul>
+<h4 id="HyperEnclave-的真实机制：一个动态加载的独立-Hypervisor"><a href="#HyperEnclave-的真实机制：一个动态加载的独立-Hypervisor" class="headerlink" title="HyperEnclave 的真实机制：一个动态加载的独立 Hypervisor"></a>HyperEnclave 的真实机制：一个动态加载的独立 Hypervisor</h4><p><strong>HyperEnclave 的实现不依赖 KVM，它本身就是一个用 Rust 编写的、完整的、独立的 Type 1 Hypervisor。</strong></p>
+<p>它创造性地使用了一个正在运行的 Linux 系统作为”跳板”来启动自己，一旦运行，它就完全接管硬件虚拟化的控制权。</p>
+<p>其精确的启动和工作流程如下：</p>
+<h3 id="1-加载与跳转"><a href="#1-加载与跳转" class="headerlink" title="1. 加载与跳转"></a>1. <strong>加载与跳转</strong></h3><p>用户通过一个特制的 Linux 内核驱动（<code>hyper_enclave.ko</code>）来加载 HyperEnclave 的二进制程序。该驱动随后会在所有在线的 CPU 核心上，执行指令跳转到 HyperEnclave 的入口点 <code>entry()</code>，从而将 CPU 的<strong>完全控制权</strong>交给 HyperEnclave。</p>
+<h3 id="2-保存与接管"><a href="#2-保存与接管" class="headerlink" title="2. 保存与接管"></a>2. <strong>保存与接管</strong></h3><p>HyperEnclave 接管 CPU 后，第一件事是保存好 Linux 内核的完整执行上下文（寄存器状态、栈指针 <code>linux_sp</code> 等），这是为了确保将来可以安全地退出并返回到 Linux。</p>
+<h3 id="3-独立初始化"><a href="#3-独立初始化" class="headerlink" title="3. 独立初始化"></a>3. <strong>独立初始化</strong></h3><p>接下来，HyperEnclave 作为<strong>一个全新的 Hypervisor</strong> 开始进行彻底的初始化。它不依赖 Linux 的任何服务，而是建立自己的内存管理、页表、中断描述符表（IDT），并为即将运行的机密虚拟机配置虚拟机控制结构（VMCS&#x2F;VMCB）。</p>
+<h3 id="4-启动机密VM"><a href="#4-启动机密VM" class="headerlink" title="4. 启动机密VM"></a>4. <strong>启动机密VM</strong></h3><p>所有初始化完成后，HyperEnclave 根据 CPU 架构执行相应的虚拟化指令：</p>
+<ul>
+<li><strong>Intel 平台</strong>: 执行 <code>vmlaunch</code> 指令启动虚拟机</li>
+<li><strong>AMD 平台</strong>: 执行 <code>vmrun</code> 指令启动虚拟机</li>
+</ul>
+<p>从此刻起，所有虚拟化相关的 <code>VM-Exit</code> 事件都由 HyperEnclave 自行处理，与 Linux 内核或 KVM 毫无关系。</p>
+<p><strong>总结</strong>：HyperEnclave 和 KVM 是<strong>平级的、二选一</strong>的 Hypervisor。HyperEnclave 只是利用 Linux 内核驱动完成了一次”热部署”，实现了从一个通用操作系统到专用 Hypervisor 的”变身”。</p>
+<p><strong>HyperEnclave 启动流程图</strong>:</p>
+<pre class="mermaid">graph TD
+    subgraph "Linux 系统"
+        App["用户应用程序"] -- "ioctl() 系统调用" --> Driver["HyperEnclave 内核驱动"]
+        Driver -- "1. 加载 HyperEnclave 二进制文件到内存" --> H_Bin["HyperEnclave 代码"]
+        Driver -- "2. 在每个CPU上跳转到 entry() 函数" --> H_Bin
+    end
+
+    subgraph "硬件控制层 (HyperEnclave 接管)"
+        H_Bin -- "3. 保存 Linux 状态并完全接管 CPU" --> CPU["CPU 硬件 (VMX/SVM)"]
+        H_Bin -- "4. 作为 Hypervisor 自我初始化 (内存, VMCS/VMCB 等)" --> CPU
+        H_Bin -- "5. 执行 'vmlaunch'(Intel) 或 'vmrun'(AMD) 启动机密虚拟机" --> GuestVM["机密客户虚拟机"]
+    end
+
+    GuestVM -- "虚拟机退出 (例如 I/O)" --> H_Bin
+    H_Bin -- "处理退出并恢复虚拟机" --> GuestVM
+
+    style H_Bin fill:#d4edda,stroke:#155724,stroke-width:2px</pre>
+
+<h2 id="4-内部核心原理与机制"><a href="#4-内部核心原理与机制" class="headerlink" title="4. 内部核心原理与机制"></a>4. 内部核心原理与机制</h2><p>Hypervisor 的魔力在于它如何巧妙地“欺骗”客户机操作系统，让其相信自己拥有硬件。这主要通过虚拟化 CPU、内存和 I&#x2F;O 设备来实现。</p>
+<h3 id="CPU-虚拟化"><a href="#CPU-虚拟化" class="headerlink" title="CPU 虚拟化"></a>CPU 虚拟化</h3><p>CPU 虚拟化是核心。现代 CPU 有不同的特权级（如 x86 架构的 Ring 0-3），操作系统内核运行在最高特权级 Ring 0，而应用程序在 Ring 3。问题是，客户机操作系统也认为自己应该在 Ring 0 运行，但物理 CPU 的 Ring 0 已经被 Hypervisor 占用了。</p>
+<p>早期的解决方案是**二进制翻译 (Binary Translation)**，Hypervisor 动态地翻译客户机操作系统的敏感指令。但这种方式效率低下。</p>
+<p>现代的解决方案是**硬件辅助虚拟化 (Hardware-assisted Virtualization)**，即 Intel 的 <strong>VT-x</strong> 和 AMD 的 <strong>AMD-V</strong> 技术。</p>
+<ul>
+<li><strong>核心思想</strong>: 引入了一种新的操作模式，称为“根模式 (Root Operation)”和“非根模式 (Non-root Operation)”。</li>
+<li><strong>Hypervisor</strong> 运行在根模式下，拥有最高权限。</li>
+<li><strong>虚拟机</strong> 运行在非根模式下，即使在 Ring 0，其权限也受 Hypervisor 限制。</li>
+<li>当客户机操作系统执行敏感指令时，CPU 会自动触发一次<strong>VM Exit</strong>，将控制权交还给根模式下的 Hypervisor。</li>
+<li>Hypervisor 处理完敏感操作后，再执行 <strong>VM Entry</strong>，将控制权返还给虚拟机。</li>
+</ul>
+<p>这个过程虽然有切换开销，但远比软件模拟高效和简单。</p>
+<h3 id="内存虚拟化"><a href="#内存虚拟化" class="headerlink" title="内存虚拟化"></a>内存虚拟化</h3><p>客户机操作系统管理的是<strong>客户机物理地址 (Guest Physical Address, GPA)<strong>，但 Hypervisor 需要将其映射到真正的</strong>主机物理地址 (Host Physical Address, HPA)</strong> 上。</p>
+<ul>
+<li><p><strong>传统方法：影子页表 (Shadow Page Tables)</strong>: Hypervisor 为每个虚拟机维护一套“影子页表”，这套页表直接将客户机的虚拟地址 (GVA) 映射到主机物理地址 (HPA)。当客户机修改自己的页表时，Hypervisor 会捕获该操作并同步更新影子页表，开销很大。</p>
+</li>
+<li><p><strong>硬件辅助方法：二级地址翻译 (Second Level Address Translation, SLAT)</strong>: Intel 的 <strong>EPT (Extended Page Tables)</strong> 和 AMD 的 <strong>NPT (Nested Page Tables)</strong> 技术。</p>
+<ul>
+<li>CPU 的内存管理单元 (MMU) 硬件本身支持两级页表。</li>
+<li>第一级由客户机操作系统管理（GVA -&gt; GPA）。</li>
+<li>第二级由 Hypervisor 管理（GPA -&gt; HPA）。</li>
+<li>地址翻译完全由硬件完成，Hypervisor 只需维护好第二级页表即可，极大提升了内存虚拟化性能。</li>
+</ul>
+</li>
+</ul>
+<p><strong>内存翻译流程图</strong>:</p>
+<pre class="mermaid">graph LR;
+    subgraph "客户机操作系统"
+        GVA["客户机虚拟地址 (GVA)"]
+        GPA["客户机物理地址 (GPA)"]
+        GVA -- "客户机页表" --> GPA;
+    end
+
+    subgraph "Hypervisor"
+        HPA["主机物理地址 (HPA)"]
+        GPA -- "二级地址翻译 (EPT/NPT)" --> HPA;
+    end
+    
+    subgraph "硬件"
+        MMU["CPU 内存管理单元"]
+    end
+
+    HPA -- "访问" --> MMU;</pre>
+
+<h3 id="I-O-虚拟化"><a href="#I-O-虚拟化" class="headerlink" title="I&#x2F;O 虚拟化"></a>I&#x2F;O 虚拟化</h3><p>I&#x2F;O 虚拟化是最复杂的，因为它涉及种类繁多的外部设备。主要有三种方式：</p>
+<ol>
+<li><p><strong>全模拟 (Full Emulation)</strong>:</p>
+<ul>
+<li>Hypervisor 模拟一个真实的、具体的硬件设备，例如一个 Intel E1000 网卡或一个 IDE 控制器。</li>
+<li><strong>优点</strong>: 客户机操作系统无需任何特殊驱动，兼容性好。</li>
+<li><strong>缺点</strong>: 效率极低。每一次 I&#x2F;O 操作都需要 Hypervisor 介入、翻译和模拟，CPU 开销巨大。QEMU 经常用于此目的。</li>
+</ul>
+</li>
+<li><p><strong>半虚拟化 (Paravirtualization, PV)</strong>:</p>
+<ul>
+<li>这是一种协作模式。客户机操作系统“知道”自己运行在虚拟环境中，并安装专门的“半虚拟化驱动”。</li>
+<li>Hypervisor 也提供一个高效的后端驱动。两者通过一个优化的通信接口（如共享内存环形缓冲区）直接交换数据。</li>
+<li><strong>VirtIO</strong> 就是一个标准的半虚拟化接口规范。</li>
+<li><strong>优点</strong>: 性能远高于全模拟，接近原生性能。</li>
+<li><strong>缺点</strong>: 需要在客户机中安装特定驱动。</li>
+</ul>
+</li>
+<li><p><strong>设备直通 (Passthrough)</strong>:</p>
+<ul>
+<li>利用 <strong>Intel VT-d</strong> 或 <strong>AMD-Vi (IOMMU)</strong> 技术，将一个物理 PCI 设备（如网卡、GPU）直接分配给一个虚拟机。</li>
+<li>该虚拟机可以像在物理机上一样直接操作这个硬件，无需 Hypervisor 介入 I&#x2F;O 过程。</li>
+<li><strong>优点</strong>: 能够达到几乎 100% 的原生性能，适用于高性能计算、NFV 等场景。</li>
+<li><strong>缺点</strong>: 该设备无法被其他虚拟机共享。</li>
+</ul>
+</li>
+</ol>
+<p><strong>I&#x2F;O 虚拟化方案对比图</strong>:</p>
+<pre class="mermaid">graph TD;
+    subgraph "客户机操作系统"
+      Request["I/O 请求"]
+    end
+    
+    subgraph "Hypervisor"
+      Hypervisor_Layer["Hypervisor 层"]
+    end
+    
+    subgraph "硬件"
+      PhysicalDevice["物理设备"]
+    end
+    
+    Request --> Hypervisor_Layer;
+    
+    subgraph "虚拟化方法"
+      Emulation["全模拟"]
+      Paravirt["半虚拟化 (VirtIO)"]
+      Passthrough["设备直通 (VT-d/IOMMU)"]
+    end
+
+    Hypervisor_Layer --> Emulation;
+    Hypervisor_Layer --> Paravirt;
+    Hypervisor_Layer --> Passthrough;
+    
+    Emulation -- "慢速路径" --> PhysicalDevice;
+    Paravirt -- "优化路径" --> PhysicalDevice;
+    Passthrough -- "直接访问" --> PhysicalDevice;</pre>
+
+<h2 id="5-上下游交互与协作"><a href="#5-上下游交互与协作" class="headerlink" title="5. 上下游交互与协作"></a>5. 上下游交互与协作</h2><p>Hypervisor 位于一个复杂生态的中心，与上下游系统紧密协作。</p>
+<ul>
+<li><p><strong>与硬件 (下游) 的交互</strong>:</p>
+<ul>
+<li>Hypervisor 在启动时会检测所有物理硬件（CPU、内存、存储、网络），并取得它们的控制权。</li>
+<li>它通过硬件虚拟化扩展（VT-x, EPT 等）来调度 CPU 和内存资源。</li>
+<li>它管理物理设备的访问，要么通过模拟，要么通过半虚拟化后端，要么通过 IOMMU 进行设备分配。</li>
+</ul>
+</li>
+<li><p><strong>与客户机操作系统 (上游) 的交互</strong>:</p>
+<ul>
+<li>Hypervisor 向客户机呈现一个标准化的虚拟硬件平台。</li>
+<li>客户机操作系统使用自己的标准驱动程序与这些虚拟设备交互。</li>
+<li>为了获得更好的性能，可以在客户机中安装 <strong>Guest Tools</strong> 或 <strong>VirtIO 驱动</strong>，实现与 Hypervisor 的高效半虚拟化通信。</li>
+</ul>
+</li>
+<li><p><strong>与管理平台 (上游) 的交互</strong>:</p>
+<ul>
+<li>单个 Hypervisor 的能力有限，通常由一个更高级的管理平台来编排。</li>
+<li><strong>libvirt</strong> 是一个开源的 API 和工具集，它提供了一个统一的、中立的接口来管理不同种类的 Hypervisor（如 KVM, Xen, QEMU）。<code>virsh</code> 就是它附带的命令行工具。</li>
+<li>在云环境中，像 <strong>OpenStack</strong>, <strong>CloudStack</strong> 或 <strong>VMware vCenter</strong> 这样的云管平台，会通过 libvirt 或专用 API 来自动化地创建、迁移、监控和销毁成千上万的虚拟机。</li>
+</ul>
+</li>
+</ul>
+<h2 id="6-Hypervisor-能做什么？-应用场景"><a href="#6-Hypervisor-能做什么？-应用场景" class="headerlink" title="6. Hypervisor 能做什么？(应用场景)"></a>6. Hypervisor 能做什么？(应用场景)</h2><ul>
+<li><strong>服务器整合</strong>: 将多台负载较低的物理服务器整合到一台或少数几台服务器上，降低硬件成本、电力和空间消耗。</li>
+<li><strong>开发与测试</strong>: 为开发人员和测试人员快速提供干净、隔离的、可随时销毁和重建的实验环境。</li>
+<li><strong>云计算 (IaaS)</strong>: Hypervisor 是 Infrastructure as a Service (IaaS) 的核心。云服务商利用它将庞大的物理资源池切分成可供租用的虚拟机。</li>
+<li><strong>桌面虚拟化 (VDI)</strong>: 在数据中心运行桌面操作系统（如 Windows 10&#x2F;11），用户通过网络远程访问，实现集中管理和数据安全。</li>
+<li><strong>安全隔离与沙箱</strong>: 利用虚拟机的强隔离性来运行不可信的软件，或者分析恶意软件，即使软件崩溃或被攻击，也不会影响到宿主机和其他虚拟机。</li>
+</ul>
+<h2 id="7-主流-Hypervisor-对比"><a href="#7-主流-Hypervisor-对比" class="headerlink" title="7. 主流 Hypervisor 对比"></a>7. 主流 Hypervisor 对比</h2><table>
+<thead>
+<tr>
+<th align="left">特性 (Feature)</th>
+<th align="left">KVM</th>
+<th align="left">Xen</th>
+<th align="left">VMware ESXi</th>
+<th align="left">Microsoft Hyper-V</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>类型 (Type)</strong></td>
+<td align="left">Type 1 (集成于Linux内核)</td>
+<td align="left">Type 1 (微内核架构)</td>
+<td align="left">Type 1 (独立内核)</td>
+<td align="left">Type 1 (集成于Windows)</td>
+</tr>
+<tr>
+<td align="left"><strong>架构 (Architecture)</strong></td>
+<td align="left">宏内核 (Monolithic with Kernel)</td>
+<td align="left">微内核 (Microkernel)</td>
+<td align="left">独立内核 (Proprietary Kernel)</td>
+<td align="left">微内核化 (Microkernelized)</td>
+</tr>
+<tr>
+<td align="left"><strong>CPU虚拟化</strong></td>
+<td align="left">硬件辅助 (VT-x&#x2F;AMD-V)</td>
+<td align="left">半虚拟化 &#x2F; 硬件辅助</td>
+<td align="left">硬件辅助</td>
+<td align="left">硬件辅助</td>
+</tr>
+<tr>
+<td align="left"><strong>开源性 (Open Source)</strong></td>
+<td align="left">开源 (Open Source)</td>
+<td align="left">开源 (Open Source)</td>
+<td align="left">闭源 (Proprietary, 有免费版)</td>
+<td align="left">闭源 (Proprietary, 随Windows Server)</td>
+</tr>
+<tr>
+<td align="left"><strong>生态系统 (Ecosystem)</strong></td>
+<td align="left">极强 (OpenStack, oVirt, Proxmox)</td>
+<td align="left">强大 (AWS, Citrix, Oracle VM)</td>
+<td align="left">非常成熟 (企业级市场领导者)</td>
+<td align="left">强大 (Azure, Windows 生态)</td>
+</tr>
+<tr>
+<td align="left"><strong>管理工具 (Management)</strong></td>
+<td align="left">libvirt, virsh, Web UIs</td>
+<td align="left">xl, xe, XenCenter</td>
+<td align="left">vSphere, vCenter</td>
+<td align="left">Hyper-V Manager, PowerShell, SCVMM</td>
+</tr>
+</tbody></table>
+<h2 id="8-总结与未来展望"><a href="#8-总结与未来展望" class="headerlink" title="8. 总结与未来展望"></a>8. 总结与未来展望</h2><p>Hypervisor 是现代计算技术的中流砥柱。它通过在软件层面抽象硬件，实现了资源的灵活调度、高效利用和强力隔离。从最初的服务器整合，到今天支撑整个云计算，Hypervisor 的重要性不言而喻。</p>
+<p>未来，Hypervisor 技术仍在不断演进：</p>
+<ul>
+<li><strong>轻量化</strong>: 随着容器技术的发展，出现了像 <strong>Firecracker</strong> 这样的微型 Hypervisor，它们专为无服务器计算和容器设计，启动速度极快，开销极小。</li>
+<li><strong>与容器融合</strong>: 项目如 <strong>Kata Containers</strong> 尝试将虚拟机的安全隔离优势与容器的轻便快捷相结合。</li>
+<li><strong>嵌套虚拟化 (Nested Virtualization)</strong>: 在虚拟机内部再运行一个 Hypervisor，这为云中云、虚拟化培训等场景提供了可能。</li>
+</ul>
+<p>理解 Hypervisor 不仅是理解虚拟化，更是理解现代 IT 基础设施如何工作的关键一步。 </p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/')">Hypervisor技术解析：传统虚拟化技术与HyperEnclave</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=Hypervisor技术解析：传统虚拟化技术与HyperEnclave&amp;url=http://example.com/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>机密计算<span class="tagsPageCount">6</span></a><a class="post-meta__box__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>虚拟化<span class="tagsPageCount">4</span></a><a class="post-meta__box__tags" href="/tags/Hypervisor/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Hypervisor<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/KVM/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>KVM<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">HyperEnclave启动和初始化流程</div></div></a></div><div class="next-post pull-right"><a href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">HyperEnclave内存管理模块源码与原理分析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-21</div><div class="title">HyperEnclave启动和初始化流程</div></div></a></div><div><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-20</div><div class="title">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div><div><a href="/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/" title="HyperEnclave：一个开放且跨平台的可信执行环境"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-19</div><div class="title">HyperEnclave：一个开放且跨平台的可信执行环境</div></div></a></div><div><a href="/2025/07/18/HyperEnclave%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%9B%BE/" title="HyperEnclave源码学习路线图"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115418384.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-18</div><div class="title">HyperEnclave源码学习路线图</div></div></a></div><div><a href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-23</div><div class="title">HyperEnclave内存管理模块源码与原理分析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Hypervisor-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. Hypervisor 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Hypervisor-%E7%9A%84%E4%BD%93%E7%B3%BB%E6%9E%B6%E6%9E%84%EF%BC%9A%E4%B8%A4%E5%A4%A7%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">2. Hypervisor 的体系架构：两大分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Type-1-%E8%A3%B8%E9%87%91%E5%B1%9E-Hypervisor-Bare-metal"><span class="toc-number">2.1.</span> <span class="toc-text">Type 1: 裸金属 Hypervisor (Bare-metal)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Type-2-%E5%AE%BF%E4%B8%BB%E5%9E%8B-Hypervisor-Hosted"><span class="toc-number">2.2.</span> <span class="toc-text">Type 2: 宿主型 Hypervisor (Hosted)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Hypervisor-%E7%9A%84%E5%90%AF%E5%8A%A8%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">3.</span> <span class="toc-text">3. Hypervisor 的启动与初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E9%80%9A%E7%94%A8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 计算机的通用启动流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%B8%8D%E5%90%8C-Hypervisor-%E7%9A%84%E2%80%9C%E7%99%BB%E5%9C%BA%E2%80%9D%E6%96%B9%E5%BC%8F"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 不同 Hypervisor 的“登场”方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%BB%8E%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E5%88%B0%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%EF%BC%9AHyperEnclave-%E7%9A%84%E5%88%9B%E6%96%B0"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 从传统虚拟化到机密计算：HyperEnclave 的创新</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E7%9A%84%E6%8A%80%E6%9C%AF%E6%BC%94%E8%BF%9B"><span class="toc-number">3.3.1.</span> <span class="toc-text">机密计算的技术演进</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HyperEnclave-%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%9C%BA%E5%88%B6%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%8A%A8%E6%80%81%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%8B%AC%E7%AB%8B-Hypervisor"><span class="toc-number">3.3.2.</span> <span class="toc-text">HyperEnclave 的真实机制：一个动态加载的独立 Hypervisor</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8A%A0%E8%BD%BD%E4%B8%8E%E8%B7%B3%E8%BD%AC"><span class="toc-number">3.4.</span> <span class="toc-text">1. 加载与跳转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BF%9D%E5%AD%98%E4%B8%8E%E6%8E%A5%E7%AE%A1"><span class="toc-number">3.5.</span> <span class="toc-text">2. 保存与接管</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%8B%AC%E7%AB%8B%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">3.6.</span> <span class="toc-text">3. 独立初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%90%AF%E5%8A%A8%E6%9C%BA%E5%AF%86VM"><span class="toc-number">3.7.</span> <span class="toc-text">4. 启动机密VM</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%86%85%E9%83%A8%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E4%B8%8E%E6%9C%BA%E5%88%B6"><span class="toc-number">4.</span> <span class="toc-text">4. 内部核心原理与机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU-%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">4.1.</span> <span class="toc-text">CPU 虚拟化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">4.2.</span> <span class="toc-text">内存虚拟化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O-%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">4.3.</span> <span class="toc-text">I&#x2F;O 虚拟化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E4%B8%8A%E4%B8%8B%E6%B8%B8%E4%BA%A4%E4%BA%92%E4%B8%8E%E5%8D%8F%E4%BD%9C"><span class="toc-number">5.</span> <span class="toc-text">5. 上下游交互与协作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Hypervisor-%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">6.</span> <span class="toc-text">6. Hypervisor 能做什么？(应用场景)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E4%B8%BB%E6%B5%81-Hypervisor-%E5%AF%B9%E6%AF%94"><span class="toc-number">7.</span> <span class="toc-text">7. 主流 Hypervisor 对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E6%80%BB%E7%BB%93%E4%B8%8E%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B"><span class="toc-number">8.</span> <span class="toc-text">8. 总结与未来展望</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/" title="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/" title="Hypervisor技术解析：传统虚拟化技术与HyperEnclave">Hypervisor技术解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave启动和初始化流程"/></a><div class="content"><a class="title" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程">HyperEnclave启动和初始化流程</a><time datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"/></a><div class="content"><a class="title" href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</a><time datetime="2025-07-20T14:00:00.000Z" title="发表于 2025-07-20 22:00:00">2025-07-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/" title="HyperEnclave：一个开放且跨平台的可信执行环境"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave：一个开放且跨平台的可信执行环境"/></a><div class="content"><a class="title" href="/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/" title="HyperEnclave：一个开放且跨平台的可信执行环境">HyperEnclave：一个开放且跨平台的可信执行环境</a><time datetime="2025-07-18T16:00:00.000Z" title="发表于 2025-07-19 00:00:00">2025-07-19</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">48</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">62</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">5</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>4</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>1</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>6</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>2</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
