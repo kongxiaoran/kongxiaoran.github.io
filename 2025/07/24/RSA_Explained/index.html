@@ -1,0 +1,678 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>深入理解RSA：加密与签名的艺术 | 凌霄的博客</title><meta name="keywords" content="密码学,RSA,非对称加密,数字签名"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="深入理解RSA：加密与签名的艺术"><meta name="application-name" content="深入理解RSA：加密与签名的艺术"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="深入理解RSA：加密与签名的艺术"><meta property="og:url" content="http://example.com/2025/07/24/RSA_Explained/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="深入剖析RSA加密算法的数学原理、密钥生成过程、加密解密机制，以及数字签名的实现原理，包含完整的可手动计算示例"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg"><meta name="description" content="深入剖析RSA加密算法的数学原理、密钥生成过程、加密解密机制，以及数字签名的实现原理，包含完整的可手动计算示例"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/24/RSA_Explained/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '深入理解RSA：加密与签名的艺术',
+  postAI: '',
+  pageFillDescription: '深入理解RSA：加密与签名的艺术, 1. 核心数学概念, 2. 第一步：生成密钥对（公钥与私钥）, 3. 第二步：使用RSA进行加密和解密, 加密过程 (Alice操作), 解密过程 (Bob操作), 4. 第三步：使用RSA进行数字签名和验证, 签名过程 (Alice操作), 验证过程 (Bob操作), 5. 为什么RSA是安全的？—— 理论与现实的差距, 理论上的安全性, 现实中的致命漏洞, 深度剖析：存在性伪造攻击 (Existential Forgery), 6. 签名时不进行哈希可行吗？, 6.1 未知的结构性攻击 (Structural Attacks), 6.2 来自历史的教训：密码学标准曾因此犯错, 结论深入理解加密与签名的艺术是当今世界应用最广泛的公钥加密算法由和在年提出它巧妙地利用了数论中一个核心的难题将一个巨大的合数分解质因数是极其困难的但将两个大素数相乘却非常容易这份文档将带你走完从密钥生成加密解密到数字签名验证的全过程并附带一个可手动计算的真实数据示例核心数学概念理解需要了解一些基础的数论概念别担心我们会用最直观的方式解释素数只能被和自身整除的数如它们是算法的基石模运算也叫时钟运算即取余数例如等于时钟上的点就是点公式写作表示和除以的余数相同欧拉函数表示小于且与互质没有除以外的公约数的数的个数这是一个关键的函数它有一个神奇的性质如果是两个素数和的乘积即那么欧拉定理这是能够工作的数学基石它指出如果一个整数与互质那么模反元素如果和满足那么我们称是相对于的模反元素可以理解为是在模运算下的倒数第一步生成密钥对公钥与私钥让我们用一个真实的可手动计算的例子来生成一套密钥在真实世界中所选的素数会非常巨大几百位长目标生成公钥和私钥选择两个不同的素数和为了简单起见我们选择和保密这两个数在生成密钥后必须销毁绝对不能泄露计算这个是公钥和私钥的一部分是公开的计算欧拉函数保密必须保密因为如果它被泄露攻击者就能轻易计算出私钥选择一个公钥指数必须满足且与互质我们选择是素数且不能被整除所以它们互质公钥诞生我们的公钥是这个可以告诉任何人计算私钥指数是相对于的模反元素即我们需要找到一个使得这可以通过扩展欧几里得算法来解决这里我们直接给出结果验证一下然后私钥诞生我们的私钥是这个必须死守天知地知你知小结公钥用于加密或验证签名私钥用于解密或生成签名第二步使用进行加密和解密场景想给发送一个秘密消息她需要用的公钥来加密原始消息必须是一个小于的整数如果消息是文本需要先转换成数字我们假设要发送的秘密数字是加密过程操作使用的公钥公式计算这个计算需要计算器结果是现在将这个加密后的密文通过不安全的网络发送给即使被窃听攻击者拿到也无法推断出原始消息是解密过程操作收到密文他使用自己的私钥来解密公式计算这同样是个巨大的计算但结果会精确地回到为什么能解密这背后的数学原理是欧拉定理由于我们可以把写成的形式所以根据欧拉定理等于所以上式变为最终结果就是欧拉定理要求与互质即在示例中因两者互质故成立但若是或的倍数如欧拉定理不直接适用此时需用中国剩余定理保证解密正确性实际实现均依赖优化第三步使用进行数字签名和验证场景想发布一个软件她需要对软件签名以证明这个软件确实是她发布的真实性并且没有被篡改完整性签名的过程与加密正好相反是用私钥加密用公钥解密重要直接对大数据如整个软件进行签名速度极慢且不安全正确的做法是先哈希再签名哈希先用一个密码学哈希函数如计算软件的哈希值一个简短的独一无二的指纹为简化计算我们假设软件的哈希摘要转换成数字后是签名过程操作使用她自己的私钥来签名公式计算计算结果为将原始软件签名一起发布验证过程操作下载了软件和签名他需要用的公钥来验证第一步对他下载的软件使用完全相同的哈希算法计算哈希值结果必然也是第二步使用的公钥对签名进行解密操作公式计算计算结果为第三步比较比较他自己计算的哈希和从签名中还原出的哈希是否等于是的结论签名有效可以确信这个软件确实是发布的并且从发布到现在一个比特都没有被改动过如果有人篡改了软件将会改变验证就会失败为什么是安全的理论与现实的差距理论上的安全性的安全性根植于一个数学难题大数质因数分解攻击者知道公钥但要推导出私钥就必须先计算出而要计算就必须知道的两个质因数和当足够大时如位分解在计算上是不可行的现实中的致命漏洞然而理论上的安全不等于实践中的安全如果我们直接使用上面介绍的教科书式进行签名会存在一个致命的漏洞即存在性伪造攻击这个攻击生动地展示了为什么填充是绝对必要的深度剖析存在性伪造攻击攻击者如何凭空创造有效签名攻击者完全不知道您的私钥但她知道您的公钥她的目标是构造出一对伪造的消息伪造的签名并让它通过验证思路完全是逆向的第一步选择一个签名随机挑选一个数字并决定把它当作一个签名比如随便选一个数字只要小于即可第二步使用公钥计算消息利用验证公式和公钥来反向计算这个签名对应的消息第三步伪造完成得到了一对数据她将这对数据发给接收者为什么这个伪造会通过验证接收者执行标准验证流程用公钥计算然后将结果与收到的比较根据的构造方法这个计算结果正好就是因此验证通过接收者会误以为这是一个合法的签名这破解了吗没有并没有找出私钥她也无法为任何她指定的有意义的消息比如转账万伪造签名她伪造出的消息几乎肯定是无意义的乱码这种攻击因此被称为存在性伪造只能证明一个有效的消息签名对的存在但无法控制其内容解决方案密码学填充的威力为了阻止这种逆向攻击现实世界的标准如引入了强制的格式要求这就是填充流程在签名之前必须先计算消息的哈希值然后将哈希值与其他约定好的数据如固定前缀打包成一个高度结构化的数据块最后才对这个进行签名如何挫败攻击现在当再次尝试攻击时她计算出的必须符合这个预先定义好的严格的结构一个随机计算的结果恰好满足这种复杂格式的概率是微乎其微的在计算上可以认为是不可能的一句话总结填充方案是确保在现实世界中安全使用的生命线绝不可省略签名时不进行哈希可行吗这个是我在看中使用签名防止篡改时想到的一个问题我的好奇哈希保证了签名的安全还是非对称加密还是两种共同保证了签名的安全为什么不能直接使用私钥进行签名然后使用公钥验证当时在想这个问题的时候我还不是很清楚填充不过即使后来了解到存在性伪造攻击与填充我还是有点点疑惑那我把数据进行填充了呢我的新问题如果我的原始数据已经很短了比如一个字节的我不能跳过哈希直接对它进行填充然后签名吗这样既解决了数据长度问题也通过填充防止了我们之前讨论的存在性伪造攻击从安全角度看这可行吗哈哈我问了豆包和这个问题它的回答是这个想法非常敏锐但答案是强烈不推荐这样做会引入严重的安全风险过程中我和多个模型讨论了这个点很多反复和我强调必须要使用哈希来进行签名但是一直没回答的要点上后面我发现了答案虽然填充后直接签名确实可以抵御最基础的伪造攻击但它忽略了哈希函数在此流程中扮演的另一个至关重要的但更微妙的角色破坏消息的数学结构让我们看看为什么省略哈希是危险的未知的结构性攻击算法依赖于模幂运算这个运算本身具有一些数学特性例如乘法同态性虽然我们使用的填充方案如旨在破坏这些特性但它是围绕着签名一个哈希值来设计的如果被签名的内容不是一个近乎随机的哈希值而是包含特定结构比如全零的字节重复的序列或者与其他消息有数学关联的原始数据那么即使经过了填充也可能存在一些未知的非常巧妙的攻击方法可以利用这些原始数据的内在结构来伪造签名哈希函数在这里起到了随机预处理的作用无论你的原始数据是什么结构经过哈希后都会变成一串毫无规律近乎随机的比特这串随机的数据再被填充和签名其安全性就大大增强了因为它彻底消除了原始数据结构可能带来的任何风险来自历史的教训密码学标准曾因此犯错这不仅仅是理论上的担忧而是有真实案例的才知道原来不是只有我想过这个历史上确实存在过一些为了效率而设计的签名标准如早期版本的我搜的一些资料说的好像是版它们就采用了填充后直接签名短消息的方案然而后来密码学家们发现了针对这些标准的严重漏洞证明了可以在不知道私钥的情况下伪造签名这些攻击非常复杂它们正是利用了被签名消息的非随机性即没有经过哈希处理这个弱点最终这些标准不得不被废弃或进行重大修订结论先哈希再签名并不仅仅是为了压缩数据它是一个经过了数十年研究和实战检验的安全范式哈希负责将任意长度任意结构的输入转换为一个固定长度无结构的近乎随机的摘要填充负责为这个摘要提供一个安全的标准化的封装以抵御针对算法本身的攻击签名对填充后的数据块执行核心的非对称加密操作这三个步骤环环相扣缺一不可省略掉哈希就相当于绕过了安全体系中的第一道也是至关重要的一道防线即使后面的防线看起来很坚固整个体系的安全性也会因此受到极大损害所以结论是无论原始数据多短都必须先进行哈希然后再进行填充和签名这是确保数字签名安全的黄金准则密码学确实是一门很精妙的艺术充满了美感',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-25 11:14:22',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">15</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" itemprop="url">隐私计算</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>密码学</span></a><a class="article-meta__tags" href="/tags/RSA/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>RSA</span></a><a class="article-meta__tags" href="/tags/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>非对称加密</span></a><a class="article-meta__tags" href="/tags/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>数字签名</span></a></span></div></div><h1 class="post-title" itemprop="name headline">深入理解RSA：加密与签名的艺术</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-25T03:14:22.981Z" title="更新于 2025-07-25 11:14:22">2025-07-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="深入理解RSA：加密与签名的艺术"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/24/RSA_Explained/"><header><a class="post-meta-categories" href="/categories/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" itemprop="url">隐私计算</a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" tabindex="-1" itemprop="url">密码学</a><a href="/tags/RSA/" tabindex="-1" itemprop="url">RSA</a><a href="/tags/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/" tabindex="-1" itemprop="url">非对称加密</a><a href="/tags/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" tabindex="-1" itemprop="url">数字签名</a><h1 id="CrawlerTitle" itemprop="name headline">深入理解RSA：加密与签名的艺术</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time><time itemprop="dateCreated datePublished" datetime="2025-07-25T03:14:22.981Z" title="更新于 2025-07-25 11:14:22">2025-07-25</time></header><h1 id="深入理解RSA：加密与签名的艺术"><a href="#深入理解RSA：加密与签名的艺术" class="headerlink" title="深入理解RSA：加密与签名的艺术"></a>深入理解RSA：加密与签名的艺术</h1><p>RSA 是当今世界应用最广泛的公钥加密算法，由 Ron <strong>R</strong>ivest, Adi <strong>S</strong>hamir 和 Leonard <strong>A</strong>dleman 在1977年提出。它巧妙地利用了数论中一个核心的难题：<strong>将一个巨大的合数分解质因数是极其困难的，但将两个大素数相乘却非常容易。</strong></p>
+<p>这份文档将带你走完 RSA 从密钥生成、加密&#x2F;解密，到数字签名&#x2F;验证的全过程，并附带一个可手动计算的真实数据示例。</p>
+<hr>
+<h2 id="1-核心数学概念"><a href="#1-核心数学概念" class="headerlink" title="1. 核心数学概念"></a>1. 核心数学概念</h2><p>理解RSA需要了解一些基础的数论概念，别担心，我们会用最直观的方式解释。</p>
+<ul>
+<li><p><strong>素数 (Prime Number):</strong> 只能被1和自身整除的数，如 7, 11, 13。它们是RSA算法的基石。</p>
+</li>
+<li><p><strong>模运算 (Modular Arithmetic):</strong> 也叫“时钟运算”，即取余数。例如 <code>14 mod 12</code> 等于 <code>2</code>（时钟上的14点就是2点）。公式写作 <code>a ≡ b (mod n)</code>，表示 <code>a</code> 和 <code>b</code> 除以 <code>n</code> 的余数相同。</p>
+</li>
+<li><p><strong>欧拉函数 (Euler’s Totient Function):</strong> <code>φ(n)</code> 表示小于 <code>n</code> 且与 <code>n</code> 互质（没有除1以外的公约数）的数的个数。这是一个关键的函数，它有一个神奇的性质：</p>
+<blockquote>
+<p>如果 <code>n</code> 是两个素数 <code>p</code> 和 <code>q</code> 的乘积，即 <code>n = p * q</code>，<br>那么 **<code>φ(n) = (p-1) * (q-1)</code>**。</p>
+</blockquote>
+</li>
+<li><p><strong>欧拉定理 (Euler’s Theorem):</strong> 这是RSA能够工作的数学基石。它指出，如果一个整数 <code>a</code> 与 <code>n</code> 互质，那么：</p>
+<blockquote>
+<p><strong><code>a^φ(n) ≡ 1 (mod n)</code></strong></p>
+</blockquote>
+</li>
+<li><p><strong>模反元素 (Modular Multiplicative Inverse):</strong> 如果 <code>e</code> 和 <code>d</code> 满足 <code>(e * d) mod φ(n) = 1</code>，那么我们称 <code>d</code> 是 <code>e</code> 相对于 <code>φ(n)</code> 的模反元素。可以理解为 <code>d</code> 是 <code>e</code> 在模 <code>φ(n)</code> 运算下的“倒数”。</p>
+</li>
+</ul>
+<hr>
+<h2 id="2-第一步：生成密钥对（公钥与私钥）"><a href="#2-第一步：生成密钥对（公钥与私钥）" class="headerlink" title="2. 第一步：生成密钥对（公钥与私钥）"></a>2. 第一步：生成密钥对（公钥与私钥）</h2><p>让我们用一个真实的、可手动计算的例子来生成一套密钥。在真实世界中，所选的素数会非常巨大（几百位长）。</p>
+<p><strong>目标：</strong> 生成公钥 <code>(n, e)</code> 和私钥 <code>(n, d)</code>。</p>
+<ol>
+<li><p><strong>选择两个不同的素数 <code>p</code> 和 <code>q</code>。</strong></p>
+<ul>
+<li>为了简单起见，我们选择 <code>p = 61</code> 和 <code>q = 53</code>。</li>
+<li><strong>保密：</strong> 这两个数在生成密钥后必须销毁，绝对不能泄露。</li>
+</ul>
+</li>
+<li><p><strong>计算 <code>n = p * q</code>。</strong></p>
+<ul>
+<li><code>n = 61 * 53 = 3233</code>。</li>
+<li>这个 <code>n</code> 是公钥和私钥的一部分，是公开的。</li>
+</ul>
+</li>
+<li><p><strong>计算欧拉函数 <code>φ(n) = (p-1) * (q-1)</code>。</strong></p>
+<ul>
+<li><code>φ(3233) = (61-1) * (53-1) = 60 * 52 = 3120</code>。</li>
+<li><strong>保密：</strong> <code>φ(n)</code> 必须保密，因为如果它被泄露，攻击者就能轻易计算出私钥。</li>
+</ul>
+</li>
+<li><p><strong>选择一个公钥指数 <code>e</code>。</strong></p>
+<ul>
+<li><code>e</code> 必须满足 <code>1 &lt; e &lt; φ(n)</code> 且 <code>e</code> 与 <code>φ(n)</code> 互质。</li>
+<li>我们选择 <code>e = 17</code>。（17是素数，且3120不能被17整除，所以它们互质）。</li>
+<li><strong>公钥诞生：</strong> 我们的公钥是 <code>(n, e) = (3233, 17)</code>。这个可以告诉任何人。</li>
+</ul>
+</li>
+<li><p><strong>计算私钥指数 <code>d</code>。</strong></p>
+<ul>
+<li><code>d</code> 是 <code>e</code> 相对于 <code>φ(n)</code> 的模反元素。即 <code>(d * e) mod φ(n) = 1</code>。</li>
+<li>我们需要找到一个 <code>d</code> 使得 <code>(d * 17) mod 3120 = 1</code>。</li>
+<li>这可以通过“扩展欧几里得算法”来解决。这里我们直接给出结果：<code>d = 2753</code>。</li>
+<li>（验证一下：<code>2753 * 17 = 46801</code>，然后 <code>46801 mod 3120 = (15 * 3120 + 1) mod 3120 = 1</code>）。</li>
+<li><strong>私钥诞生：</strong> 我们的私钥是 <code>(n, d) = (3233, 2753)</code>。这个必须死守，天知地知你知。</li>
+</ul>
+</li>
+</ol>
+<p><strong>小结:</strong></p>
+<ul>
+<li><strong>公钥 (Public Key): (3233, 17)</strong>  -&gt; 用于加密，或验证签名</li>
+<li><strong>私钥 (Private Key): (3233, 2753)</strong> -&gt; 用于解密，或生成签名</li>
+</ul>
+<hr>
+<h2 id="3-第二步：使用RSA进行加密和解密"><a href="#3-第二步：使用RSA进行加密和解密" class="headerlink" title="3. 第二步：使用RSA进行加密和解密"></a>3. 第二步：使用RSA进行加密和解密</h2><p><strong>场景：</strong> Alice 想给 Bob 发送一个秘密消息。她需要用 Bob 的 <strong>公钥</strong> 来加密。</p>
+<ul>
+<li><strong>原始消息 (Message):</strong> <code>M</code>。必须是一个小于 <code>n</code> 的整数。如果消息是文本，需要先转换成数字。我们假设要发送的秘密数字是 <code>M = 123</code>。</li>
+</ul>
+<h3 id="加密过程-Alice操作"><a href="#加密过程-Alice操作" class="headerlink" title="加密过程 (Alice操作)"></a>加密过程 (Alice操作)</h3><p>Alice 使用 Bob 的 **公钥 <code>(n, e) = (3233, 17)</code>**。</p>
+<ul>
+<li><strong>公式:</strong> <code>Ciphertext (C) = M^e mod n</code></li>
+<li><strong>计算:</strong> <code>C = 123^17 mod 3233</code></li>
+<li>这个计算需要计算器，结果是：<code>C = 855</code>。</li>
+</ul>
+<p>现在，Alice 将这个加密后的密文 <code>855</code> 通过不安全的网络发送给 Bob。即使被窃听，攻击者拿到 <code>855</code> 也无法推断出原始消息是 <code>123</code>。</p>
+<h3 id="解密过程-Bob操作"><a href="#解密过程-Bob操作" class="headerlink" title="解密过程 (Bob操作)"></a>解密过程 (Bob操作)</h3><p>Bob 收到密文 <code>C = 855</code>，他使用自己的 <strong>私钥 <code>(n, d) = (3233, 2753)</code></strong> 来解密。</p>
+<ul>
+<li><strong>公式:</strong> <code>Message (M) = C^d mod n</code></li>
+<li><strong>计算:</strong> <code>M = 855^2753 mod 3233</code></li>
+<li>这同样是个巨大的计算，但结果会精确地回到：<code>M = 123</code>。</li>
+</ul>
+<p><strong>为什么能解密？</strong><br>这背后的数学原理是欧拉定理。<code>C^d = (M^e)^d = M^(e*d)</code>。由于 <code>e*d mod φ(n) = 1</code>，我们可以把 <code>e*d</code> 写成 <code>k*φ(n) + 1</code> 的形式。所以：<br><code>M^(e*d) mod n = M^(k*φ(n) + 1) mod n = (M^φ(n))^k * M^1 mod n</code><br>根据欧拉定理, <code>M^φ(n) mod n</code> 等于 <code>1</code>。所以上式变为 <code>1^k * M mod n</code>，最终结果就是 <code>M</code>。</p>
+<blockquote>
+<p>欧拉定理要求 <code>M</code> 与 <code>n</code> 互质（即<code>gcd(M,n)=1</code>）。在示例中<code>M=123</code>，<code>n=3233</code>，因<code>123=3×41</code>，<code>n=61×53</code>，两者互质，故成立。但若<code>M</code>是<code>p</code>或<code>q</code>的倍数（如<code>M=61</code>），欧拉定理不直接适用，此时需用<strong>中国剩余定理（CRT）</strong>保证解密正确性。实际RSA实现均依赖CRT优化。</p>
+</blockquote>
+<hr>
+<h2 id="4-第三步：使用RSA进行数字签名和验证"><a href="#4-第三步：使用RSA进行数字签名和验证" class="headerlink" title="4. 第三步：使用RSA进行数字签名和验证"></a>4. 第三步：使用RSA进行数字签名和验证</h2><p><strong>场景：</strong> Alice 想发布一个软件，她需要对软件签名，以证明这个软件确实是她发布的（<strong>真实性</strong>），并且没有被篡改（<strong>完整性</strong>）。</p>
+<p>签名的过程与加密<strong>正好相反</strong>，是<strong>用私钥“加密”</strong>，用公钥“解密”。</p>
+<p><strong>重要：</strong> 直接对大数据（如整个软件）进行签名，速度极慢且不安全。正确的做法是 <strong>“先哈希，再签名”</strong>。</p>
+<ol>
+<li><strong>哈希 (Hashing):</strong> Alice 先用一个密码学哈希函数（如 SHA-256）计算软件的哈希值（一个简短的、独一无二的“指纹”）。<ul>
+<li>为简化计算，我们假设软件的哈希摘要转换成数字后是 <code>H = 99</code>。</li>
+</ul>
+</li>
+</ol>
+<h3 id="签名过程-Alice操作"><a href="#签名过程-Alice操作" class="headerlink" title="签名过程 (Alice操作)"></a>签名过程 (Alice操作)</h3><p>Alice 使用她自己的 <strong>私钥 <code>(n, d) = (3233, 2753)</code></strong> 来签名。</p>
+<ul>
+<li><strong>公式:</strong> <code>Signature (S) = H^d mod n</code></li>
+<li><strong>计算:</strong> <code>S = 99^2753 mod 3233</code></li>
+<li>计算结果为 <code>S = 2426</code>。</li>
+</ul>
+<p>Alice 将 <strong><code>(原始软件, 签名S=2426)</code></strong> 一起发布。</p>
+<h3 id="验证过程-Bob操作"><a href="#验证过程-Bob操作" class="headerlink" title="验证过程 (Bob操作)"></a>验证过程 (Bob操作)</h3><p>Bob 下载了软件和签名 <code>2426</code>。他需要用 Alice 的 <strong>公钥 <code>(n, e) = (3233, 17)</code></strong> 来验证。</p>
+<ol>
+<li><strong>第一步：</strong> Bob 对他下载的软件 <strong>使用完全相同的哈希算法</strong>（SHA-256）计算哈希值。结果必然也是 <code>H1 = 99</code>。</li>
+<li><strong>第二步：</strong> Bob 使用 Alice 的公钥对签名进行“解密”操作。<ul>
+<li><strong>公式:</strong> <code>Verified_Hash (H2) = S^e mod n</code></li>
+<li><strong>计算:</strong> <code>H2 = 2426^17 mod 3233</code></li>
+<li>计算结果为 <code>H2 = 99</code>。</li>
+</ul>
+</li>
+<li><strong>第三步：比较</strong><ul>
+<li>Bob 比较他自己计算的哈希 <code>H1</code> 和从签名中还原出的哈希 <code>H2</code>。</li>
+<li><code>H1 (99)</code> 是否等于 <code>H2 (99)</code>？ <strong>是的</strong>。</li>
+<li><strong>结论：</strong> 签名有效。Bob 可以确信，这个软件确实是 Alice 发布的，并且从发布到现在，一个比特都没有被改动过。如果有人篡改了软件，<code>H1</code> 将会改变，验证就会失败。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="5-为什么RSA是安全的？——-理论与现实的差距"><a href="#5-为什么RSA是安全的？——-理论与现实的差距" class="headerlink" title="5. 为什么RSA是安全的？—— 理论与现实的差距"></a>5. 为什么RSA是安全的？—— 理论与现实的差距</h2><h4 id="理论上的安全性"><a href="#理论上的安全性" class="headerlink" title="理论上的安全性"></a>理论上的安全性</h4><p>RSA的安全性根植于一个数学难题——<strong>大数质因数分解</strong>。攻击者知道公钥 <code>(n, e)</code>，但要推导出私钥 <code>d</code>，就必须先计算出 <code>φ(n) = (p-1)(q-1)</code>。而要计算 <code>φ(n)</code>，就必须知道 <code>n</code> 的两个质因数 <code>p</code> 和 <code>q</code>。当 <code>n</code> 足够大时（如2048位），分解 <code>n</code> 在计算上是不可行的。</p>
+<h4 id="现实中的致命漏洞"><a href="#现实中的致命漏洞" class="headerlink" title="现实中的致命漏洞"></a>现实中的致命漏洞</h4><p>然而，理论上的安全不等于实践中的安全。如果我们直接使用上面介绍的“教科书式”RSA进行签名，会存在一个致命的漏洞，即<strong>存在性伪造攻击 (Existential Forgery)<strong>。这个攻击生动地展示了为什么</strong>填充 (Padding)</strong> 是绝对必要的。</p>
+<h3 id="深度剖析：存在性伪造攻击-Existential-Forgery"><a href="#深度剖析：存在性伪造攻击-Existential-Forgery" class="headerlink" title="深度剖析：存在性伪造攻击 (Existential Forgery)"></a>深度剖析：存在性伪造攻击 (Existential Forgery)</h3><p><strong>攻击者如何“凭空”创造有效签名</strong></p>
+<p>攻击者 Eve 完全不知道您的私钥 <code>d</code>，但她知道您的公钥 <code>(n, e)</code>。她的目标是构造出一对 <code>(伪造的消息 m&#39;, 伪造的签名 s&#39;)</code>，并让它通过验证。思路完全是<strong>逆向的</strong>：</p>
+<ol>
+<li><p><strong>第一步 (选择一个“签名”):</strong> Eve 随机挑选一个数字 <code>s&#39;</code>，并决定<strong>把它当作一个“签名”</strong>。比如，Eve 随便选一个数字 <code>s&#39; = 12345</code> (只要小于 <code>n</code> 即可)。</p>
+</li>
+<li><p><strong>第二步 (使用公钥计算“消息”):</strong> Eve 利用<strong>验证公式</strong>和<strong>公钥</strong>来反向计算这个“签名”对应的“消息”：<br><code>m&#39; = (s&#39;)^e mod n</code></p>
+</li>
+<li><p><strong>第三步 (伪造完成):</strong> Eve 得到了一对数据：<code>(m&#39;, s&#39;)</code>。她将这对数据发给接收者。</p>
+</li>
+</ol>
+<p><strong>为什么这个伪造会通过验证？</strong></p>
+<p>接收者执行标准验证流程：用公钥 <code>e</code> 计算 <code>(s&#39;)^e mod n</code>，然后将结果与收到的 <code>m&#39;</code> 比较。根据 Eve 的构造方法，这个计算结果**正好就是 <code>m&#39;</code>**，因此验证通过！接收者会误以为这是一个合法的签名。</p>
+<p><strong>这破解了RSA吗？</strong></p>
+<p>没有。Eve <strong>并没有</strong> 找出私钥 <code>d</code>，她也<strong>无法</strong>为任何<strong>她指定的、有意义的</strong>消息（比如“转账100万”）伪造签名。她伪造出的消息 <code>m&#39;</code> 几乎肯定是无意义的乱码。这种攻击因此被称为“存在性伪造”——只能证明一个有效的 <code>(消息, 签名)</code> 对的存在，但无法控制其内容。</p>
+<p><strong>解决方案：密码学填充 (Padding) 的威力</strong></p>
+<p>为了阻止这种逆向攻击，现实世界的标准（如 <code>PKCS#1</code>）引入了<strong>强制的格式要求</strong>，这就是填充。</p>
+<ul>
+<li><p><strong>流程：</strong> 在签名之前，必须先计算消息的哈希值 <code>H(m)</code>，然后将哈希值与其他约定好的数据（如固定前缀）打包成一个<strong>高度结构化</strong>的数据块 <code>Formatted_Block</code>。最后才对这个 <code>Formatted_Block</code> 进行签名。</p>
+</li>
+<li><p><strong>如何挫败攻击：</strong> 现在，当 Eve 再次尝试攻击时，她计算出的 <code>m&#39; = (s&#39;)^e mod n</code> <strong>必须</strong>符合这个预先定义好的、严格的结构。一个随机计算的结果恰好满足这种复杂格式的概率是微乎其微的，在计算上可以认为是不可能的。</p>
+</li>
+</ul>
+<p><strong>一句话总结：填充方案是确保RSA在现实世界中安全使用的生命线，绝不可省略。</strong></p>
+<h2 id="6-签名时不进行哈希可行吗？"><a href="#6-签名时不进行哈希可行吗？" class="headerlink" title="6. 签名时不进行哈希可行吗？"></a>6. 签名时不进行哈希可行吗？</h2><p>这个是我在看SGX中使用签名防止篡改时想到的一个问题。我的好奇：哈希保证了签名的安全，还是非对称加密，还是两种共同保证了签名的安全。为什么不能直接使用私钥进行签名，然后使用公钥验证？（当时在想这个问题的时候，我还不是很清楚填充）。不过即使后来了解到存在性伪造攻击与填充，我还是有点点疑惑。那我把数据进行填充了呢？</p>
+<blockquote>
+<p><strong>我的新问题：</strong> 如果我的原始数据已经很短了（比如一个64字节的ID），我不能跳过哈希，直接对它进行**填充(Padding)**然后签名吗？这样既解决了数据长度问题，也通过填充防止了我们之前讨论的存在性伪造攻击。从安全角度看，这可行吗？</p>
+</blockquote>
+<p>哈哈，我问了AI（豆包和gemini-2.5）这个问题，它的回答是：这个想法非常敏锐，但答案是：**强烈不推荐，这样做会引入严重的安全风险。过程中，我和多个ai模型讨论了这个点，很多ai反复和我强调必须要使用哈希来进行签名。但是一直没回答的要点上，后面我发现了答案。</p>
+<p>虽然“填充后直接签名”确实可以抵御最基础的伪造攻击，但它忽略了哈希函数在此流程中扮演的另一个至关重要的、但更微妙的角色：<strong>破坏消息的数学结构</strong>。</p>
+<p>让我们看看为什么省略哈希是危险的：</p>
+<h3 id="6-1-未知的结构性攻击-Structural-Attacks"><a href="#6-1-未知的结构性攻击-Structural-Attacks" class="headerlink" title="6.1 未知的结构性攻击 (Structural Attacks)"></a>6.1 未知的结构性攻击 (Structural Attacks)</h3><p>RSA算法依赖于模幂运算，这个运算本身具有一些数学特性（例如，乘法同态性：<code>sig(m1) * sig(m2) = sig(m1 * m2)</code>）。虽然我们使用的填充方案（如PKCS#1 v1.5）旨在破坏这些特性，但它是<strong>围绕着签名一个哈希值</strong>来设计的。</p>
+<p>如果被签名的内容不是一个近乎随机的哈希值，而是包含特定结构（比如全零的字节、重复的序列、或者与其他消息有数学关联）的原始数据，那么即使经过了填充，也<strong>可能</strong>存在一些未知的、非常巧妙的攻击方法，可以利用这些原始数据的内在结构来伪造签名。</p>
+<p>哈希函数在这里起到了<strong>“随机预处理”</strong>的作用。无论你的原始数据是什么结构，经过哈希后，都会变成一串毫无规律、近乎随机的比特。这串“随机”的数据再被填充和签名，其安全性就大大增强了，因为它彻底消除了原始数据结构可能带来的任何风险。</p>
+<h3 id="6-2-来自历史的教训：密码学标准曾因此犯错"><a href="#6-2-来自历史的教训：密码学标准曾因此犯错" class="headerlink" title="6.2 来自历史的教训：密码学标准曾因此犯错"></a>6.2 来自历史的教训：密码学标准曾因此犯错</h3><p>这不仅仅是理论上的担忧，而是有真实案例的（才知道原来不是只有我想过这个）。</p>
+<p>历史上，确实存在过一些为了效率而设计的签名标准（如早期版本的 <code>ISO/IEC 9796</code>，我搜的一些资料说的好像是1994版），它们就采用了“填充后直接签名短消息”的方案。然而，后来密码学家们发现了针对这些标准的严重漏洞，证明了可以在不知道私钥的情况下伪造签名。</p>
+<p>这些攻击非常复杂，它们正是利用了被签名消息的非随机性（即没有经过哈希处理）这个弱点。最终，这些标准不得不被废弃或进行重大修订。</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>“先哈希，再签名” (Hash-then-Sign) 并不仅仅是为了压缩数据，它是一个经过了数十年研究和实战检验的安全范式。</p>
+<ul>
+<li><strong>哈希</strong>：负责将任意长度、任意结构的输入，转换为一个固定长度、无结构的、近乎随机的摘要。</li>
+<li><strong>填充</strong>：负责为这个摘要提供一个安全的、标准化的封装，以抵御针对RSA算法本身的攻击。</li>
+<li><strong>签名</strong>：对填充后的数据块执行核心的非对称加密操作。</li>
+</ul>
+<p>这三个步骤环环相扣，缺一不可。省略掉哈希，就相当于绕过了安全体系中的第一道也是至关重要的一道防线，即使后面的防线看起来很坚固，整个体系的安全性也会因此受到极大损害。</p>
+<p>所以，结论是：<strong>无论原始数据多短，都必须先进行哈希，然后再进行填充和签名。这是确保数字签名安全的黄金准则。</strong></p>
+<hr>
+<p><em>密码学确实是一门很精妙的艺术，充满了美感</em></p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/24/RSA_Explained/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/24/RSA_Explained/')">深入理解RSA：加密与签名的艺术</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/24/RSA_Explained/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=深入理解RSA：加密与签名的艺术&amp;url=http://example.com/2025/07/24/RSA_Explained/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>密码学<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/RSA/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>RSA<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>非对称加密<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>数字签名<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">HyperEnclave内存管理模块源码与原理分析</div></div></a></div><div class="next-post pull-right"><a href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Intel SGX 设计与安全原理全解析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/06/22/Argon2%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E5%8E%9F%E7%90%86%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%AE%9E%E6%88%98%E5%BA%94%E7%94%A8/" title="Argon2密码哈希算法深度解析：原理、实现与实战应用"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-22</div><div class="title">Argon2密码哈希算法深度解析：原理、实现与实战应用</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RSA%EF%BC%9A%E5%8A%A0%E5%AF%86%E4%B8%8E%E7%AD%BE%E5%90%8D%E7%9A%84%E8%89%BA%E6%9C%AF"><span class="toc-number">1.</span> <span class="toc-text">深入理解RSA：加密与签名的艺术</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%95%B0%E5%AD%A6%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">1. 核心数学概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9%EF%BC%88%E5%85%AC%E9%92%A5%E4%B8%8E%E7%A7%81%E9%92%A5%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">2. 第一步：生成密钥对（公钥与私钥）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E4%BD%BF%E7%94%A8RSA%E8%BF%9B%E8%A1%8C%E5%8A%A0%E5%AF%86%E5%92%8C%E8%A7%A3%E5%AF%86"><span class="toc-number">1.3.</span> <span class="toc-text">3. 第二步：使用RSA进行加密和解密</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E8%BF%87%E7%A8%8B-Alice%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.1.</span> <span class="toc-text">加密过程 (Alice操作)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%AF%86%E8%BF%87%E7%A8%8B-Bob%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.2.</span> <span class="toc-text">解密过程 (Bob操作)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E4%BD%BF%E7%94%A8RSA%E8%BF%9B%E8%A1%8C%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="toc-number">1.4.</span> <span class="toc-text">4. 第三步：使用RSA进行数字签名和验证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%BE%E5%90%8D%E8%BF%87%E7%A8%8B-Alice%E6%93%8D%E4%BD%9C"><span class="toc-number">1.4.1.</span> <span class="toc-text">签名过程 (Alice操作)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E8%BF%87%E7%A8%8B-Bob%E6%93%8D%E4%BD%9C"><span class="toc-number">1.4.2.</span> <span class="toc-text">验证过程 (Bob操作)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E4%B8%BA%E4%BB%80%E4%B9%88RSA%E6%98%AF%E5%AE%89%E5%85%A8%E7%9A%84%EF%BC%9F%E2%80%94%E2%80%94-%E7%90%86%E8%AE%BA%E4%B8%8E%E7%8E%B0%E5%AE%9E%E7%9A%84%E5%B7%AE%E8%B7%9D"><span class="toc-number">1.5.</span> <span class="toc-text">5. 为什么RSA是安全的？—— 理论与现实的差距</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E4%B8%8A%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7"><span class="toc-number">1.5.0.1.</span> <span class="toc-text">理论上的安全性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%B0%E5%AE%9E%E4%B8%AD%E7%9A%84%E8%87%B4%E5%91%BD%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.5.0.2.</span> <span class="toc-text">现实中的致命漏洞</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90%EF%BC%9A%E5%AD%98%E5%9C%A8%E6%80%A7%E4%BC%AA%E9%80%A0%E6%94%BB%E5%87%BB-Existential-Forgery"><span class="toc-number">1.5.1.</span> <span class="toc-text">深度剖析：存在性伪造攻击 (Existential Forgery)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E7%AD%BE%E5%90%8D%E6%97%B6%E4%B8%8D%E8%BF%9B%E8%A1%8C%E5%93%88%E5%B8%8C%E5%8F%AF%E8%A1%8C%E5%90%97%EF%BC%9F"><span class="toc-number">1.6.</span> <span class="toc-text">6. 签名时不进行哈希可行吗？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%9C%AA%E7%9F%A5%E7%9A%84%E7%BB%93%E6%9E%84%E6%80%A7%E6%94%BB%E5%87%BB-Structural-Attacks"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 未知的结构性攻击 (Structural Attacks)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E6%9D%A5%E8%87%AA%E5%8E%86%E5%8F%B2%E7%9A%84%E6%95%99%E8%AE%AD%EF%BC%9A%E5%AF%86%E7%A0%81%E5%AD%A6%E6%A0%87%E5%87%86%E6%9B%BE%E5%9B%A0%E6%AD%A4%E7%8A%AF%E9%94%99"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 来自历史的教训：密码学标准曾因此犯错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">1.6.3.</span> <span class="toc-text">结论</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intel SGX 设计与安全原理全解析"/></a><div class="content"><a class="title" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析">Intel SGX 设计与安全原理全解析</a><time datetime="2025-07-26T14:00:00.000Z" title="发表于 2025-07-26 22:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解RSA：加密与签名的艺术"/></a><div class="content"><a class="title" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术">深入理解RSA：加密与签名的艺术</a><time datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/" title="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/92e4b61997e43bfa9f726cfce3b0b5ef.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor技术解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/23/Hypervisor%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BC%A0%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B8%8EHyperEnclave/" title="Hypervisor技术解析：传统虚拟化技术与HyperEnclave">Hypervisor技术解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave启动和初始化流程"/></a><div class="content"><a class="title" href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程">HyperEnclave启动和初始化流程</a><time datetime="2025-07-21T11:00:00.000Z" title="发表于 2025-07-21 19:00:00">2025-07-21</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">68</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">5</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
