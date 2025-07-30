@@ -1,0 +1,1592 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>一起来学Intel SGX | 凌霄的博客</title><meta name="keywords" content="机密计算,TEE,Intel SGX,硬件安全"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="一起来学Intel SGX"><meta name="application-name" content="一起来学Intel SGX"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="一起来学Intel SGX"><meta property="og:url" content="http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="深度解析Intel SGX可信执行环境的设计原理、硬件架构、安全机制与编程实践，从理论到实践的完整指南"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg"><meta name="description" content="深度解析Intel SGX可信执行环境的设计原理、硬件架构、安全机制与编程实践，从理论到实践的完整指南"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '一起来学Intel SGX',
+  postAI: '',
+  pageFillDescription: '一起来学Intel SGX, 前言, 一、SGX基础与核心概念, 1.1 SGX的目标：机密计算, 1.2 TCB（可信计算基）, 1.3 Enclave的身份三要素：MRENCLAVE SIGSTRUCT MRSIGNER, a) MRENCLAVE - Enclave的DNA指纹, b) SIGSTRUCT - Enclave的数字封条与身份凭证, c) EINIT与MRSIGNER - 身份验证与身份授予, d) 深度解析：为何需要MRSIGNER？, e) 我能伪造MRSIGNER吗？, 二、核心硬件与组件解析, 2.1 PRM amp EPC, 2.2 MEE, 2.3 SECS, 2.4 EPCM, 三、SGX工作原理与内部流程, 3.1 Enclave 的生命周期管理, 阶段 1 创建 (Creation) - ECREATE, 阶段 2 加载代码与数据 (Content Loading) - EADD amp EEXTEND, 阶段 3 初始化 (Initialization) - EINIT, 阶段 4 amp 5 进入与退出 (Enter amp Exit) - EENTER ERESUME EEXIT, 阶段 6 销毁 (Deletion) - EREMOVE, 3.2 SGX 硬件指令集与内部执行流程, 指令内部执行流程示例 (EADD), 3.3 安全加载, 步骤 1：防窥探 - MEE 的实时加密, 步骤 2：防篡改 - 测量机制的核心 EEXTEND, 为什么这个机制是安全的？, 四、关键安全机制深度剖析, 4.1 内存安全：如何抵御来自 OS 的攻击, 4.2 EDMM：Enclave 动态内存管理, 4.3 认证机制：构建信任的阶梯, 4.3.1 信任阶梯的起点：CPU内部的自我信任 (本地认证), 4.3.2 远程认证：构建跨网络的信任链, a) 远程认证的完整流程, b) 深度解析：信任链的构建细节, 4.4 持久化数据保护：数据密封 (Data Sealing), a) 核心思想与关键要素, b) EGETKEY 与两种密封策略, c) 密钥派生细节与降级攻击防御, d) 完整生命周期：密封与解封, 五、概念实践：在思想上构建一个Enclave, a) SGX项目的三国鼎立架构, b) 神奇的胶水：EDL文件与edger8r工具, c) 核心代码导读：理论与实践的交汇, d) 最后的魔法：sgx_sign与SIGSTRUCT, e) 超越Hello World：一个更真实的思想实验, 六、未来挑战：如何尽量预防侧信道攻击, 10.1 什么是侧信道攻击？, 10.2 为何 SGX 难以完全免疫侧信道攻击？, 10.3 防护策略与未来方向, 结语一起来学前言还是比较难学透的因为可供学习的资料确实有限并且并没有开放其源码实现所以我们仅能通过其官方上发布的一些手册和学术论文来学习坦率的说不是很容易学官方文档搜索我写本文的目的其实很简单就是想让自己可以尽量透彻的理解的设计与实现知道它面临哪些问题然后如何解决的一基础与核心概念是一项强大的硬件安全技术它允许开发者在充满潜在威胁的环境中例如一个被恶意软件感染的操作系统创建一块被称为的安全区域以保护敏感的代码和数据的目标机密计算想象一下你有一段非常敏感的程序例如处理用户密码的算法或一份机密数据例如公司所运营的里的个人信息数据在传统的计算模式下这段程序和数据在运行时会完全暴露给操作系统和系统管理员如果被黑客攻破那么机密将荡然无存的核心目标就是解决这个问题它致力于实现机密计算即保护正在使用中的数据即使在操作系统虚拟机监视器甚至物理内存探测等最高权限的攻击下也能确保内部的代码和数据不被窃取或篡改可信计算基在看一些机密计算或者隐私计算的文章时候可能会经常看到这个词其实可信计算基看字母以为是一个具体的硬件其实是一个安全概念的定义是一个系统中所有必须依赖其来保障安全策略的硬件固件和软件组件的集合简单来说就是我们选择无条件信任的所有部分也叫信任的边界一个系统的越小其被攻击的面就越小系统就越安全在传统的计算机系统中非常庞大它包括硬件固件虚拟机监视器操作系统驱动程序等传统计算环境的攻击面大传统计算环境硬件固件虚拟机监控程序操作系统驱动程序应用程序环境极小可信计算基微码不可信组件不可信区域固件驱动安全边界安全边界样式类定义兼容性写法的革命性在于它极大地减小了在使用的模型中主要只包含硬件特指支持的芯片本身微码内部实现功能的固件操作系统等所有其他软件都被排除在之外被视为不可信的这意味着我们不再需要信任庞大而复杂的操作系统只需要信任设计和制造的即可这就是安全模型的基石不过一旦信任基出现问题可能整个体系框架都会土崩瓦解这个其实也是所担忧的他们不希望由厂商来决定信任基的身份三要素要理解如何信任一个我们必须解剖它的三大身份要素这三者环环相扣共同构成了不可伪造的身份证明的指纹定义是一个位的哈希值是代码和初始数据内容的唯一标识计算过程这是在加载过程中由硬件通过指令动态计算的每当一页代码或数据被加载到受保护内存中硬件都会执行一次密码学测量将其内容合并到的累积哈希计算中安全意义完整性保证任何对内容的微小修改哪怕一个比特都会导致最终的值发生天翻地覆的变化这保证了运行中的与其开发者编译时的原始版本完全一致的数字封条与身份凭证一个文件就像一个带防伪标识的机密文件袋它包含两部分主体内容即的二进制代码和数据数字封条这是一个独立的数据结构包含了验证身份所需的所有元数据其核心内容是开发者的公钥用来签名的那个私钥所对应的公钥对的签名开发者在编译后会用自己的私钥对预期的值进行签名这个签名本身被保存在中与身份验证与身份授予指令是生命周期中决定性的加冕典礼由硬件扮演一个无法被软件干预的终极边检官当指令被调用时硬件会执行两个核心动作动作一验证签名验证数字封条的真实性提取凭证硬件从中提取出开发者的公钥和签名动态计算硬件根据已加载到内存中的代码独立计算出一个密码学验证使用开发者的公钥来验证签名对于它刚刚算出的是否有效如果验证失败意味着代码被篡改或签名是伪造的将失败被拒绝启动动作二授予身份只有在签名验证成功后硬件才会执行这一步计算哈希硬件提取出刚刚用于验证的那个开发者公钥并计算其哈希值授予身份这个哈希结果就是硬件会将其权威地记录在的控制结构中代表了这个的签发机构或血统它证明了这个确实是由该公钥的持有者所担保的深度解析为何需要一个精准的问题是既然已经用完整的公钥完成了验证工作为什么还要多此一举计算并保存这个公钥的哈希值呢答案是因为开发者公钥和虽然源自一体但用途完全不同特性开发者公钥角色验证工具身份标签本质一个庞大复杂的非对称密钥结构字节一个短小固定的哈希值字节生命周期仅在指令执行的瞬间被硬件用来验证签名在时被创建并伴随的整个生命周期核心用途验证签名的真实性作为开发者身份的唯一标识符用于远程认证策略检查实现数据密封和版本升级作为身份标签的核心价值体现在便于管理的身份标识符在远程认证中服务器只需存储一个简短的哈希列表即可进行策略检查远比管理庞大的公钥高效实现安全的数据版本升级数据密封允许向申请一个与自身身份绑定的加密密钥用于将数据密封到硬盘上密封到只有代码完全相同的才能解密这意味着版本更新后无法读取旧数据密封到只要是由同一个开发者拥有同一个签名私钥签名的无论版本如何都能获取到相同的密钥这就完美地解决了版本升级时的数据迁移问题简化硬件设计对硬件而言在启动后用一个固定长度的哈希值来代表开发者身份远比处理一个复杂公钥要简单高效我能伪造吗答案是绝对不能这个机制的精妙之处在于一个无法破解的密码学闭环让我们用一个比喻来解释你的证件照片证件上的签发机关比如中华人民共和国外交部开发者的公钥签发机关的官方公章模板签名盖在照片上的那个红色的防伪的官方钢印硬件一丝不苟的海关边检官一个攻击者可以尝试如下伪造你的目标你创建了一个恶意一张新的证件照片想让它的签发机关变成中华人民共和国外交部得到的你的行动你必须向边检官出示外交部的公章模板的公钥边检官才会认可这个签发机关致命悖论边检官在认可签发机关后会立即使用这个公章模板去核对盖在你照片上的那个钢印用公钥验证签名但你并没有外交部的官方钢印的私钥你只有一个萝卜刻的假章用你自己的私钥生成的签名最终结果边检官发现钢印不匹配你的证件被没收你被拒绝入境启动失败结论你无法在冒用他人公钥的同时还能提供一个能被该公钥验证的对自己代码的有效签名这个密码学闭环保证了的不可伪造性二核心硬件与组件解析为了实现将缩小到仅剩的目标在其处理器中集成了一系列专门的硬件单元和机制理解这些组件是解开工作原理的钥匙处理器预留内存首先会要求在物理内存中划出一块专门的区域这块区域被称为这块内存对于来说是可见的但是对于外部设备如网卡显卡通过直接内存访问是不可见的是安全内存的土壤这个物理内存还是就是内存条我一开始以为是内单独的一块硬件页面缓存这块土壤里真正生长作物的区域就是由一系列大小的物理内存页组成它是代码和数据实际存放的地方可以把它想象成一个保险库的所有资产都存放在这里的所有页面都受到硬件级别的加密和完整性保护内存加密引擎这是的守护神当需要将数据从其内部缓存写入到时会自动对其进行加密当需要从读取数据到缓存时又会自动进行解密这个过程对程序是完全透明的它的核心作用是防御物理攻击即使攻击者把内存条拔下来或者使用特殊设备探测内存总线他们能看到的也只是一堆毫无意义的加密数据确保了数据一旦离开的核心就是经过加密的控制结构如果说是保险库那么就是这个保险库的总台账和控制器每个在中都有一个唯一的与之对应的结构作用它是一个特殊的受硬件严格保护的数据结构记录了该的所有元数据和状态信息例如的大小的安全属性如是否允许被调试的身份标识我们稍后会讲到的和的生命周期状态例如正在创建已初始化正在运行等是管理的枢纽任何对的操作如添加内存初始化都必须先通过的检查和记录页面缓存地图如果是保险库里的一排排保险柜内存页那么就是记录每个保险柜归属和权限的地图作用是一个受硬件保护的存在于内部的数据结构它为中的每一个页面都维护一个条目详细记录了这个页面属于哪个通过指向对应的这个页面的类型是本身还是存放代码数据的普通页或是用于线程管理的页等这个页面的访问权限读写执行权限这个页面是否已经被验证和加载核心安全机制任何对内存的访问都会强制查询如果一个程序试图访问一个它无权访问的页面例如试图读取的数据页或者试图访问的页面会在硬件层面直接拒绝该访问并触发异常是实现之间以及与外部世界隔离的根本保证内部组件内存加密引擎地图缓存物理内存结构处理器预留内存安全页面缓存内存组织连接关系明文数据密文数据权限校验分组说明兼容性写法虚拟分组通过注释实现内部属于区域属于三工作原理与内部流程了解了静态的硬件组件后我们现在来探讨的动态行为这部分将聚焦于一个是如何被创建执行并最终被销毁的以及这个过程中涉及到的关键指令和安全机制的生命周期管理一个的生命周期由一系列定义明确的状态和转换构成这些都由硬件指令严格控制不可信的操作系统如或扮演着资源管理员的角色负责分配内存但它无法干预的内部状态转换只能听从硬件的指令来执行操作以下是生命周期最核心的几个阶段不可信区域由操作开始创建加载代码与数据初始化可信区域内部执行是否在运行是进入恢复执行发生中断调用外部函数是退出否销毁结束阶段创建发起者用户的应用程序通过驱动向发出请求操作在物理内存中分配一块页面指令执行指令硬件行为将这块页面初始化为该的控制结构中会记录一些基础信息比如的安全属性由开发者定义基地址和大小范围等此时处于创建中状态它只是一个空的框架里面没有任何代码和数据还会生成一个用于后续验证的密钥阶段加载代码与数据发起者应用程序操作根据应用程序的请求继续分配页面用于存放代码和数据指令由执行将一个普通的内存页面包含开发者的代码或数据的内容拷贝到新分配的页面中并根据中设定的目标地址更新页表建立映射关系同时会记录下这个页面的归属和权限如代码页设为读执行数据页设为读写这是保障加载过程安全性的核心指令每当一个页面被添加进来后就会执行指令将这个页面的内容字节为一块送入一个专门的密码学累加器中进行测量硬件行为会不断更新中一个被称为的特殊字段这个字段是整个所有代码和数据的完整性度量值计算刚刚加载进来的那一页内存的哈希值将这个哈希值与一个特殊的保存在中的度量寄存器寄存器的当前值合并起来再算一次哈希新旧刚刚加载页的哈希这个过程会一直持续直到所有代码和数据页都被加载完毕最终寄存器里的值就成了整个代码和数据的唯一指纹任何一页哪怕一个比特的改动都会导致最终的完全不同关键点这个测量过程是原子性的由硬件保证任何对代码或数据的篡改哪怕只修改了一个比特最终生成的值都会截然不同这回答了如何保证加载过程不被篡改的核心问题阶段初始化指令是生命周期的加冕典礼是它从一个半成品变为可信实体的决定性一步可以把想象成一个无法被软件干预的由硬件扮演的终极海关边检官发起者应用程序请求执行并向提供从文件中读出的数字封条硬件行为硬件会执行以下两个核心动作将的实际内容与其声称的作者牢牢地不可伪造地绑定在一起动作一验证签名验证数字封条的真实性提取凭证硬件从中提取出开发者的公钥和签名动态计算硬件根据已加载到内存中的代码独立计算出一个密码学验证这是最关键的一环使用开发者的公钥来验证签名对于它刚刚算出的是否有效动作二授予身份只有在签名验证成功后硬件才会执行这一步硬件提取出刚刚用于验证的那个开发者公钥并计算其哈希值这个结果就是硬件将这个权威地记录在的控制结构中最终裁决如果签名验证成功成功正式诞生其生命周期状态变为已初始化从此以后的内容将不可再更改和指令将对此失效这固化了的身份这个匹配成功同时证明了完整性从被开发者签名后到被加载进内存其代码和数据一个比特都没有被篡改过真实性这个确实是由所代表的开发者签名的如果签名验证失败失败被销毁绝对无法运行关于细心的读者可能会在官方文档中看到这是一个由特殊的许可生成的令牌用于确保加载的平台软件栈如驱动是合法的指令同时也会验证这个令牌不过从理解身份验证的核心逻辑来说的验证是根本它保证了内容本身的可信阶段进入与退出当应用程序需要调用内部的函数时执行此指令会保存当前的上下文寄存器状态等然后跳转到指定的入口点开始执行受保护的代码当需要调用外部函数或处理硬件中断如时钟中断时执行此指令它会保存的内部状态然后返回到不可信的应用程序或中当外部调用或中断处理完成后执行此指令恢复的上下文并从上次退出的地方继续执行这个进入退出的循环是发挥作用的主要方式阶段销毁发起者应用程序或指令执行指令硬件行为会安全地擦除指定的页面一旦被销毁与之关联的所有页面通过的记录都将变为无效随后可以回收这些页面用于其他目的的生命周期至此结束理解了的生命周期后我们在下一节深入探讨驱动这些状态转换的核心硬件指令集并揭示其内部的执行流程硬件指令集与内部执行流程的所有操作都由一组全新的指令驱动这些指令是硬件原生支持的它们的执行过程受到严格的硬件检查从而保证了操作的原子性和安全性不可信的软件如可以请求执行这些指令但无法干预其内部逻辑以下是一些最重要的指令及其作用指令类别关键指令主要作用构建创建一个空的初始化其将代码数据页面加载到中测量加载的页面更新摘要完成初始化使其准备好被执行执行首次进入开始执行代码从中断或外部调用后恢复的执行主动退出返回到不可信的应用代码管理销毁一个释放其所有资源在调试模式下读写内存获取用于生成认证报告或密封数据的密钥生成一份关于当前的报告用于本地认证内存管理为已存在的增加页面修改已加载页面的权限停止对的追踪用于电源管理指令内部执行流程示例让我们以指令为例看看其内部的执行流程有多么严谨权限检查首先检查当前是否处于内核态因为只有才有权限管理物理内存参数验证检查指令的参数包括源内存地址普通内存目标页面地址以及目标页面的地址状态检查读取目标的检查其生命周期状态只有处于创建中或加载中的才能接受如果已初始化将失败地址检查验证目标页面的地址是否在声明的基地址和大小范围之内查找在页面缓存地图中查找目标页面如果页面已被占用检查它是否属于当前如果属于其他操作失败如果页面未被占用标记该页面为有效内容拷贝将源内存页面的内容拷贝到目标页面这个过程由硬件直接完成更新在中更新该页面的条目记录其归属的页面类型例如代表普通页面以及开发者在中预设的访问权限读写执行状态返回如果所有步骤都成功指令执行完毕否则返回相应的错误码这个流程中的每一步都由硬件强制执行确保了即使是恶意的也无法将页面加载到错误的中或者赋予页面错误的权限这就是硬件的魅力可以将一些安全逻辑固化到硬件上是香的不过不要有漏洞哦不然就废了安全加载不知道你有没有疑惑我之前看到说是操作系统加载程序和数据到里的时候我就有疑惑了因为不是说不在信任基内吗如果是来加载的话就无法保证需要加载的程序和数据在中途被窥探和篡改吧答案的核心在于两个机制的协作内存加密引擎和测量机制步骤防窥探的实时加密当应用程序在不可信的普通内存中准备好一段代码或数据并通过指令将其加载到时数据会流经内部当数据离开核心准备写入到物理内存时内存加密引擎会自动对其进行加密这意味着任何在外部的人无论是物理探测内存总线的黑客还是拥有最高权限的看到的都只是加密后的密文它们无法窥探到您加载的真实内容这个过程是硬件强制的自动的且对开发者透明的不知道你是不是觉得这段话是正确合理能完美保证安全问题其实是不完全正确的如果应用程序准备好了一段代码或数据那么在执行指令前这段代码或数据其实就在会泄露因为应用程序是在不可信的普通内存中的所以怎么预防正确的答案是对于真正需要保护的商业级应用敏感数据从一开始就不会以明文形式出现在不可信的内存中而是一直加密的这就是所谓的明文不落地只有在内才会解密的数据是这样的代码总不能说加密吧这确实的应用程序代码文件本身在加载前确实是以明文形式存放在不可信的硬盘上并且会被加载到不可信的内存中这意味着和攻击者确实可以看到您的代码的二进制指令我们能做的是在软件层面去做混淆保护代码混淆安全模型能保证的是正在运行的绝对是未经任何篡改的原始代码这个怎么实现的是是通过下面这个步骤防篡改测量机制的核心仅仅加密是不够的恶意的仍然可以篡改加密后的数据例如替换掉整个加密页面可以把你本来需要加载的内的程序偷换掉或者修改其内部部分代码使用测量机制来解决这个问题初始状态在创建时其内部有一个名为的测量寄存器初始值为空累积更新每当一条指令成功加载一个页面后必须紧接着执行指令指令会读取刚刚加载的那个页面的明文内容注意是在内部加密之前进行的将页面内容以字节为单位进行切块将每一块的内容连同当前寄存器的值一起送入一个哈希计算单元用计算出的新哈希值去更新寄存器最终结果当所有代码和数据页面都通过和加载完成后寄存器中就保存了一个独一无二的代表了所有初始内容的哈希值初始化阶段初始值全零状态加载页面度量过程指令当前内容更新加载指令新内容更新最终结果迭代过程最终值样式定义连接线说明为什么这个机制是安全的顺序依赖性测量的顺序是固定的如果试图改变页面加载的顺序最终的将会不同内容敏感性算法的特性保证了哪怕原始代码或数据中只有一个比特被篡改最终的值也会完全不同一次性固化当指令执行成功后就被锁定了的值被最终确定下来无法再被修改这个最终的值就成了这个的指纹或其实这个和我之前调研过的一个审计日志方案里方法是一致的如何保证日志链完整性和未被篡改在后续的认证流程我们将在第四部分详细讲解中远程服务器会验证这个如果在加载过程中进行了任何手脚导致最终的与开发者预期的不符认证将会失败远程服务器就不会信任这个也不会给它发送任何敏感数据总结通过的测量可以保证我们的代码一定是完整的被加载到中的而敏感数据因为在前一直是加密的所以也是安全的当进入到后解密时又由来保护其安全至此我们已经了解了是如何被安全地创建和加载的下一部分我们将深入探讨最核心的各种安全机制包括内存安全认证和数据持久化等四关键安全机制深度剖析在这一部分我们将深入探讨如何实现其安全承诺我们将逐一剖析内存安全身份认证和数据持久化这三大核心安全机制内存安全如何抵御来自的攻击这是设计的出发点和核心价值所在即使操作系统是恶意的也无法侵害的内存这主要通过硬件层面的三个机制实现加密权限检查我们回顾一下之前说的核心组件内存加密引擎保证了所有离开写入到的数据都是加密的防止了物理嗅探页面缓存地图这是实现访问控制的关键它像一个严格的门卫记录了每个页面的户口它属于哪个以及它的访问权限读写执行当一个内存访问发生时硬件会强制执行以下检查访问源检查如果访问来自内部检查该是否有权访问目标页面例如不能写入一个只读的代码页如果访问来自外部如会检查由于所有页面都在中被标记为受保护的硬件会直接拒绝任何来自外部的读写或执行请求并立即触发一个页面错误异常给地址范围检查还会检查访问的地址是否在的结构中声明的地址范围之内这个由硬件强制执行的流程确保了对内存的三不看不见数据是加密的读不到硬件拒绝访问改不了硬件拒绝访问这就是如何从根本上防御来自恶意的直接内存攻击实现内存隔离与访问控制动态内存管理在中的大小在创建时是固定的这极大地限制了其实用性为了解决这个问题引入了机制允许在运行时动态地申请和释放内存的实现依然遵循的核心原则作为不可信的资源管理员而作为可信的执行者动态添加内存的流程请求内部的内存管理器例如的安全实现发现不足它会触发一个外部调用通知外部的与协作向请求分配一块普通的新的内存页面请求加载请求驱动使用指令将这个新页面作为页面添加到中执行指令与类似但它操作的是一个已经初始化的将普通页面的内容拷贝到一块新的页面中通常是全最关键的是在中将这个新页面与发起请求的的关联起来并设置好访问权限使用一旦完成内部的内存管理器就可以安全地使用这块新的内存了动态释放内存的流程释放内存相对复杂需要确保页面中没有敏感数据残留标记内部的函数会将一块不再使用的页面标记为待释放内容清除负责清除该页面的内容通常是填并调用指令将其页面类型在中从普通页修改为待回收回收可以通过指令安全地回收这些被标记为的页面并将其归还给系统通过这一套由硬件指令保障的流程实现了在不破坏安全模型的前提下对内存的动态安全管理内存安全是基础但如何证明一个的身份是可信的我们将深入探讨的杀手级应用认证机制认证机制构建信任的阶梯这一节是有理解难度的请先自行理解透数字签名原理非对称加密这些不然很难理解透这个信任体系的搭建仅仅在本地保护好是不够的在真实世界的应用中一个通常需要与外部世界交互比如向一个远程服务器请求敏感数据这时远程服务器如何才能相信它正在与之通信的确实是一个在安全未被篡改的环境中运行的内容正确的认证机制就是用来解决这个问题的它是一个分阶段建立信任的过程就像爬一个梯子每一阶都依赖于前一阶的稳固信任阶梯的起点内部的自我信任本地认证场景在同一台物理机上有两个不同的我们称之为和它们需要相互验证对方的身份并建立一个安全的通信信道核心思想利用作为可信的中间人通过一个只有本机硬件能生成和验证的报告来交换身份信息流程详解发起者目标指令请求生成关于自己的报告并指定目标为用和的身份派生出派生报告密钥生成包含的身份用派生报告密钥签名返回已签名的通过不可信内存发送指令请求获取用于验证来自的报告的密钥再次派生出同一个派生报告密钥返回派生报告密钥用密钥验证的若成功信任的身份请求定向报告调用指令最关键的是它在指令中明确将的身份标识如作为目标它还可以在字段中放入自己的临时通信公钥哈希用于后续建立安全信道派生密钥并生成报告硬件执行派生密钥它取出自己内部的和指令中指定的目标身份通过密钥派生函数计算出一个一次性的专用于本次通信的派生报告密钥计算使用这个新鲜出炉的派生报告密钥为包含身份和数据的内容计算一个返回报告将完整的内容返回给转发报告通过普通内存将这份报告发送给请求验证密钥收到报告后为了验证它需要获取同一个派生报告密钥它会调用指令向申请一个用于验证来自的报告的密钥再次派生因为是当初指定的合法目标会再次执行完全相同的派生过程并将同一个派生报告密钥安全地交给验证使用获取到的密钥重新计算收到内容的并与报告附带的进行比对建立信任如果匹配就获得了硬件级别的信任确信这份报告确实来自内容未经篡改且就是发给自己的本地认证成功总结本地认证通过密钥派生机制实现了硬件级别的访问控制和身份验证它高效且轻量因为它完全在内部完成不涉及外部通信它使得同一平台上的多个可以安全地协作是所有后续信任的基础远程认证构建跨网络的信任链这是最核心最强大的功能它旨在解决一个终极问题远程服务器如何能绝对相信它正在通信的对象确实是一个运行在安全正版硬件上未被篡改的且内容正确的为了实现这个目标设计了一套精密的环环相扣的信任链我们首先来看完整的流程然后再深入剖析每一步背后的设计哲学远程认证的完整流程流程总览图应用飞地远程挑战者服务商认证服务供应服务阶段平台首次启动或更新时执行一次性的密钥供应流程用特权密钥向请求验证后颁发平台私钥将私钥安全转交阶段一应用发起远程认证生成含用平台私钥签名生成阶段二远程验证与建立信任发送及临时公钥到远程转发请求最终裁决验证签名检查状态返回签名的认证报告验证签名若检查验证临时公钥建立安全信道分步详解阶段密钥供应一次性请求在平台首次配置或更新时拥有特殊身份的会向供应服务发起请求颁发服务器验证的身份后会为当前平台生成一个独一无二的平台私钥转交将这个密钥安全地转交给会将其密封保存供后续使用阶段一生成认证报告应用生成当应用飞地需要远程认证时它会调用指令生成一份包含自身身份和通信公钥哈希的本地报告生成应用飞地将发送给首先在本地验证的真实性然后用阶段获取的平台私钥对其进行签名生成最终的可跨国公证书阶段二远程验证与建立信任发送至服务商客户端将和用于通信的临时公钥发送给远程服务商挑战者转发至服务商不直接验证而是将其原样转发给认证服务最终裁决作为最终权威会验证的签名并检查平台的可信计算基版本是否安全返回认证报告向服务商返回一份签名的报告告知是否可信建立信任服务商验证的签名后如果结果就会信任该的身份它会检查和是否符合其策略并用客户端发来的临时公钥建立端到端的安全信道深度解析信任链的构建细节现在我们来回答那些关键的为什么和如何做到为什么需要中间人这是一个核心的架构设计问题答案是权责分离与风险隔离存在的问题解决方案密钥管理的灾难让每个应用都去管理高风险的平台私钥是不现实且危险的密钥所有权隔离平台私钥属于平台由签名的标准化代理统一保管应用无权接触安全责任的灾难应用的漏洞可能导致平台密钥泄露威胁整个平台的认证能力减少攻击面代码精简审查严格应用漏洞不会影响到平台认证机制本身实现了安全隔离复杂性的灾难应用开发者被迫成为密码学和底层认证协议的专家职责分离封装了所有复杂的认证逻辑应用只需调用简单接口专注于自身业务即可结论是一个系统级的标准化的认证代理它隔离了复杂性和关键密钥让应用可以安全简单地请求认证服务如何自证合法谁来为作保自己无法向证明我是合法的它需要一个更可信的实体来为它作保这个实体就是在密钥供应流程阶段中与之间进行了一次本地认证这背后是一套精密的硬件机制生成定向报告调用指令在指令中明确指定作为报告的目标硬件使用派生密钥生成硬件根据的请求生成关键在于它并不会直接使用而是会执行一个密钥派生的过程来生成一个一次性的对称密钥深度解析什么是派生密钥它不是本身派生密钥是一个全新的为本次通信临时生成的对称密钥来源它由硬件通过一个标准的密码学函数密钥派生函数计算得来派生原料的输入是永不暴露的作为主密钥和目标的身份标识比如的比喻就像一把万能的主模具当要为这扇门配一把钥匙时就用主模具门独有的花纹制造出一把独一无二的钥匙这把钥匙就是派生密钥为何要派生这是为了实现精确的访问控制只有指定的目标才能向提供正确的花纹自己的身份从而派生出同一把钥匙来完成验证这从硬件上保证了报告不会被错领或被非目标验证计算硬件使用这个刚刚派生出的密钥为的完整内容计算并附加在报告末尾验证将这份带的交给为了验证会向请求重新派生出同一个密钥硬件会因为是合法目标方而成功派生使用此密钥重新计算的并与收到的进行比对建立信任如果匹配就获得了硬件级别的保证这份确实来自本机内容未经篡改且真的是发给自己的此时便可信任中的并检查其是否与官方发布的身份相符通过这套机制为的合法性作出了担保并同意为它继续执行密钥申请流程如何自证合法信任的真正起源我们把信任追溯到了那的合法性又从何而来这触及了整个信任模型的硬件信任根的特殊身份也是一个由提供的但它的特殊之处在于它是用的根私钥创世私钥签名的硬件信任根在制造过程中根私钥对应的公钥哈希值被永久性地不可更改地烧录在芯片的硬件电路中关于哈希值的统一性是的为了保证生态的兼容性和可扩展性同一代的所有都会烧录相同的根公钥哈希这使得一个由统一签名的程序可以在所有这些上被一致地识别为合法如果每个的哈希都不同将不得不为每一颗芯片单独签名一个这在实践中是不可行的硬件认证当被加载时硬件在过程中会计算其即根公钥的哈希并发现它与芯片内烧录的哈希值完全匹配授予特权这个硬件层面的匹配向证明了的至高无上的身份因此授予特殊的其他任何都没有的权限访问这是一个对称密钥由同代和供应服务所共享但每个的都是独一无二的保证了即便根公钥哈希相同每个平台的信道也是独立的结论对的信任来自于的签名与硬件的内置校验相匹配这是一个硬编码在硅片里的信任关系是整个信任模型的第一推动力认证风暴拆解所有密钥签名与哈希整个远程认证流程涉及了多种密码学元素理解它们各自的用途是关键为了最清晰地展示我们将表格分为三部分哈希密钥以及最终的签名认证码哈希作为身份标识名称来源生成者作用与目的不可或缺的理由硬件在时为代码和数据生成唯一的指纹保证完整性确认内容未被篡改硬件在时为开发者公钥生成唯一的身份标签保证开发者身份的一致性用于策略检查和数据版本升级密钥作为加密和签名的工具类型名称来源生成者作用与目的对称密钥硬件制造时烧录每颗唯一作为的秘密指纹是派生其他本地认证密钥的根源硬件制造时烧录每颗唯一作为的另一秘密指纹是派生所有密封密钥的根源用于数据持久化加密将在下一节详述派生报告密钥硬件由和目标身份派生为定向的指令生成一次性的计算密钥硬件由硬件根密钥派生每颗唯一用于向服务器认证自己可通过此密钥验证平台身份从而安全地供应平台私钥非对称密钥开发者私钥公钥应用开发者用于签名并在时验证平台私钥供应服务用于对进行签名生成根私钥公用于签名其公钥哈希是硬件信任根私钥公钥认证服务用于对发回给服务商的认证报告进行签名签名认证码作为可验证的凭证名称来源生成者使用哪个密钥签名作用与目的不可或缺的理由上的硬件通过指令派生报告密钥它是一种对称签名通过等算法为提供本地可验证的完整性和来源证明解决本地信任在本机上快速安全地证明中的签名应用开发者开发者私钥非对称签名对签名证明代码由该开发者授权连接代码与开发者在时绑定代码与开发者身份上的签名平台私钥非对称签名对签名使其变为可被远程验证的凭证解决远程信任将本地报告转变为国际护照认证报告的签名认证服务私钥非对称签名对最终的认证结果签名发送给远程服务商保证最终裁决的真实性让服务商确信收到的认证结果确实来自通过以上这些角色的精密协作构建了一条从硬件内部的信任根到云端服务的完整可验证的信任链综述贯穿始终的合法性验证链为了让逻辑更清晰我们最后可以把整个流程中的合法性验证串起来看阶段一加载时验证什么代码的完整性与开发者的真实性如何验证硬件使用中的开发者公钥验证对的签名结论确认了软件是开发者原版阶段二本地认证时验证验证什么的报告对于的真实性如何验证使用授予的与定向生成的密钥验证报告的结论确认了报告是本机同伴真实未篡改的意图表达阶段三供应密钥时请求验证什么发起密钥申请的平台的合法性如何验证服务器使用共享的验证的请求能拿到此密钥本身就是因为它通过了硬件烧录哈希的验证结论确认了平台是正版有权申请平台密钥阶段四远程认证时验证验证什么的真实性与平台的安全性如何验证使用公钥体系验证由合法的平台私钥签名并检查平台的版本结论确认了认证报告是来自一个安全正版平台的可信的声明阶段五最终决策时服务商验证报告验证什么认证报告的真实性以及身份是否符合业务策略如何验证服务商验证报告的签名并检查报告中的是否是自己期望与之通信的结论确认了这个是我要找的那个并且为它的身份和环境安全背书身份问题解决后内部的数据如果需要被长期保存到硬盘上又该如何保护呢下一节我们将探讨的持久化数据保护机制持久化数据保护数据密封我们已经解决了运行时和认证时的安全问题但还剩下最后一个关键环节持久化的内存是易失的断电后数据就会消失如果需要将一个重要的秘密如一个解密密钥一个会话状态或一份配置文件保存下来供下次使用该怎么办直接写入由不可信管理的硬盘无异于将秘密公之于众数据密封机制就是提供的用于解决数据安全落盘问题的硬件级方案核心思想与关键要素核心思想允许将数据加密后安全地存储到不可信的外部介质如硬盘并确保只有特定的才能解封这些数据硬件指令这是向申请各种硬件密钥的统一接口信任根源我们在密钥表格中提到的这个与并列的制造时烧录的每颗芯片唯一的硬件密钥是所有密封密钥的信任之根与两种密封策略当调用指令请求一个用于密封的密钥时它必须做出一个关键的策略选择这个密钥到底应该和谁的身份绑定提供了两种策略策略一绑定的指纹含义密封密钥的派生将与当前的值强绑定效果数据被密封后只有拥有完全相同代码和初始数据的即拥有相同才能派生出同一个密钥来解封类比这就像一个只认特定人物指纹的保险箱优点极致的安全它保证了只有原汁原味未经任何修改的才能访问数据缺点毫无灵活性如果开发者修复了一个重新编译的哪怕只改变了一个比特其就会变化导致新版无法读取旧版数据这对于需要迭代升级的应用是致命的策略二绑定开发者的家族徽章含义密封密钥的派生将与当前的值强绑定效果数据被密封后只要是由同一个开发者拥有同一个签名私钥即拥有相同签名的任何都可以派生出同一个密钥来解封类比这就像一个只认特定家族徽章的保险箱家族里的任何成员不同版本的都能打开优点极佳的灵活性开发者可以随意发布新版本的来修复或增加功能只要签名密钥不变新版就能无缝访问和迁移旧版数据这是应用升级的基石缺点安全边界更广其安全性完全依赖于开发者的签名私钥一旦私钥泄露攻击者就可以伪造一个属于该开发者的恶意从而解封所有由该绑定的数据密钥派生细节与降级攻击防御实际上在派生时不仅仅只考虑或为了提供更精细的安全控制它还会混入其他安全属性例如开发者自己定义的安全版本号微码的安全版本号这意味着开发者可以在密封时设定一个策略比如只有相同且不低于的才能解封这可以有效防止降级攻击即防止攻击者用一个存在已知漏洞的旧版来解封新版产生的数据完整生命周期密封与解封不可信存储硬盘阶段一密封指令请求一个绑定到和特定的密封密钥用及相关策略派生出密封密钥返回密封密钥用密封密钥加密敏感数据通过将加密数据写入外部存储时间流逝重启阶段二解封通过读取之前存储的再次发起请求使用完全相同的策略硬件重新派生出同一个密封密钥返回密封密钥使用密钥解密恢复总结数据密封机制通过指令利用内独有的并结合的身份标识或及其他安全属性为数据提供了一种强大的持久化保护方案它巧妙地将数据的访问权限与的完整性作者身份和安全版本绑定在一起确保了即使数据离开了安全的环境其保密性依然能够得到硬件级别的保障至此我们已经完整地剖析了的三大核心安全机制真不容易下一部分我们将从理论走向实践五概念实践在思想上构建一个理论知识是根基但真正的理解升华来自于观察这些理论如何在实践中被编排和应用这个是我特别喜欢的一句话但是因为我的电脑搭建不了一个环境所以这里我通过思想实验实现一个案例通过一个程序的代码来反向印证和串联之前学过的所有硬件行为和安全机制看懂一个程序是如何从代码最终变为一个受硬件保护的可信实体的项目的三国鼎立架构一个典型的项目由三个核心部分组成缺一不可不可信应用角色类似与上面提到的项目经理与外交官本质一个标准的运行在正常环境下的用户态程序职责负责加载初始化销毁是生命周期的管理者作为与外部世界如文件系统网络用户界面沟通的唯一桥梁通过请求执行可信计算为提供服务响应其访问外部资源的需求可信飞地角色保险库与核心算法专家本质一个特殊的将被加密和保护的动态库或职责存放所有需要被保护的敏感代码和数据执行核心的机密计算任务与外界完全隔离只能通过定义的接口进行有限的交互接口定义语言角色法律契约与海关申报单本质一个遵循特定语法的文件职责严格定义了和之间的通信边界明确声明了哪些函数是可调用哪些是可调用这个文件是后续自动生成跨边界通信代码的唯一蓝图神奇的胶水文件与工具文件是理解编程的关键它不仅是定义更是自动生成安全代码的依据示例文件块声明可以调用这些函数进入表示该函数是可信入口点块声明可以调用这些函数离开等属性它们是数据封送的指令告诉编译器如何安全地拷贝数据跨越可信不可信边界工具的魔法当您用编译项目时一个名为的工具会读取这个文件并自动生成一对胶水文件和对而言会生成一个与中函数同名的函数比如但这个函数不是真正的代码而是一个代理函数当调用它时它内部会执行一系列复杂操作将参数安全打包触发指令并将执行权交给内的对应函数对而言会生成一个真正的函数体它负责接收从传来的数据解包参数然后调用您在中亲手编写的逻辑这层自动生成的胶水代码将开发者从复杂的边界数据处理和底层指令调用中解放出来是编程的核心便利性所在其实坦率的说如果真的自己开发应用是很麻烦的核心代码导读理论与实践的交汇现在我们来看代码在阅读时请时刻回想我们之前学习的硬件机制部分的生命周期管理者运行时库为生成的头文件必须实现所有在中声明的函数其他变量理论交汇点的诞生这一行代码触发了整个的硬件加载生命周期指向签过名的文件是否允许调试背后发生了什么创建逐页加载的代码和数据到硬件并行计算硬件用中的公钥验证签名并计算存入错误处理理论交汇点进入这个函数调用实际上触发了指令背后发生了什么保存当前的上下文寄存器等将执行流跳转到内部的指定入口点硬件确保只能访问自己的内存理论交汇点销毁触发指令擦除部分保险库内的核心逻辑为生成的头文件实现所有在中声明的函数此时代码已在受保护的中执行参数已经被安全地从不可信内存拷贝进来理论交汇点退出这个函数调用实际上触发了指令背后发生了什么保存当前的上下文返回到中执行实现的函数从返回后会通过指令恢复的执行最后的魔法与您编写的还不能直接被加载它必须被签名提供的工具会执行这最后一步关键的封装计算工具会模拟硬件的过程对您的内容进行完整性测量计算出最终的值生成签名您需要提供一个私钥会用这个私钥对上一步算出的进行数字签名打包工具将您的公钥上一步生成的签名以及其他元数据如打包成一个结构生成最终文件最后它将原始的和这个捆绑在一起生成最终的可加载文件这个文件就是函数真正读取的对象也是我们所有安全机制的起点超越一个更真实的思想实验想象一个场景两家互不信任的医院想联合研究一种罕见病但又不能将各自的病人隐私数据直接分享给对方解决方案一个中立的软件开发者开发并签名一个数据分析代表了这个算法提供方的可信身份两家医院都通过远程认证验证在云服务器上运行的确实是那个未经篡改的由可信方开发的和都正确两家医院各自与建立端到端的加密信道它们将自己的加密病人数据发送给数据只有在内部才被解密和处理在内部完成联合统计分析并将最终的不含任何个体隐私的统计结果返回给两家医院在这个过程中没有任何一方包括云服务商算法开发者任何一家医院能看到另一方的原始数据但联合计算的目标却达成了这就是在现实世界中发挥其机密计算核心价值的典型模式至此我们完成了从理论到概念实践的完整旅程的体系虽然复杂但其每一个设计都服务于一个明确的安全目标每次我都会以质疑的目光去看每个组件及流程的意义六未来挑战如何尽量预防侧信道攻击没有任何技术是一定绝对安全的放宽时间的长度任何技术在未来都会面临挑战即使是密码学加密应用的皇冠非对称加密也在预防来自量子计算的攻击尽管在防御直接的软件攻击如内存读取代码注入方面做得非常出色但它依然面临着一类更为微妙和困难的威胁侧信道攻击什么是侧信道攻击侧信道攻击不直接攻击加密算法或安全协议本身而是通过观察计算过程中的物理信息或副作用即侧信道来推断敏感信息这些副作用五花八门对于来说最主要的威胁来自于缓存攻击通过精确测量访问某个内存地址的耗时攻击者可以推断出该地址对应的数据是否在缓存中恶意程序可以通过监控与共享的缓存特别是来推断的内存访问模式从而可能泄露加密密钥等信息等都是著名的缓存侧信道攻击页表攻击恶意的控制着页表它虽然不能读取的页面内容但可以通过故意将某个页面标记为不存在来观察何时会访问它当访问该页面时会触发一次页面错误就能捕获到这个事件通过这种方式可以精确地监控的代码执行流和数据访问模式分支预测攻击像这样的攻击利用了现代的分支预测执行单元攻击者可以训练分支预测器诱导在推测执行的路径上访问其内部的敏感数据并通过缓存等侧信道将这些信息泄露出来为何难以完全免疫侧信道攻击的设计理念是将排除在之外但它无法改变一个基本事实必须与不可信的共享底层的物理硬件资源如缓存分支预测器内存控制器等侧信道攻击正是利用了对这些共享资源的访问和观察能力的内存加密和访问控制无法阻止这些元信息的泄露防护策略与未来方向预防侧信道攻击是一个持续演进的系统性的工程需要软件和硬件的协同努力硬件层面改进来自增强隔离在新一代的中已经开始引入更强的硬件隔离机制例如缓存的刷新机制对分支预测器的间接分支限制等以减小信息泄露的带宽更新会定期发布微码更新修复已知的硬件漏洞保持的更新是防御的基础软件层面缓解来自开发者数据无关的编程范式编写代码时尽量避免让程序的内存访问模式或执行时间与敏感数据直接相关例如无论输入是什么都执行相同的分支和内存访问路径这被称为恒定时间编程访问模式混淆在代码中插入一些伪随机的无意义的内存访问指令以淹没真实的内存访问信号让攻击者难以分析这被称为代码混淆或噪声注入使用编译器提供的防护一些先进的或专门的安全编译器如会尝试自动在代码中插入防护指令例如在每次进入或退出时自动刷新分支预测器状态或在循环的末尾插入指令来阻止推测执行越过边界减少攻击面精心设计的接口最小化与不可信世界的交互次数和数据量避免在内部处理过于复杂的逻辑尤其是那些容易产生复杂分支和内存访问模式的逻辑操作系统层面资源划分在云环境中可以采用更严格的资源调度策略例如将运行敏感的物理核心与运行其他不可信任务的核心分离开避免共享缓存总结侧信道攻击是乃至所有现代处理器面临的共同挑战目前没有一劳永逸的银弹防护工作更像是一场持续的军备竞赛我们需要保持对最新攻击方法的关注并在编程实践中始终贯穿减少信息泄露的安全意识结合使用硬件更新防护和数据无关编程等多种策略来共同构建更健壮的机密计算应用世间安得双全法唯有不断前进结语我们从的基本概念和出发深入剖析了其核心硬件组件完整的生命周期关键的硬件指令集并详细拆解了内存安全身份认证持久化存储这三大核心安全机制最后我们还通过一个编程实例展示了如何上手开发并探讨了侧信道攻击这一前沿挑战',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-30 11:56:02',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" itemprop="url">机密计算</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>机密计算</span></a><a class="article-meta__tags" href="/tags/TEE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TEE</span></a><a class="article-meta__tags" href="/tags/Intel-SGX/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Intel SGX</span></a><a class="article-meta__tags" href="/tags/%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>硬件安全</span></a></span></div></div><h1 class="post-title" itemprop="name headline">一起来学Intel SGX</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-30T03:56:02.177Z" title="更新于 2025-07-30 11:56:02">2025-07-30</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="一起来学Intel SGX"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/"><header><a class="post-meta-categories" href="/categories/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" itemprop="url">机密计算</a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url">机密计算</a><a href="/tags/TEE/" tabindex="-1" itemprop="url">TEE</a><a href="/tags/Intel-SGX/" tabindex="-1" itemprop="url">Intel SGX</a><a href="/tags/%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8/" tabindex="-1" itemprop="url">硬件安全</a><h1 id="CrawlerTitle" itemprop="name headline">一起来学Intel SGX</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time><time itemprop="dateCreated datePublished" datetime="2025-07-30T03:56:02.177Z" title="更新于 2025-07-30 11:56:02">2025-07-30</time></header><h1 id="一起来学Intel-SGX"><a href="#一起来学Intel-SGX" class="headerlink" title="一起来学Intel SGX"></a>一起来学Intel SGX</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Intel SGX 还是比较难学透的，因为可供学习的资料确实有限，并且 Intel 并没有开放其源码实现。所以我们仅能通过其官方上发布的一些手册和学术论文来学习。坦率的说，不是很容易学。</p>
+<blockquote>
+<p>Intel SGX Explained：<a target="_blank" rel="noopener" href="https://eprint.iacr.org/2016/086.pdf">https://eprint.iacr.org/2016/086.pdf</a></p>
+<p>Intel® Software Guard Extensions (Intel® SGX) Developer Guide：</p>
+<p><a target="_blank" rel="noopener" href="https://download.01.org/intel-sgx/sgx-linux/2.8/docs/Intel_SGX_Developer_Guide.pdf">https://download.01.org/intel-sgx/sgx-linux/2.8/docs/Intel_SGX_Developer_Guide.pdf</a></p>
+<p>Intel 官方文档搜索：<a target="_blank" rel="noopener" href="https://www.intel.com/content/www/us/en/search.html?toplevelcategory=Developers&keyword=sgx#q=intel%20sgx&first=30&sort=relevancy">https://www.intel.com/content/www/us/en/search.html?toplevelcategory=Developers&amp;keyword=sgx#q=intel%20sgx&amp;first=30&amp;sort=relevancy</a></p>
+</blockquote>
+<p>我写本文的目的其实很简单，就是想让自己可以尽量透彻的理解 SGX的设计与实现。知道它面临哪些问题，然后如何解决的。</p>
+<h2 id="一、SGX基础与核心概念"><a href="#一、SGX基础与核心概念" class="headerlink" title="一、SGX基础与核心概念"></a>一、SGX基础与核心概念</h2><p>Intel SGX (Software Guard Extensions) 是一项强大的硬件安全技术，它允许开发者在充满潜在威胁的环境中（例如，一个被恶意软件感染的操作系统）创建一块被称为”Enclave”的安全区域，以保护敏感的代码和数据。</p>
+<h3 id="1-1-SGX的目标：机密计算"><a href="#1-1-SGX的目标：机密计算" class="headerlink" title="1.1 SGX的目标：机密计算"></a>1.1 SGX的目标：机密计算</h3><p>想象一下，你有一段非常敏感的程序（例如，处理用户密码的算法）或一份机密数据（例如，公司所运营的app里的个人信息数据）。在传统的计算模式下，这段程序和数据在运行时会完全暴露给操作系统（OS）和系统管理员。如果 OS 被黑客攻破，那么机密将荡然无存。</p>
+<p><strong>SGX 的核心目标就是解决这个问题。</strong> 它致力于实现”机密计算”（Confidential Computing），即：<strong>保护正在使用中的数据</strong>。即使在操作系统、虚拟机监视器（VMM&#x2F;Hypervisor）甚至物理内存探测等最高权限的攻击下，SGX 也能确保 Enclave 内部的代码和数据不被窃取或篡改。</p>
+<h3 id="1-2-TCB（可信计算基）"><a href="#1-2-TCB（可信计算基）" class="headerlink" title="1.2 TCB（可信计算基）"></a>1.2 TCB（可信计算基）</h3><p>在看一些机密计算或者隐私计算的文章时候，可能会经常看到这个词。其实 <strong>TCB（Trusted Computing Base，可信计算基）</strong>，看字母以为是一个具体的硬件，其实是一个安全概念。</p>
+<p><strong>TCB 的定义是</strong>：一个系统中，所有必须依赖其来保障安全策略的硬件、固件和软件组件的集合。简单来说，TCB 就是我们选择”无条件信任”的所有部分（也叫信任的边界）。一个系统的 TCB 越小，其被攻击的面就越小，系统就越安全。</p>
+<p>在传统的计算机系统中，TCB 非常庞大，它包括：</p>
+<ul>
+<li>硬件</li>
+<li>固件（BIOS&#x2F;UEFI）</li>
+<li>虚拟机监视器（VMM&#x2F;Hypervisor）</li>
+<li>操作系统（OS）</li>
+<li>驱动程序等</li>
+</ul>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  graph TD
+    %% 传统计算环境的TCB (攻击面大)
+    Traditional[传统计算环境TCB] --&gt; Hardware[硬件]
+    Traditional --&gt; Firmware[固件&#x2F;BIOS]
+    Traditional --&gt; VMM[虚拟机监控程序]
+    Traditional --&gt; OS[操作系统]
+    Traditional --&gt; Driver[驱动程序]
+    Traditional --&gt; App[应用程序]
+    
+    %% SGX环境 (TCB极小)
+    SGX[SGX可信计算基] --&gt; CPU[CPU+SGX微码]
+    
+    %% 不可信组件
+    Untrusted[不可信区域] --&gt; SGX_Firmware[固件&#x2F;BIOS]
+    Untrusted --&gt; SGX_VMM[VMM]
+    Untrusted --&gt; SGX_OS[OS]
+    Untrusted --&gt; SGX_Driver[驱动]
+    
+    %% 安全边界
+    CPU -.-&gt;|安全边界| Untrusted
+    
+    %% 样式类定义（兼容性写法）
+    classDef trusted fill:#90ee90,stroke:#2e8b57;
+    classDef untrusted fill:#ffcccb,stroke:#333;
+    class CPU trusted;
+    class Hardware,Firmware,VMM,OS,Driver,App untrusted;
+    class SGX_Firmware,SGX_VMM,SGX_OS,SGX_Driver untrusted;
+  </pre></div>
+
+<p>SGX 的革命性在于，它极大地减小了 TCB。</p>
+<p>在使用 SGX 的模型中，TCB 主要只包含：</p>
+<ol>
+<li><strong>CPU 硬件</strong>：特指支持 SGX 的 CPU 芯片本身。</li>
+<li><strong>SGX 微码（Microcode）</strong>：CPU 内部实现 SGX 功能的固件。</li>
+</ol>
+<p>操作系统、Hypervisor、BIOS 等所有其他软件都被排除在 TCB 之外，被视为”不可信”的。这意味着，我们不再需要信任庞大而复杂的操作系统，只需要信任 Intel 设计和制造的 CPU 即可。这就是 SGX 安全模型的基石。</p>
+<blockquote>
+<p>不过一旦信任基出现问题，可能整个体系框架都会土崩瓦解。这个其实也是 HyperEnclave所担忧的，他们不希望由CPU厂商来决定信任基。</p>
+</blockquote>
+<h3 id="1-3-Enclave的身份三要素：MRENCLAVE-SIGSTRUCT-MRSIGNER"><a href="#1-3-Enclave的身份三要素：MRENCLAVE-SIGSTRUCT-MRSIGNER" class="headerlink" title="1.3 Enclave的身份三要素：MRENCLAVE, SIGSTRUCT, MRSIGNER"></a>1.3 Enclave的身份三要素：MRENCLAVE, SIGSTRUCT, MRSIGNER</h3><p>要理解SGX如何信任一个Enclave，我们必须解剖它的三大身份要素。这三者环环相扣，共同构成了Enclave不可伪造的身份证明。</p>
+<h4 id="a-MRENCLAVE-Enclave的”DNA指纹”"><a href="#a-MRENCLAVE-Enclave的”DNA指纹”" class="headerlink" title="a) MRENCLAVE - Enclave的”DNA指纹”"></a>a) MRENCLAVE - Enclave的”DNA指纹”</h4><p><strong>定义</strong>: <code>MRENCLAVE</code> 是一个 256 位的哈希值，是Enclave代码和初始数据内容的唯一标识。</p>
+<p><strong>计算过程</strong>: 这是在Enclave加载过程中，由CPU硬件通过<code>EEXTEND</code>指令动态计算的。每当一页代码或数据被加载到受保护内存（EPC）中，CPU硬件都会执行一次密码学”测量”，将其内容合并到<code>MRENCLAVE</code>的累积哈希计算中。</p>
+<p><strong>安全意义</strong>:</p>
+<ul>
+<li><strong>完整性保证</strong>: 任何对Enclave内容的微小修改（哪怕一个比特）都会导致最终的<code>MRENCLAVE</code>值发生天翻地覆的变化。这保证了运行中的Enclave与其开发者编译时的原始版本完全一致。</li>
+</ul>
+<hr>
+<h4 id="b-SIGSTRUCT-Enclave的”数字封条”与身份凭证"><a href="#b-SIGSTRUCT-Enclave的”数字封条”与身份凭证" class="headerlink" title="b) SIGSTRUCT - Enclave的”数字封条”与身份凭证"></a>b) SIGSTRUCT - Enclave的”数字封条”与身份凭证</h4><p>一个Enclave文件（<code>.signed.so</code>）就像一个带防伪标识的机密文件袋。它包含两部分：</p>
+<ol>
+<li><strong>主体内容</strong>: 即Enclave的二进制代码和数据。</li>
+<li><strong>数字封条 (<code>SIGSTRUCT</code>)</strong>: 这是一个独立的数据结构，包含了验证Enclave身份所需的所有元数据。其核心内容是：<ul>
+<li><strong>开发者的公钥</strong>: 用来签名Enclave的那个私钥所对应的公钥。</li>
+<li><strong>对MRENCLAVE的签名</strong>: 开发者在编译后，会用自己的<strong>私钥</strong>对预期的<code>MRENCLAVE</code>值进行签名。这个<strong>签名本身</strong>被保存在SIGSTRUCT中。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4 id="c-EINIT与MRSIGNER-“身份验证”与”身份授予”"><a href="#c-EINIT与MRSIGNER-“身份验证”与”身份授予”" class="headerlink" title="c) EINIT与MRSIGNER - “身份验证”与”身份授予”"></a>c) EINIT与MRSIGNER - “身份验证”与”身份授予”</h4><p><code>EINIT</code>指令是Enclave生命周期中决定性的”加冕典礼”，由CPU硬件扮演一个无法被软件干预的”终极边检官”。当<code>EINIT</code>指令被调用时，硬件会执行两个核心动作：</p>
+<p><strong>动作一：验证签名 (验证”数字封条”的真实性)</strong></p>
+<ol>
+<li><strong>提取凭证</strong>: CPU硬件从<code>SIGSTRUCT</code>中提取出<strong>开发者的公钥</strong>和<strong>签名</strong>。</li>
+<li><strong>动态计算</strong>: CPU硬件根据已加载到内存中的代码，独立计算出一个<code>actual_mrenclave</code>。</li>
+<li><strong>密码学验证</strong>: CPU使用<strong>开发者的公钥</strong>来验证<strong>签名</strong>对于它刚刚算出的<code>actual_mrenclave</code>是否有效。</li>
+</ol>
+<p>如果验证失败，意味着Enclave代码被篡改或签名是伪造的，<code>EINIT</code>将失败，Enclave被拒绝启动。</p>
+<p><strong>动作二：授予身份 (<code>MRSIGNER</code>)</strong></p>
+<p><strong>只有在签名验证成功后</strong>，CPU硬件才会执行这一步：</p>
+<ol>
+<li><strong>计算哈希</strong>: CPU硬件提取出刚刚用于验证的那个<strong>开发者公钥</strong>，并计算其SHA-256哈希值。</li>
+<li><strong>授予身份</strong>: 这个哈希结果，就是<code>MRSIGNER</code>。CPU硬件会将其权威地记录在Enclave的控制结构（SECS）中。</li>
+</ol>
+<p>**<code>MRSIGNER</code>代表了这个Enclave的”签发机构”或”血统”**。它证明了这个Enclave确实是由该公钥的持有者所担保的。</p>
+<hr>
+<h4 id="d-深度解析：为何需要MRSIGNER？"><a href="#d-深度解析：为何需要MRSIGNER？" class="headerlink" title="d) 深度解析：为何需要MRSIGNER？"></a>d) 深度解析：为何需要MRSIGNER？</h4><p>一个精准的问题是：既然CPU已经用完整的公钥完成了验证工作，为什么还要多此一举，计算并保存这个公钥的哈希值（<code>MRSIGNER</code>）呢？</p>
+<p>答案是：<strong>因为开发者公钥和<code>MRSIGNER</code>，虽然源自一体，但用途完全不同。</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><strong>开发者公钥 (Public Key)</strong></th>
+<th align="left"><strong>MRSIGNER</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>角色</strong></td>
+<td align="left"><strong>验证工具</strong> 🛠️</td>
+<td align="left"><strong>身份标签</strong> 🏷️</td>
+</tr>
+<tr>
+<td align="left"><strong>本质</strong></td>
+<td align="left">一个庞大、复杂的非对称密钥结构 (e.g., 384字节)</td>
+<td align="left">一个短小、固定的哈希值 (32字节)</td>
+</tr>
+<tr>
+<td align="left"><strong>生命周期</strong></td>
+<td align="left">仅在<code>EINIT</code>指令执行的瞬间，被硬件用来验证签名。</td>
+<td align="left">在<code>EINIT</code>时被创建，并伴随Enclave的整个生命周期。</td>
+</tr>
+<tr>
+<td align="left"><strong>核心用途</strong></td>
+<td align="left">1. 验证Enclave签名的真实性。</td>
+<td align="left">1. 作为开发者身份的唯一标识符。<br>2. 用于远程认证策略检查。<br>3. 实现数据密封和版本升级。</td>
+</tr>
+</tbody></table>
+<p><strong><code>MRSIGNER</code>作为”身份标签”的核心价值体现在：</strong></p>
+<ol>
+<li><strong>便于管理的身份标识符</strong>: 在远程认证中，服务器只需存储一个简短的<code>MRSIGNER</code>哈希列表即可进行策略检查，远比管理庞大的公钥高效。</li>
+<li><strong>实现安全的数据版本升级（数据密封 Sealing）</strong>:<ul>
+<li>SGX允许Enclave向CPU申请一个与自身身份绑定的加密密钥(<code>EGETKEY</code>)，用于将数据”密封”到硬盘上。</li>
+<li><strong>密封到<code>MRENCLAVE</code></strong>: 只有代码完全相同的Enclave才能解密。这意味着Enclave版本更新后，无法读取旧数据。</li>
+<li><strong>密封到<code>MRSIGNER</code></strong>: 只要是由<strong>同一个开发者</strong>（拥有同一个签名私钥）签名的Enclave，无论版本如何，都能获取到相同的密钥。这就完美地解决了版本升级时的数据迁移问题。</li>
+</ul>
+</li>
+<li><strong>简化硬件设计</strong>: 对CPU硬件而言，在Enclave启动后，用一个固定长度的哈希值来代表开发者身份，远比处理一个复杂公钥要简单高效。</li>
+</ol>
+<hr>
+<h4 id="e-我能伪造MRSIGNER吗？"><a href="#e-我能伪造MRSIGNER吗？" class="headerlink" title="e) 我能伪造MRSIGNER吗？"></a>e) 我能伪造MRSIGNER吗？</h4><p>答案是：<strong>绝对不能。</strong></p>
+<p>这个机制的精妙之处在于一个无法破解的密码学闭环。让我们用一个比喻来解释：</p>
+<ul>
+<li><strong>MRENCLAVE</strong>: 你的<strong>证件照片</strong>。</li>
+<li><strong>MRSIGNER</strong>: 证件上的<strong>签发机关</strong>，比如”中华人民共和国外交部”。</li>
+<li><strong>开发者的公钥</strong>: 签发机关的<strong>官方公章模板</strong>。</li>
+<li><strong>签名</strong>: 盖在照片上的那个红色的、防伪的<strong>官方钢印</strong>。</li>
+<li><strong>CPU硬件 (<code>EINIT</code>)</strong>: 一丝不苟的<strong>海关边检官</strong>。</li>
+</ul>
+<p>一个攻击者可以尝试如下伪造：</p>
+<ol>
+<li><strong>你的目标</strong>: 你创建了一个恶意Enclave（一张新的<strong>证件照片</strong>），想让它的签发机关变成”中华人民共和国外交部”（得到Intel的<code>MRSIGNER</code>）。</li>
+<li><strong>你的行动</strong>: 你必须向边检官（CPU）出示外交部的<strong>公章模板</strong>（Intel的公钥），边检官才会认可这个签发机关。</li>
+<li><strong>致命悖论</strong>: 边检官在认可签发机关后，会立即使用这个公章模板去核对盖在你照片上的那个<strong>钢印</strong>（用公钥验证签名）。但你并没有外交部的官方钢印（Intel的私钥），你只有一个萝卜刻的假章（用你自己的私钥生成的签名）。</li>
+<li><strong>最终结果</strong>: 边检官发现钢印不匹配，你的证件被没收，你被拒绝入境（Enclave启动失败）。</li>
+</ol>
+<p><strong>结论</strong>: 你无法在冒用他人公钥的同时，还能提供一个能被该公钥验证的、对自己代码的有效签名。这个密码学闭环，保证了<code>MRSIGNER</code>的不可伪造性。</p>
+<h2 id="二、核心硬件与组件解析"><a href="#二、核心硬件与组件解析" class="headerlink" title="二、核心硬件与组件解析"></a>二、核心硬件与组件解析</h2><p>为了实现将 TCB 缩小到仅剩 CPU 的目标，Intel 在其处理器中集成了一系列专门的硬件单元和机制。理解这些组件是解开 SGX 工作原理的钥匙。</p>
+<h3 id="2-1-PRM-EPC"><a href="#2-1-PRM-EPC" class="headerlink" title="2.1 PRM &amp; EPC"></a>2.1 PRM &amp; EPC</h3><p><strong>PRM</strong> (Processor Reserved Memory) ：<strong>处理器预留内存</strong>。首先，CPU 会要求 BIOS 在物理内存中划出一块专门的区域，这块区域被称为 PRM。这块内存对于 CPU 来说是”可见”的，但是对于外部设备（如网卡、显卡）通过 DMA（直接内存访问）是不可见的。PRM 是 SGX 安全内存的”土壤”。</p>
+<blockquote>
+<p>这个物理内存还是DRAM，就是内存条。我一开始以为是 CPU内单独的一块硬件。</p>
+</blockquote>
+<p><strong>EPC</strong> (Enclave Page Cache)：<strong>Enclave 页面缓存</strong>。PRM 这块”土壤”里真正生长作物的区域就是 EPC。EPC 由一系列 4KB 大小的物理内存页组成，它是 <strong>Enclave 代码和数据实际存放的地方</strong>。可以把它想象成一个保险库，Enclave 的所有资产都存放在这里。EPC 的所有页面都受到硬件级别的加密和完整性保护。</p>
+<h3 id="2-2-MEE"><a href="#2-2-MEE" class="headerlink" title="2.2 MEE"></a>2.2 MEE</h3><p><strong>MEE</strong> (Memory Encryption Engine)：<strong>内存加密引擎</strong>，这是 SGX 的”守护神”。当 CPU 需要将数据从其内部缓存写入到 EPC 时，MEE 会自动对其进行<strong>加密</strong>；当 CPU 需要从 EPC 读取数据到缓存时，MEE 又会自动进行<strong>解密</strong>。</p>
+<p>这个过程对程序是完全透明的。它的核心作用是防御<strong>物理攻击</strong>。即使攻击者把内存条拔下来，或者使用特殊设备探测内存总线，他们能看到的也只是一堆毫无意义的加密数据。MEE 确保了数据一旦离开 CPU 的核心，就是经过加密的。</p>
+<h3 id="2-3-SECS"><a href="#2-3-SECS" class="headerlink" title="2.3 SECS"></a>2.3 SECS</h3><p><strong>SECS</strong> (SGX Enclave Control Structure)：<strong>SGX Enclave 控制结构</strong>。如果说 EPC 是保险库，那么 SECS 就是这个保险库的<strong>总台账和控制器</strong>。每个 Enclave 在 EPC 中都有一个唯一的、与之对应的 SECS 结构。</p>
+<p><strong>作用</strong>：它是一个特殊的、受硬件严格保护的数据结构，记录了该 Enclave 的所有元数据和状态信息，例如：</p>
+<ul>
+<li>Enclave 的大小。</li>
+<li>Enclave 的安全属性（如是否允许被调试）。</li>
+<li>Enclave 的”身份标识”（我们稍后会讲到的 MRENCLAVE 和 MRSIGNER）。</li>
+<li>Enclave 的生命周期状态（例如，正在创建、已初始化、正在运行等）。</li>
+<li><strong>SECS 是 Enclave 管理的枢纽，任何对 Enclave 的操作（如添加内存、初始化）都必须先通过 SECS 的检查和记录。</strong></li>
+</ul>
+<h3 id="2-4-EPCM"><a href="#2-4-EPCM" class="headerlink" title="2.4 EPCM"></a>2.4 EPCM</h3><p>EPCM (Enclave Page Cache Map)：Enclave 页面缓存地图。如果 EPC 是保险库里的一排排保险柜（内存页），那么 EPCM 就是<strong>记录每个保险柜归属和权限的地图</strong>。</p>
+<p><strong>作用</strong>：EPCM 是一个受硬件保护的、存在于 CPU 内部的数据结构。它为 EPC 中的每一个 4KB 页面都维护一个条目，详细记录了：</p>
+<ul>
+<li><strong>这个页面属于哪个 Enclave</strong>（通过指向对应的 SECS）。</li>
+<li><strong>这个页面的类型</strong>（是 SECS 本身，还是存放代码&#x2F;数据的普通页，或是用于线程管理的 TCS 页等）。</li>
+<li><strong>这个页面的访问权限</strong>（读、写、执行权限）。</li>
+<li><strong>这个页面是否已经被验证和加载</strong>。</li>
+</ul>
+<p><strong>核心安全机制</strong>：任何对 EPC 内存的访问，CPU 都会<strong>强制查询 EPCM</strong>。如果一个程序试图访问一个它无权访问的 EPC 页面（例如，OS 试图读取 Enclave 的数据页，或者 Enclave A 试图访问 Enclave B 的页面），CPU 会在硬件层面直接拒绝该访问并触发异常。<strong>EPCM 是实现 Enclave 之间以及 Enclave 与外部世界隔离的根本保证。</strong></p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  graph TD
+    %% CPU内部组件
+    MEE[MEE 内存加密引擎]
+    EPCM[EPCM 地图]
+    CPU_Cache[CPU 缓存]
+    
+    %% 物理内存结构
+    PRM[PRM 处理器预留内存]
+    EPC[EPC 安全页面缓存]
+    
+    %% Enclave内存组织
+    SECS_A[SECS for Enclave A]
+    Page_A1[Page 1 for A]
+    Page_A2[Page 2 for A]
+    
+    SECS_B[SECS for Enclave B] 
+    Page_B1[Page 1 for B]
+    
+    %% 连接关系
+    CPU_Cache &lt;--&gt;|明文数据| MEE
+    MEE &lt;--&gt;|密文数据| EPC
+    
+    EPCM --&gt;|权限校验| EPC
+    SECS_A --&gt; Page_A1
+    SECS_A --&gt; Page_A2
+    SECS_B --&gt; Page_B1
+    
+    %% 分组说明（兼容性写法）
+    classDef cpu fill:#87ceeb,stroke:#333;
+    classDef enclave fill:#90ee90,stroke:#2e8b57;
+    class MEE,EPCM,CPU_Cache cpu;
+    class SECS_A,SECS_B,Page_A1,Page_A2,Page_B1 enclave;
+    
+    %% 虚拟分组（通过注释实现）
+    %% CPU内部::: 
+    %% MEE&#x2F;EPCM&#x2F;CPU_Cache属于CPU
+    %% 
+    %% PRM区域:::
+    %% EPC属于PRM
+  </pre></div>
+
+
+
+<h2 id="三、SGX工作原理与内部流程"><a href="#三、SGX工作原理与内部流程" class="headerlink" title="三、SGX工作原理与内部流程"></a>三、SGX工作原理与内部流程</h2><p>了解了静态的硬件组件后，我们现在来探讨 SGX 的动态行为。这部分将聚焦于一个 Enclave 是如何被创建、执行、并最终被销毁的，以及这个过程中涉及到的关键指令和安全机制。</p>
+<h3 id="3-1-Enclave-的生命周期管理"><a href="#3-1-Enclave-的生命周期管理" class="headerlink" title="3.1 Enclave 的生命周期管理"></a>3.1 Enclave 的生命周期管理</h3><p>一个 Enclave 的生命周期由一系列定义明确的状态和转换构成，这些都由 SGX 硬件指令严格控制。不可信的操作系统（如 Windows 或 Linux）扮演着资源管理员的角色，负责分配内存，但它无法干预 Enclave 的内部状态转换，只能”听从”硬件的指令来执行操作。以下是 Enclave 生命周期最核心的几个阶段：</p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  graph TD
+    subgraph &quot;不可信区域 (由OS&#x2F;App操作)&quot;
+        A[开始] --&gt; B(1. 创建 Enclave&lt;br&gt;EGETKEY &#x2F; ECREATE);
+        B --&gt; C(2. 加载代码与数据&lt;br&gt;EADD &#x2F; EEXTEND);
+        C --&gt; D(3. 初始化 Enclave&lt;br&gt;EINIT);
+    end
+
+    subgraph &quot;可信区域 (Enclave内部执行)&quot;
+        D --&gt; E{Enclave 是否在运行?};
+        E -- 是 --&gt; F(4. 进入&#x2F;恢复执行&lt;br&gt;EENTER &#x2F; ERESUME);
+        F --&gt; G{发生中断&#x2F;调用外部函数?};
+        G -- 是 --&gt; H(5. 退出 Enclave&lt;br&gt;EEXIT);
+        H --&gt; E;
+    end
+    
+    E -- 否 --&gt; I(6. 销毁 Enclave&lt;br&gt;EREMOVE);
+    I --&gt; J[结束];
+
+    style D fill:#90ee90
+    style F fill:#90ee90
+  </pre></div>
+
+<h4 id="阶段-1-创建-Creation-ECREATE"><a href="#阶段-1-创建-Creation-ECREATE" class="headerlink" title="阶段 1: 创建 (Creation) - ECREATE"></a>阶段 1: 创建 (Creation) - <code>ECREATE</code></h4><ol>
+<li><strong>发起者</strong>：用户的应用程序（App）通过 SGX 驱动向 OS 发出请求。</li>
+<li><strong>OS 操作</strong>：OS 在物理内存中分配一块 EPC 页面。</li>
+<li><strong>CPU 指令</strong>：CPU 执行 <code>ECREATE</code> 指令。</li>
+<li><strong>硬件行为</strong>：<ul>
+<li>CPU 将这块 EPC 页面初始化为该 Enclave 的 <strong>SECS（SGX Enclave 控制结构）</strong>。</li>
+<li>SECS 中会记录一些基础信息，比如 Enclave 的安全属性（由开发者定义）、基地址和大小范围等。</li>
+<li>此时，Enclave 处于”创建中”状态，它只是一个空的框架，里面没有任何代码和数据。</li>
+<li><code>ECREATE</code>还会生成一个用于后续验证的 <code>ECREATE</code> 密钥。</li>
+</ul>
+</li>
+</ol>
+<h4 id="阶段-2-加载代码与数据-Content-Loading-EADD-EEXTEND"><a href="#阶段-2-加载代码与数据-Content-Loading-EADD-EEXTEND" class="headerlink" title="阶段 2: 加载代码与数据 (Content Loading) - EADD &amp; EEXTEND"></a>阶段 2: 加载代码与数据 (Content Loading) - <code>EADD</code> &amp; <code>EEXTEND</code></h4><ol>
+<li><p><strong>发起者</strong>：应用程序。</p>
+</li>
+<li><p><strong>OS 操作</strong>：根据应用程序的请求，继续分配 EPC 页面用于存放代码和数据。</p>
+</li>
+<li><p><strong>CPU 指令</strong>：</p>
+<ul>
+<li><code>EADD</code>：由 CPU 执行，将一个普通的内存页面（包含开发者的代码或数据）的内容<strong>拷贝</strong>到新分配的 EPC 页面中，并根据 SECS 中设定的目标地址，更新页表，建立映射关系。同时，EPCM 会记录下这个页面的归属和权限（如代码页设为读&#x2F;执行，数据页设为读&#x2F;写）。</li>
+<li><code>EEXTEND</code>：这是<strong>保障加载过程安全性的核心指令</strong>。每当一个页面被 <code>EADD</code> 添加进来后，CPU 就会执行 <code>EEXTEND</code> 指令，将这个页面的内容（256字节为一块）送入一个专门的 SHA-256 密码学累加器中进行”<strong>测量</strong>“(Measure)。</li>
+</ul>
+</li>
+<li><p><strong>硬件行为</strong>：</p>
+<ul>
+<li><p><code>EEXTEND</code> 会不断更新 SECS 中一个被称为 <code>MRENCLAVE</code> 的特殊字段。这个字段是整个 Enclave 所有代码和数据的完整性度量值</p>
+<ul>
+<li><p>计算刚刚加载进来的那一页内存的SHA-256哈希值。</p>
+</li>
+<li><p>将这个哈希值，与一个特殊的、保存在SECS中的度量寄存器（MRENCLAVE寄存器）的当前值，合并起来再算一次哈希。</p>
+</li>
+<li><p>新MRENCLAVE &#x3D; SHA256(旧MRENCLAVE + 刚刚加载页的哈希)</p>
+</li>
+<li><p>这个过程会一直持续，直到所有代码和数据页都被加载完毕。最终，MRENCLAVE寄存器里的值，就成了整个Enclave代码和数据的唯一”DNA指纹”。任何一页哪怕一个比特的改动，都会导致最终的MRENCLAVE完全不同。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>关键点</strong>：这个测量过程是原子性的，由硬件保证。任何对代码或数据的篡改（哪怕只修改了一个比特），最终生成的 <code>MRENCLAVE</code> 值都会截然不同。这回答了”<strong>如何保证加载过程不被篡改</strong>“的核心问题。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="阶段-3-初始化-Initialization-EINIT"><a href="#阶段-3-初始化-Initialization-EINIT" class="headerlink" title="阶段 3: 初始化 (Initialization) - EINIT"></a>阶段 3: 初始化 (Initialization) - <code>EINIT</code></h4><p><code>EINIT</code> 指令是 Enclave 生命周期的”加冕典礼”，是它从一个”半成品”变为”可信实体”的决定性一步。可以把 <code>EINIT</code> 想象成一个无法被软件干预的、由CPU硬件扮演的”终极海关边检官”。</p>
+<ol>
+<li><p><strong>发起者</strong>：应用程序请求执行 <code>EINIT</code>，并向CPU提供从Enclave文件中读出的<code>SIGSTRUCT</code>（”数字封条”）。</p>
+</li>
+<li><p><strong>CPU硬件行为</strong>：CPU硬件会执行以下两个核心动作，将Enclave的实际内容 (<code>MRENCLAVE</code>) 与其声称的作者 (<code>MRSIGNER</code>) 牢牢地、不可伪造地绑定在一起。</p>
+<ul>
+<li><p><strong>动作一：验证签名 (验证”数字封条”的真实性)</strong></p>
+<ol>
+<li><strong>提取凭证</strong>: CPU硬件从<code>SIGSTRUCT</code>中提取出<strong>开发者的公钥</strong>和<strong>签名</strong>。</li>
+<li><strong>动态计算</strong>: CPU硬件根据已加载到内存中的代码，独立计算出一个<code>actual_mrenclave</code>。</li>
+<li><strong>密码学验证</strong>: 这是最关键的一环！CPU使用<strong>开发者的公钥</strong>来验证<strong>签名</strong>对于它刚刚算出的<code>actual_mrenclave</code>是否有效。</li>
+</ol>
+</li>
+<li><p><strong>动作二：授予身份 (<code>MRSIGNER</code>)</strong></p>
+<ul>
+<li><strong>只有在签名验证成功后</strong>，CPU硬件才会执行这一步。</li>
+<li>CPU硬件提取出刚刚用于验证的那个<strong>开发者公钥</strong>，并计算其SHA-256哈希值，这个结果就是<code>MRSIGNER</code>。</li>
+<li>CPU硬件将这个<code>MRSIGNER</code>权威地记录在Enclave的控制结构（SECS）中。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>最终裁决</strong>:</p>
+<ul>
+<li><strong>如果签名验证成功</strong>:<ul>
+<li><code>EINIT</code>成功，Enclave正式”诞生”，其生命周期状态变为”已初始化”。</li>
+<li><strong>从此以后，Enclave 的内容将不可再更改</strong>，<code>EADD</code> 和 <code>EEXTEND</code> 指令将对此 Enclave失效。这固化了 Enclave 的身份。</li>
+<li>这个匹配成功同时证明了：<ul>
+<li><strong>完整性 (Integrity)</strong>: Enclave从被开发者签名后，到被加载进内存，其代码和数据一个比特都没有被篡改过。</li>
+<li><strong>真实性 (Authenticity)</strong>: 这个Enclave确实是由<code>MRSIGNER</code>所代表的开发者签名的。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>如果签名验证失败</strong>:<ul>
+<li><code>EINIT</code>失败，Enclave被销毁，绝对无法运行。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p><strong>关于<code>EINITTOKEN</code></strong>: 细心的读者可能会在官方文档中看到<code>EINITTOKEN</code>。这是一个由特殊的”许可Enclave”生成的令牌，用于确保加载Enclave的平台软件栈（如SGX驱动）是合法的。<code>EINIT</code>指令同时也会验证这个令牌。不过，从理解Enclave身份验证的核心逻辑来说，<code>SIGSTRUCT</code>的验证是根本，它保证了Enclave内容本身的可信。</p>
+</blockquote>
+<h4 id="阶段-4-5-进入与退出-Enter-Exit-EENTER-ERESUME-EEXIT"><a href="#阶段-4-5-进入与退出-Enter-Exit-EENTER-ERESUME-EEXIT" class="headerlink" title="阶段 4 &amp; 5: 进入与退出 (Enter &amp; Exit) - EENTER, ERESUME, EEXIT"></a>阶段 4 &amp; 5: 进入与退出 (Enter &amp; Exit) - <code>EENTER</code>, <code>ERESUME</code>, <code>EEXIT</code></h4><ul>
+<li>**<code>EENTER</code>**：当应用程序需要调用 Enclave 内部的函数时，CPU 执行此指令。CPU 会保存当前的上下文（寄存器状态等），然后跳转到 Enclave 指定的入口点开始执行受保护的代码。</li>
+<li>**<code>EEXIT</code>**：当 Enclave 需要调用外部函数（OCALL）或处理硬件中断（如时钟中断）时，CPU 执行此指令。它会保存 Enclave 的内部状态，然后返回到不可信的应用程序或 OS 中。</li>
+<li>**<code>ERESUME</code>**：当外部调用或中断处理完成后，CPU 执行此指令，恢复 Enclave 的上下文并从上次退出的地方继续执行。</li>
+</ul>
+<p>这个进入&#x2F;退出的循环是 Enclave 发挥作用的主要方式。</p>
+<h4 id="阶段-6-销毁-Deletion-EREMOVE"><a href="#阶段-6-销毁-Deletion-EREMOVE" class="headerlink" title="阶段 6: 销毁 (Deletion) - EREMOVE"></a>阶段 6: 销毁 (Deletion) - <code>EREMOVE</code></h4><ol>
+<li><strong>发起者</strong>：应用程序或 OS。</li>
+<li><strong>CPU 指令</strong>：CPU 执行 <code>EREMOVE</code> 指令。</li>
+<li><strong>硬件行为</strong>：<ul>
+<li>CPU 会安全地擦除指定的 SECS 页面。</li>
+<li>一旦 SECS 被销毁，与之关联的所有 EPC 页面（通过 EPCM 的记录）都将变为无效。</li>
+<li>OS 随后可以回收这些 EPC 页面，用于其他目的。Enclave 的生命周期至此结束。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><em>理解了 Enclave 的生命周期后，我们在下一节深入探讨驱动这些状态转换的核心——SGX 硬件指令集，并揭示其内部的执行流程。</em></p>
+<h3 id="3-2-SGX-硬件指令集与内部执行流程"><a href="#3-2-SGX-硬件指令集与内部执行流程" class="headerlink" title="3.2 SGX 硬件指令集与内部执行流程"></a>3.2 SGX 硬件指令集与内部执行流程</h3><p>SGX 的所有操作都由一组全新的 CPU 指令驱动。这些指令是 CPU 硬件原生支持的，它们的执行过程受到严格的硬件检查，从而保证了操作的原子性和安全性。不可信的软件（如 OS）可以”请求”执行这些指令，但无法干预其内部逻辑。</p>
+<p>以下是一些最重要的 SGX 指令及其作用：</p>
+<table>
+<thead>
+<tr>
+<th align="left">指令类别</th>
+<th align="left">关键指令</th>
+<th align="left">主要作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Enclave 构建</strong></td>
+<td align="left"><code>ECREATE</code></td>
+<td align="left">创建一个空的 Enclave，初始化其 SECS。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EADD</code></td>
+<td align="left">将代码&#x2F;数据页面加载到 EPC 中。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EEXTEND</code></td>
+<td align="left">“测量”加载的页面，更新 <code>MRENCLAVE</code> 摘要。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EINIT</code></td>
+<td align="left">完成 Enclave 初始化，使其准备好被执行。</td>
+</tr>
+<tr>
+<td align="left"><strong>Enclave 执行</strong></td>
+<td align="left"><code>EENTER</code></td>
+<td align="left">首次进入 Enclave，开始执行代码。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>ERESUME</code></td>
+<td align="left">从中断或外部调用后，恢复 Enclave 的执行。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EEXIT</code></td>
+<td align="left">主动退出 Enclave，返回到不可信的应用代码。</td>
+</tr>
+<tr>
+<td align="left"><strong>Enclave 管理</strong></td>
+<td align="left"><code>EREMOVE</code></td>
+<td align="left">销毁一个 Enclave，释放其所有资源。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EDBGRD</code>&#x2F;<code>EDBGWR</code></td>
+<td align="left">（在调试模式下）读&#x2F;写 Enclave 内存。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EGETKEY</code></td>
+<td align="left">获取用于生成认证报告或密封数据的 SGX 密钥。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EREPORT</code></td>
+<td align="left">生成一份关于当前 Enclave 的报告（用于本地认证）。</td>
+</tr>
+<tr>
+<td align="left"><strong>内存管理</strong></td>
+<td align="left"><code>EAUG</code></td>
+<td align="left">为已存在的 Enclave 增加 EPC 页面。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>EMODPE</code></td>
+<td align="left">修改已加载页面的权限。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><code>ETRACK</code></td>
+<td align="left">停止对 Enclave 的追踪（用于电源管理）。</td>
+</tr>
+</tbody></table>
+<h4 id="指令内部执行流程示例-EADD"><a href="#指令内部执行流程示例-EADD" class="headerlink" title="指令内部执行流程示例 (EADD)"></a>指令内部执行流程示例 (<code>EADD</code>)</h4><p>让我们以 <code>EADD</code> 指令为例，看看其内部的执行流程有多么严谨：</p>
+<ol>
+<li><strong>权限检查</strong>：CPU 首先检查当前是否处于 Ring 0（内核态），因为只有 OS 才有权限管理物理内存。</li>
+<li><strong>参数验证</strong>：CPU 检查 <code>EADD</code> 指令的参数，包括源内存地址（普通内存）、目标 EPC 页面地址，以及目标页面的 SECS 地址。</li>
+<li><strong>SECS 状态检查</strong>：CPU 读取目标 Enclave 的 SECS，检查其生命周期状态。只有处于”创建中”或”加载中”的 Enclave 才能接受 <code>EADD</code>。如果 Enclave 已初始化，<code>EADD</code> 将失败。</li>
+<li><strong>地址检查</strong>：CPU 验证目标 EPC 页面的地址是否在 SECS 声明的基地址和大小范围之内。</li>
+<li><strong>EPCM 查找</strong>：CPU 在 EPCM（Enclave 页面缓存地图）中查找目标 EPC 页面。<ul>
+<li><strong>如果页面已被占用</strong>：检查它是否属于当前 Enclave。如果属于其他 Enclave，操作失败。</li>
+<li><strong>如果页面未被占用</strong>：标记该页面为有效。</li>
+</ul>
+</li>
+<li><strong>内容拷贝</strong>：CPU 将源内存页面的 4KB 内容拷贝到目标 EPC 页面。这个过程由硬件直接完成。</li>
+<li><strong>EPCM 更新</strong>：CPU 在 EPCM 中更新该页面的条目，记录其归属的 SECS、页面类型（例如 <code>PT_REG</code> 代表普通页面）以及开发者在 SECS 中预设的访问权限（读&#x2F;写&#x2F;执行）。</li>
+<li><strong>状态返回</strong>：如果所有步骤都成功，指令执行完毕。否则，返回相应的错误码。</li>
+</ol>
+<p>这个流程中的每一步都由硬件强制执行，确保了即使是恶意的 OS 也无法将页面加载到错误的 Enclave 中，或者赋予页面错误的权限。</p>
+<blockquote>
+<p>这就是硬件的魅力～ 可以将一些安全逻辑固化到硬件上是香的（不过不要有漏洞哦，不然就废了。。）</p>
+</blockquote>
+<h3 id="3-3-安全加载"><a href="#3-3-安全加载" class="headerlink" title="3.3 安全加载"></a>3.3 安全加载</h3><p>不知道你有没有疑惑？我之前看到说是 操作系统（OS） 加载 程序和数据到 Enclave里的时候，我就有疑惑了，因为不是说OS不在信任基内吗。如果是OS来加载的话，就无法保证 需要加载的程序和数据在中途被窥探和篡改吧。</p>
+<p>答案的核心在于两个机制的协作：内存加密引擎（MEE）和 测量机制（Measurement）</p>
+<h4 id="步骤-1：防窥探-MEE-的实时加密"><a href="#步骤-1：防窥探-MEE-的实时加密" class="headerlink" title="步骤 1：防窥探 - MEE 的实时加密"></a>步骤 1：防窥探 - MEE 的实时加密</h4><p>当应用程序（在不可信的普通内存中）准备好一段代码或数据，并通过 <code>EADD</code> 指令将其加载到 EPC 时，数据会流经 CPU 内部。当数据离开 CPU 核心，准备写入到物理内存（EPC）时，<strong>MEE（内存加密引擎）会自动对其进行加密</strong>。</p>
+<ul>
+<li><strong>这意味着</strong>：任何在 CPU 外部的”人”（无论是物理探测内存总线的黑客，还是拥有最高权限的 OS），看到的都只是加密后的密文。它们无法窥探到您加载的真实内容。这个过程是硬件强制的、自动的、且对开发者透明的。</li>
+</ul>
+<blockquote>
+<p>不知道你是不是觉得这段话是正确合理，能完美保证安全问题。其实是不完全正确的</p>
+</blockquote>
+<p>如果应用程序准备好了一段代码或数据，那么在执行  <code>EADD</code> 指令前，这段代码或数据其实就在会泄露（因为应用程序是在不可信的普通内存中的）。</p>
+<p>所以怎么预防，正确的答案是：对于真正需要保护的商业级应用，敏感数据从一开始就不会以明文形式出现在不可信的内存中，而是一直加密的（这就是所谓的 明文不落地）。只有在Enclave内才会解密的。</p>
+<p>数据是这样的，Enclave代码总不能说加密吧。这确实！Enclave 的应用程序代码（.so 文件）本身，在加载前确实是以明文形式存放在不可信的硬盘上，并且会被加载到不可信的内存中。</p>
+<p>这意味着，<strong>OS 和攻击者确实可以看到您的 Enclave 代码的二进制指令</strong>。我们能做的是在软件层面去做混淆保护（代码混淆）。</p>
+<p>SGX安全模型能保证的是：正在运行的绝对是未经任何篡改的原始代码（这个怎么实现的是？是通过下面这个）</p>
+<h4 id="步骤-2：防篡改-测量机制的核心-EEXTEND"><a href="#步骤-2：防篡改-测量机制的核心-EEXTEND" class="headerlink" title="步骤 2：防篡改 - 测量机制的核心 EEXTEND"></a>步骤 2：防篡改 - 测量机制的核心 <code>EEXTEND</code></h4><p>仅仅加密是不够的，恶意的 OS 仍然可以篡改加密后的数据（例如，替换掉整个加密页面）。可以把你本来需要加载的Enclave内的程序偷换掉或者修改其内部部分代码。</p>
+<p>SGX 使用”<strong>测量</strong>“机制来解决这个问题。</p>
+<ol>
+<li><strong>初始状态</strong>：在 <code>ECREATE</code> 创建 Enclave 时，其内部有一个名为 <code>MRENCLAVE</code> 的测量寄存器，初始值为空。</li>
+<li><strong>累积更新</strong>：每当一条 <code>EADD</code> 指令成功加载一个页面后，CPU 必须紧接着执行 <code>EEXTEND</code> 指令。<code>EEXTEND</code> 指令会：<ul>
+<li>读取刚刚加载的那个页面的 <strong>4KB 明文内容</strong>（注意，是在 CPU 内部，加密之前进行的）。</li>
+<li>将页面内容以 256 字节为单位进行切块。</li>
+<li>将每一块的内容，连同当前 <code>MRENCLAVE</code> 寄存器的值，一起送入一个 SHA-256 哈希计算单元。</li>
+<li><strong>用计算出的新哈希值，去更新 <code>MRENCLAVE</code> 寄存器</strong>。</li>
+</ul>
+</li>
+<li><strong>最终结果</strong>：当所有代码和数据页面都通过 <code>EADD</code> 和 <code>EEXTEND</code> 加载完成后，<code>MRENCLAVE</code> 寄存器中就保存了一个独一无二的、代表了 Enclave 所有初始内容的 SHA-256 哈希值。</li>
+</ol>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  graph LR
+    %% 初始化阶段
+    A[MRENCLAVE初始值&lt;br&gt;全零状态] --&gt; B[加载Page 1]
+    
+    %% 页面度量过程
+    B --&gt; C[EEXTEND指令]
+    C --&gt; D[&quot;SHA256(当前MRENCLAVE +&lt;br&gt;Page 1内容)&quot;]
+    D --&gt; E[更新MRENCLAVE]
+    
+    E --&gt; F[加载Page 2]
+    F --&gt; G[EEXTEND指令]
+    G --&gt; H[&quot;SHA256(新MRENCLAVE +&lt;br&gt;Page 2内容)&quot;]
+    H --&gt; I[更新MRENCLAVE]
+    
+    %% 最终结果
+    I --&gt; J[...迭代过程...]
+    J --&gt; K[最终MRENCLAVE值]
+    
+    %% 样式定义
+    classDef final fill:#90ee90,stroke:#2e8b57;
+    class K final;
+    
+    %% 连接线说明
+    linkStyle 2,4,6,8 stroke:#666,stroke-width:2px;
+  </pre></div>
+
+<h4 id="为什么这个机制是安全的？"><a href="#为什么这个机制是安全的？" class="headerlink" title="为什么这个机制是安全的？"></a>为什么这个机制是安全的？</h4><ul>
+<li><strong>顺序依赖性</strong>：测量的顺序是固定的。如果 OS 试图改变页面加载的顺序，最终的 <code>MRENCLAVE</code> 将会不同。</li>
+<li><strong>内容敏感性</strong>：SHA-256 算法的特性保证了，哪怕原始代码或数据中只有一个比特被篡改，最终的 <code>MRENCLAVE</code> 值也会完全不同。</li>
+<li><strong>一次性固化</strong>：当 <code>EINIT</code> 指令执行成功后，Enclave 就被”锁定”了。<code>MRENCLAVE</code> 的值被最终确定下来，无法再被修改。这个最终的 <code>MRENCLAVE</code> 值就成了这个 Enclave 的**”指纹”或”DNA”**。</li>
+</ul>
+<blockquote>
+<p>其实这个和我之前调研过的一个审计日志方案里方法是一致的（如何保证日志链完整性和未被篡改）</p>
+</blockquote>
+<p>在后续的认证流程（我们将在第四部分详细讲解）中，远程服务器会验证这个”DNA”。如果 OS 在加载过程中进行了任何手脚，导致最终的 <code>MRENCLAVE</code> 与开发者预期的不符，认证将会失败，远程服务器就不会信任这个 Enclave，也不会给它发送任何敏感数据。</p>
+<p><strong>总结</strong>：通过<strong>EEXTEND 的测量</strong>，可以保证我们的代码一定是完整的被加载到 Enclave中的。而敏感数据因为在Enclave前一直是加密的，所以也是安全的。当进入到 Enclave后解密时，又由<strong>MEE</strong>来保护其安全。</p>
+<hr>
+<p><em>至此，我们已经了解了 Enclave 是如何被安全地创建和加载的。下一部分，我们将深入探讨 SGX 最核心的各种安全机制，包括内存安全、认证和数据持久化等。</em></p>
+<h2 id="四、关键安全机制深度剖析"><a href="#四、关键安全机制深度剖析" class="headerlink" title="四、关键安全机制深度剖析"></a>四、关键安全机制深度剖析</h2><p>在这一部分，我们将深入探讨 SGX 如何实现其安全承诺。我们将逐一剖析内存安全、身份认证和数据持久化这三大核心安全机制。</p>
+<h3 id="4-1-内存安全：如何抵御来自-OS-的攻击"><a href="#4-1-内存安全：如何抵御来自-OS-的攻击" class="headerlink" title="4.1 内存安全：如何抵御来自 OS 的攻击"></a>4.1 内存安全：如何抵御来自 OS 的攻击</h3><p>这是 SGX 设计的出发点和核心价值所在：即使操作系统（OS）是恶意的，也无法侵害 Enclave 的内存。这主要通过硬件层面的三个机制实现：<strong>MEE 加密</strong>、<strong>EPCM 权限检查</strong>。</p>
+<p>我们回顾一下之前说的核心组件：</p>
+<ul>
+<li>**MEE (内存加密引擎)**：保证了所有离开 CPU 写入到 EPC 的数据都是加密的，防止了物理嗅探。</li>
+<li>**EPCM (Enclave 页面缓存地图)**：这是实现访问控制的关键。它像一个严格的门卫，记录了每个 EPC 页面的”户口”——它属于哪个 Enclave，以及它的访问权限（读&#x2F;写&#x2F;执行）。</li>
+</ul>
+<p><strong>当一个内存访问发生时，硬件会强制执行以下检查：</strong></p>
+<ol>
+<li><p><strong>访问源检查</strong>：</p>
+<ul>
+<li><strong>如果访问来自 Enclave 内部</strong>：CPU 检查该 Enclave 是否有权访问目标 EPC 页面。例如，Enclave 不能写入一个只读的代码页。</li>
+<li><strong>如果访问来自 Enclave 外部（如 OS）</strong>：CPU 会检查 EPCM。由于所有 EPC 页面都在 EPCM 中被标记为”受保护的”，硬件会直接拒绝任何来自外部的读、写或执行请求，并立即触发一个页面错误（Page Fault）异常给 OS。</li>
+</ul>
+</li>
+<li><p><strong>地址范围检查</strong>：CPU 还会检查访问的地址是否在 Enclave 的 SECS 结构中声明的地址范围之内。</p>
+</li>
+</ol>
+<p><strong>这个由硬件强制执行的流程，确保了 OS 对 Enclave 内存的”三不”：</strong></p>
+<ul>
+<li><strong>看不见</strong>：数据是加密的。</li>
+<li><strong>读不到</strong>：硬件拒绝访问。</li>
+<li><strong>改不了</strong>：硬件拒绝访问。</li>
+</ul>
+<p>这就是 SGX 如何从根本上防御来自恶意 OS 的直接内存攻击，实现内存隔离与访问控制。</p>
+<h3 id="4-2-EDMM：Enclave-动态内存管理"><a href="#4-2-EDMM：Enclave-动态内存管理" class="headerlink" title="4.2 EDMM：Enclave 动态内存管理"></a>4.2 EDMM：Enclave 动态内存管理</h3><p>在 SGX v1 中，Enclave 的大小在创建时是固定的，这极大地限制了其实用性。为了解决这个问题，SGX v2 引入了 <strong>EDMM (Enclave Dynamic Memory Management)</strong> 机制，允许 Enclave 在运行时动态地申请和释放内存。</p>
+<p>EDMM 的实现依然遵循 SGX 的核心原则：<strong>OS 作为不可信的资源管理员，而 CPU 作为可信的执行者。</strong></p>
+<p><strong>动态添加内存 (<code>EAUG</code>) 的流程：</strong></p>
+<ol>
+<li><strong>Enclave 请求</strong>：Enclave 内部的内存管理器（例如 <code>malloc</code> 的安全实现）发现 EPC 不足，它会触发一个 OCALL（外部调用）通知外部的 App。</li>
+<li><strong>App 与 OS 协作</strong>：App 向 OS 请求分配一块普通的、新的内存页面。</li>
+<li><strong>App 请求加载</strong>：App 请求 SGX 驱动，使用 <code>EAUG</code> (Enclave AUGment) 指令将这个新页面作为 EPC 页面添加到 Enclave 中。</li>
+<li>**CPU 执行 <code>EAUG</code>**：<ul>
+<li><code>EAUG</code> 指令与 <code>EADD</code> 类似，但它操作的是一个已经初始化的 Enclave。</li>
+<li>CPU 将普通页面的内容拷贝到一块新的 EPC 页面中（通常是全 0）。</li>
+<li>最关键的是，CPU 在 EPCM 中将这个新页面与发起请求的 Enclave 的 SECS 关联起来，并设置好访问权限。</li>
+</ul>
+</li>
+<li><strong>Enclave 使用</strong>：一旦 <code>EAUG</code> 完成，Enclave 内部的内存管理器就可以安全地使用这块新的 EPC 内存了。</li>
+</ol>
+<p><strong>动态释放内存 (<code>TRIM</code>) 的流程</strong>：</p>
+<p>释放内存相对复杂，需要确保页面中没有敏感数据残留。</p>
+<ol>
+<li><strong>Enclave 标记</strong>：Enclave 内部的 <code>free</code> 函数会将一块不再使用的 EPC 页面标记为”待释放”。</li>
+<li><strong>内容清除</strong>：Enclave 负责清除该页面的内容（通常是填 0），并调用 <code>EMODT</code> (Modify Type) 指令，将其页面类型在 EPCM 中从普通页（<code>PT_REG</code>）修改为”待回收”（<code>PT_TRIM</code>）。</li>
+<li><strong>OS 回收</strong>：OS 可以通过 <code>EREMOVE</code> 指令安全地回收这些被标记为 <code>PT_TRIM</code> 的页面，并将其归还给系统。</li>
+</ol>
+<p>通过这一套由硬件指令保障的流程，EDMM 实现了在不破坏安全模型的前提下，对 Enclave 内存的动态、安全管理。</p>
+<hr>
+<p><em>内存安全是基础，但如何证明一个 Enclave 的身份是可信的？我们将深入探讨 SGX 的”杀手级应用”——认证机制。</em></p>
+<h3 id="4-3-认证机制：构建信任的阶梯"><a href="#4-3-认证机制：构建信任的阶梯" class="headerlink" title="4.3 认证机制：构建信任的阶梯"></a>4.3 认证机制：构建信任的阶梯</h3><blockquote>
+<p>这一节是有理解难度的，请先自行理解透 数字签名原理、非对称加密这些，不然很难理解透这个信任体系的搭建</p>
+</blockquote>
+<p>仅仅在本地保护好 Enclave 是不够的。在真实世界的应用中，一个 Enclave 通常需要与外部世界交互，比如向一个远程服务器请求敏感数据。这时，远程服务器如何才能相信它正在与之通信的，确实是一个在安全、未被篡改的SGX环境中运行的、内容正确的Enclave？</p>
+<p><strong>认证（Attestation）机制就是用来解决这个问题的。</strong> 它是一个分阶段建立信任的过程，就像爬一个梯子，每一阶都依赖于前一阶的稳固。</p>
+<h4 id="4-3-1-信任阶梯的起点：CPU内部的自我信任-本地认证"><a href="#4-3-1-信任阶梯的起点：CPU内部的自我信任-本地认证" class="headerlink" title="4.3.1 信任阶梯的起点：CPU内部的自我信任 (本地认证)"></a>4.3.1 信任阶梯的起点：CPU内部的自我信任 (本地认证)</h4><ul>
+<li><strong>场景</strong>：在同一台物理机上，有两个不同的 Enclave（我们称之为 Enclave A 和 Enclave B），它们需要相互验证对方的身份，并建立一个安全的通信信道。</li>
+<li><strong>核心思想</strong>：利用 CPU 作为可信的中间人，通过一个只有本机硬件能生成和验证的报告 (<code>REPORT</code>) 来交换身份信息。</li>
+</ul>
+<p> <strong>流程详解：</strong></p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  sequenceDiagram
+    participant Enclave_A as Enclave A (发起者)
+    participant CPU_Hardware as CPU Hardware
+    participant Enclave_B as Enclave B (目标)
+
+    Enclave_A-&gt;&gt;CPU_Hardware: 1. EREPORT 指令&lt;br&gt;请求生成关于自己的报告&lt;br&gt;并指定目标为 Enclave B
+
+    CPU_Hardware-&gt;&gt;CPU_Hardware: 2. (a) 用 Report Key 和 B 的身份&lt;br&gt;    派生出&#39;派生报告密钥&#39;&lt;br&gt;(b) 生成REPORT, 包含A的身份&lt;br&gt;(c) 用&#39;派生报告密钥&#39;签名MAC
+
+    CPU_Hardware--&gt;&gt;Enclave_A: 3. 返回已签名的REPORT
+
+    Enclave_A-&gt;&gt;Enclave_B: 4. (通过不可信内存) 发送REPORT
+
+    Enclave_B-&gt;&gt;CPU_Hardware: 5. EGETKEY 指令&lt;br&gt;请求获取用于验证&lt;br&gt;来自 A 的报告的密钥
+
+    CPU_Hardware-&gt;&gt;CPU_Hardware: 6. 再次派生出&lt;br&gt;同一个&#39;派生报告密钥&#39;
+
+    CPU_Hardware--&gt;&gt;Enclave_B: 7. 返回&#39;派生报告密钥&#39;
+
+    Enclave_B-&gt;&gt;Enclave_B: 8. (a) 用密钥验证REPORT的MAC&lt;br&gt;(b) 若成功, 信任A的身份
+  </pre></div>
+
+<ol>
+<li><strong>Enclave A 请求定向报告</strong>：Enclave A 调用<code>EREPORT</code>指令。最关键的是，它在指令中明确将 <strong>Enclave B 的身份标识</strong>（如<code>MRENCLAVE</code>）作为<strong>目标</strong>。它还可以在<code>REPORTDATA</code>字段中放入自己的临时通信公钥哈希，用于后续建立安全信道。</li>
+<li><strong>CPU 派生密钥并生成报告</strong>：CPU硬件执行<code>EREPORT</code>：<ul>
+<li><strong>派生密钥</strong>：它取出自己内部的<code>Report Key</code>和指令中指定的目标（Enclave B）身份，通过密钥派生函数（KDF）计算出一个**一次性的、专用于本次 A-&gt;B 通信的<code>派生报告密钥</code>**。</li>
+<li><strong>计算MAC</strong>：CPU使用这个新鲜出炉的<code>派生报告密钥</code>，为包含Enclave A身份和数据的<code>REPORT</code>内容计算一个MAC。</li>
+</ul>
+</li>
+<li><strong>返回报告</strong>：CPU将完整的<code>REPORT</code>（内容 + MAC）返回给Enclave A。</li>
+<li><strong>转发报告</strong>：Enclave A 通过普通内存将这份报告发送给 Enclave B。</li>
+<li><strong>Enclave B 请求验证密钥</strong>：Enclave B 收到报告后，为了验证它，需要获取同一个<code>派生报告密钥</code>。它会调用<code>EGETKEY</code>指令，向CPU申请一个用于验证<strong>来自Enclave A</strong>的报告的密钥。</li>
+<li><strong>CPU 再次派生</strong>：因为Enclave B是当初指定的合法目标，CPU会再次执行完全相同的派生过程，并将**同一个<code>派生报告密钥</code>**安全地交给Enclave B。</li>
+<li><strong>Enclave B 验证</strong>：Enclave B 使用获取到的密钥，重新计算收到<code>REPORT</code>内容的MAC，并与报告附带的MAC进行比对。</li>
+<li><strong>建立信任</strong>：如果MAC匹配，Enclave B就获得了硬件级别的信任，确信这份报告确实来自Enclave A，内容未经篡改，且就是发给自己的。本地认证成功。</li>
+</ol>
+<p><strong>总结</strong>：本地认证通过<strong>密钥派生</strong>机制，实现了硬件级别的访问控制和身份验证。它高效且轻量，因为它完全在 CPU 内部完成，不涉及外部通信。它使得同一平台上的多个 Enclave 可以安全地协作，是所有后续信任的基础。</p>
+<hr>
+<h4 id="4-3-2-远程认证：构建跨网络的信任链"><a href="#4-3-2-远程认证：构建跨网络的信任链" class="headerlink" title="4.3.2 远程认证：构建跨网络的信任链"></a>4.3.2 远程认证：构建跨网络的信任链</h4><p>这是SGX最核心、最强大的功能。它旨在解决一个终极问题：<strong>远程服务器如何能绝对相信，它正在通信的对象，确实是一个运行在安全、正版Intel硬件上、未被篡改的、且内容正确的Enclave？</strong></p>
+<p>为了实现这个目标，SGX设计了一套精密的、环环相扣的信任链。我们首先来看完整的流程，然后再深入剖析每一步背后的设计哲学。</p>
+<h5 id="a-远程认证的完整流程"><a href="#a-远程认证的完整流程" class="headerlink" title="a) 远程认证的完整流程"></a>a) 远程认证的完整流程</h5><p><strong>流程总览图：</strong></p>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  sequenceDiagram
+    participant App_Enclave as 应用飞地
+    participant QE as Quoting Enclave
+    participant PCE as Provisioning&lt;br&gt;Certification Enclave
+    participant Challenger as 远程挑战者(服务商)
+    participant Intel_IAS as Intel认证服务(IAS)
+    participant Intel_Provisioning as Intel供应服务
+
+    Note over QE, Intel_Provisioning: 阶段〇: 平台首次启动或QE更新时&lt;br&gt;执行一次性的密钥供应流程
+    PCE--&gt;&gt;Intel_Provisioning: (1) PCE用特权密钥向Intel请求
+    Intel_Provisioning--&gt;&gt;PCE: (2) Intel验证后, 颁发平台私钥(Attestation Key)
+    PCE--&gt;&gt;QE: (3) PCE将私钥安全转交QE
+
+    Note over App_Enclave, Challenger: 阶段一: 应用发起远程认证
+    App_Enclave-&gt;&gt;QE: (4) 生成REPORT(含MRENCLAVE, PubKeyHash)
+    QE--&gt;&gt;App_Enclave: (5) QE用平台私钥签名REPORT, 生成QUOTE
+
+    Note over App_Enclave, Challenger: 阶段二: 远程验证与建立信任
+    App_Enclave-&gt;&gt;Challenger: (6) 发送QUOTE及临时公钥到远程
+    Challenger-&gt;&gt;Intel_IAS: (7) 转发QUOTE请求最终裁决
+    
+    Intel_IAS--&gt;&gt;Intel_IAS: (8) 验证QUOTE签名, 检查TCB状态
+    Intel_IAS--&gt;&gt;Challenger: (9) 返回签名的认证报告 (Verdict)
+
+    Challenger--&gt;&gt;Challenger: (10) (a) 验证IAS签名&lt;br&#x2F;&gt;(b) 若OK, 检查MRENCLAVE&#x2F;MRSIGNER&lt;br&#x2F;&gt;(c) 验证临时公钥, 建立安全信道
+  </pre></div>
+
+<p><strong>分步详解：</strong></p>
+<ul>
+<li><p><strong>阶段〇：密钥供应 (一次性)</strong></p>
+<ol>
+<li><strong>PCE请求</strong>: 在平台首次配置SGX或QE更新时，拥有特殊身份的PCE会向Intel供应服务发起请求。</li>
+<li><strong>Intel颁发</strong>: Intel服务器验证PCE的身份后，会为当前平台生成一个独一无二的平台私钥（Attestation Key）。</li>
+<li><strong>PCE转交</strong>: PCE将这个密钥安全地转交给QE。QE会将其”密封”保存，供后续使用。</li>
+</ol>
+</li>
+<li><p><strong>阶段一：生成认证报告 (QUOTE)</strong></p>
+<ol start="4">
+<li><strong>应用生成REPORT</strong>: 当应用飞地需要远程认证时，它会调用<code>EREPORT</code>指令，生成一份包含自身身份（<code>MRENCLAVE</code>）和通信公钥哈希（<code>REPORTDATA</code>）的本地报告<code>REPORT</code>。</li>
+<li><strong>QE生成QUOTE</strong>: 应用飞地将<code>REPORT</code>发送给QE。QE首先在本地验证<code>REPORT</code>的真实性，然后用阶段〇获取的平台私钥对其进行签名，生成最终的”可跨国公证书”——<code>QUOTE</code>。</li>
+</ol>
+</li>
+<li><p><strong>阶段二：远程验证与建立信任</strong></p>
+<ol start="6">
+<li><strong>发送至服务商</strong>: 客户端将<code>QUOTE</code>和用于通信的临时公钥发送给远程服务商（挑战者）。</li>
+<li><strong>转发至IAS</strong>: 服务商不直接验证<code>QUOTE</code>，而是将其原样转发给Intel认证服务（IAS）。</li>
+<li><strong>IAS最终裁决</strong>: IAS作为最终权威，会验证<code>QUOTE</code>的签名，并检查平台的可信计算基（TCB）版本是否安全。</li>
+<li><strong>返回认证报告</strong>: IAS向服务商返回一份签名的报告（Verdict），告知<code>QUOTE</code>是否可信。</li>
+<li><strong>建立信任</strong>: 服务商验证IAS的签名后，如果结果OK，就会信任该Enclave的身份。它会检查<code>MRENCLAVE</code>和<code>MRSIGNER</code>是否符合其策略，并用客户端发来的临时公钥建立端到端的安全信道。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h5 id="b-深度解析：信任链的构建细节"><a href="#b-深度解析：信任链的构建细节" class="headerlink" title="b) 深度解析：信任链的构建细节"></a>b) 深度解析：信任链的构建细节</h5><p>现在，我们来回答那些关键的”为什么”和”如何做到”。</p>
+<p><strong>1. 为什么需要中间人(QE)？</strong></p>
+<p>这是一个核心的架构设计问题，答案是<strong>权责分离</strong>与<strong>风险隔离</strong>。</p>
+<table>
+<thead>
+<tr>
+<th align="left">存在的问题</th>
+<th align="left">QE解决方案 (<code>Quoting Enclave</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>密钥管理的灾难</strong>: 让每个应用都去管理高风险的平台私钥，是不现实且危险的。</td>
+<td align="left"><strong>密钥所有权隔离</strong>: 平台私钥属于平台，由Intel签名的标准化代理QE统一保管，应用无权接触。</td>
+</tr>
+<tr>
+<td align="left"><strong>安全责任的灾难</strong>: 应用的漏洞可能导致平台密钥泄露，威胁整个平台的认证能力。</td>
+<td align="left"><strong>减少攻击面</strong>: QE代码精简、审查严格。应用漏洞不会影响到平台认证机制本身，实现了安全隔离。</td>
+</tr>
+<tr>
+<td align="left"><strong>复杂性的灾难</strong>: 应用开发者被迫成为密码学和底层认证协议的专家。</td>
+<td align="left"><strong>职责分离</strong>: QE封装了所有复杂的认证逻辑，应用只需调用简单接口，专注于自身业务即可。</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>: QE是一个<strong>系统级的、标准化的认证代理</strong>，它隔离了复杂性和关键密钥，让应用可以安全、简单地请求认证服务。</p>
+<p><strong>2. QE如何自证合法？谁来为QE作保？</strong></p>
+<p>QE自己无法向Intel证明”我是合法的QE”。它需要一个更可信的实体来为它作保，这个实体就是**PCE (Provisioning Certification Enclave)**。</p>
+<p>在密钥供应流程（阶段〇）中，QE与PCE之间进行了一次<strong>本地认证</strong>，这背后是一套精密的硬件机制：</p>
+<ol>
+<li><strong>QE生成定向报告</strong>: QE调用<code>EREPORT</code>指令，在指令中明确指定<strong>PCE作为报告的目标</strong>。</li>
+<li><strong>CPU硬件使用派生密钥生成MAC</strong>: CPU硬件根据QE的请求，生成<code>REPORT</code>。关键在于，它<strong>并不会直接使用<code>Report Key</code><strong>，而是会执行一个</strong>密钥派生 (Key Derivation)</strong> 的过程来生成一个一次性的对称密钥。<ul>
+<li><strong>深度解析：什么是”派生密钥”？</strong><ul>
+<li><strong>它不是Report Key本身</strong>：派生密钥是一个全新的、为本次通信临时生成的对称密钥。</li>
+<li><strong>来源</strong>：它由CPU硬件通过一个标准的密码学函数（密钥派生函数, KDF）计算得来。</li>
+<li>**派生”原料”**：KDF的输入是：1) 永不暴露的<code>Report Key</code>（作为主密钥）和 2) 目标Enclave的身份标识（比如PCE的<code>MRENCLAVE</code>）。</li>
+<li><strong>比喻</strong>：<code>Report Key</code>就像一把万能的”主模具”。当要为PCE这扇”门”配一把钥匙时，CPU就用”主模具”+PCE门独有的花纹”，制造出一把独一无二的钥匙。这把钥匙就是派生密钥。</li>
+<li><strong>为何要派生？</strong>：这是为了实现精确的访问控制。只有指定的目标（PCE）才能向CPU提供正确的”花纹”（自己的身份），从而派生出同一把钥匙来完成验证。这从硬件上保证了报告不会被错领或被非目标验证。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>CPU计算MAC</strong>: CPU硬件使用这个刚刚派生出的密钥，为<code>REPORT</code>的完整内容计算MAC，并附加在报告末尾。</li>
+<li><strong>PCE验证MAC</strong>: QE将这份带MAC的<code>REPORT</code>交给PCE。PCE为了验证，会向CPU请求<strong>重新派生出同一个密钥</strong>（硬件会因为PCE是合法目标方而成功派生）。PCE使用此密钥重新计算<code>REPORT</code>的MAC，并与收到的MAC进行比对。</li>
+<li><strong>建立信任</strong>: 如果MAC匹配，PCE就获得了硬件级别的保证：这份<code>REPORT</code>确实来自本机CPU，内容未经篡改，且真的是发给自己的。PCE此时便可信任<code>REPORT</code>中的<code>MRSIGNER</code>，并检查其是否与Intel官方发布的QE身份相符。</li>
+</ol>
+<p>通过这套机制，<strong>PCE为QE的合法性作出了担保</strong>，并同意为它继续执行密钥申请流程。</p>
+<p><strong>3. PCE如何自证合法？信任的真正起源</strong></p>
+<p>我们把信任追溯到了PCE，那PCE的合法性又从何而来？这触及了整个SGX信任模型的<strong>硬件信任根</strong>。</p>
+<ul>
+<li><strong>PCE的特殊身份</strong>: PCE也是一个由Intel提供的Enclave，但它的特殊之处在于，它是用<strong>Intel的根私钥（创世私钥）</strong>签名的。</li>
+<li><strong>硬件信任根</strong>: 在CPU制造过程中，Intel根私钥对应的<strong>公钥哈希值</strong>，被永久性地、不可更改地<strong>烧录在芯片的硬件电路中</strong>。<ul>
+<li><strong>关于哈希值的统一性</strong>: 是的，为了保证生态的兼容性和可扩展性，<strong>同一代的所有CPU都会烧录相同的Intel根公钥哈希</strong>。这使得一个由Intel统一签名的PCE程序，可以在所有这些CPU上被一致地识别为合法。如果每个CPU的哈希都不同，Intel将不得不为每一颗芯片单独签名一个PCE，这在实践中是不可行的。</li>
+</ul>
+</li>
+<li><strong>硬件认证</strong>: 当PCE被加载时，CPU硬件在<code>EINIT</code>过程中会计算其<code>MRSIGNER</code>（即Intel根公钥的哈希），并发现它与芯片内烧录的哈希值<strong>完全匹配</strong>。</li>
+<li><strong>授予特权</strong>: 这个硬件层面的匹配，向CPU证明了PCE的至高无上的身份。因此，CPU授予PCE特殊的、其他任何Enclave都没有的权限——访问**<code>Provisioning Key</code>**。这是一个对称密钥，由同代CPU和Intel供应服务所共享，但每个CPU的<code>Provisioning Key</code>都是独一无二的，保证了即便根公钥哈希相同，每个平台的信道也是独立的。</li>
+</ul>
+<p><strong>结论</strong>: 对PCE的信任，来自于<strong>Intel的签名</strong>与<strong>CPU硬件的内置校验</strong>相匹配。这是一个硬编码在硅片里的信任关系，是整个SGX信任模型的”第一推动力”。</p>
+<p><strong>4. 认证风暴：拆解所有密钥、签名与哈希</strong></p>
+<p>整个远程认证流程涉及了多种密码学元素，理解它们各自的用途是关键。为了最清晰地展示，我们将表格分为三部分：<strong>哈希</strong>、<strong>密钥</strong>、以及最终的<strong>签名&#x2F;认证码</strong>。</p>
+<p><strong>Part 1: 哈希 (作为身份标识)</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">名称</th>
+<th align="left">来源&#x2F;生成者</th>
+<th align="left">作用与目的</th>
+<th align="left">不可或缺的理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>MRENCLAVE</code></td>
+<td align="left"><strong>CPU硬件</strong> (在<code>EEXTEND</code>时)</td>
+<td align="left">为Enclave代码和数据生成唯一的”DNA指纹”。</td>
+<td align="left">保证<strong>完整性</strong>，确认Enclave内容未被篡改。</td>
+</tr>
+<tr>
+<td align="left"><code>MRSIGNER</code></td>
+<td align="left"><strong>CPU硬件</strong> (在<code>EINIT</code>时)</td>
+<td align="left">为开发者公钥生成唯一的”身份标签”。</td>
+<td align="left">保证<strong>开发者身份</strong>的一致性，用于策略检查和数据版本升级。</td>
+</tr>
+</tbody></table>
+<p><strong>Part 2: 密钥 (作为加密和签名的工具)</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">名称</th>
+<th align="left">来源&#x2F;生成者</th>
+<th align="left">作用与目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>对称密钥</strong></td>
+<td align="left"><strong><code>Report Key</code></strong></td>
+<td align="left"><strong>CPU硬件</strong> (制造时烧录, 每颗CPU唯一)</td>
+<td align="left">作为CPU的秘密指纹，是派生其他本地认证密钥的根源。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong><code>Root Seal Key (RSK)</code></strong></td>
+<td align="left"><strong>CPU硬件</strong> (制造时烧录, 每颗CPU唯一)</td>
+<td align="left">作为CPU的另一秘密指纹，是派生所有”密封密钥”的根源，用于数据持久化加密 (将在下一节详述)。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong><code>派生报告密钥 (Derived Report Key)</code></strong></td>
+<td align="left"><strong>CPU硬件</strong> (由<code>Report Key</code>和目标身份派生)</td>
+<td align="left">为定向的<code>EREPORT</code>指令生成一次性的MAC计算密钥。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong><code>Provisioning Key</code></strong></td>
+<td align="left"><strong>CPU硬件</strong> (由硬件根密钥派生, 每颗CPU唯一)</td>
+<td align="left">用于PCE向Intel服务器认证自己。Intel可通过此密钥验证CPU平台身份，从而安全地供应平台私钥。</td>
+</tr>
+<tr>
+<td align="left"><strong>非对称密钥</strong></td>
+<td align="left"><strong>开发者私钥&#x2F;公钥</strong></td>
+<td align="left"><strong>应用开发者</strong></td>
+<td align="left">用于签名Enclave，并在<code>EINIT</code>时验证。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong>平台私钥(Attestation Key)</strong></td>
+<td align="left"><strong>Intel供应服务</strong></td>
+<td align="left">用于QE对<code>REPORT</code>进行签名，生成<code>QUOTE</code>。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong>Intel根私钥&#x2F;公uyo</strong></td>
+<td align="left"><strong>Intel</strong></td>
+<td align="left">用于签名PCE，其公钥哈希是硬件信任根。</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"><strong>IAS私钥&#x2F;公钥</strong></td>
+<td align="left"><strong>Intel认证服务</strong></td>
+<td align="left">用于对发回给服务商的认证报告进行签名。</td>
+</tr>
+</tbody></table>
+<p><strong>Part 3: 签名&#x2F;认证码 (作为可验证的凭证)</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">名称</th>
+<th align="left">来源&#x2F;生成者</th>
+<th align="left">使用哪个密钥签名？</th>
+<th align="left">作用与目的</th>
+<th align="left">不可或缺的理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>REPORT</code>上的MAC</strong></td>
+<td align="left"><strong>CPU硬件</strong> (通过<code>EREPORT</code>指令)</td>
+<td align="left"><code>派生报告密钥</code></td>
+<td align="left"><strong>它是一种对称签名</strong>。通过HMAC等算法，为<code>REPORT</code>提供本地可验证的完整性和来源证明。</td>
+<td align="left"><strong>解决本地信任</strong>：在本机CPU上快速、安全地证明<code>REPORT</code>。</td>
+</tr>
+<tr>
+<td align="left"><strong><code>SIGSTRUCT</code>中的签名</strong></td>
+<td align="left"><strong>应用开发者</strong></td>
+<td align="left">开发者私钥</td>
+<td align="left"><strong>非对称签名</strong>。对<code>MRENCLAVE</code>签名，证明代码由该开发者授权。</td>
+<td align="left"><strong>连接代码与开发者</strong>：在<code>EINIT</code>时绑定代码与开发者身份。</td>
+</tr>
+<tr>
+<td align="left"><strong><code>QUOTE</code>上的签名</strong></td>
+<td align="left"><strong>Quoting Enclave (QE)</strong></td>
+<td align="left">平台私钥</td>
+<td align="left"><strong>非对称签名</strong>。对<code>REPORT</code>签名，使其变为可被远程验证的凭证。</td>
+<td align="left"><strong>解决远程信任</strong>：将本地报告转变为”国际护照”。</td>
+</tr>
+<tr>
+<td align="left"><strong>IAS认证报告的签名</strong></td>
+<td align="left"><strong>Intel认证服务(IAS)</strong></td>
+<td align="left">IAS私钥</td>
+<td align="left"><strong>非对称签名</strong>。对最终的认证结果签名，发送给远程服务商。</td>
+<td align="left"><strong>保证最终裁决的真实性</strong>：让服务商确信收到的认证结果确实来自Intel。</td>
+</tr>
+</tbody></table>
+<p>通过以上这些角色的精密协作，SGX构建了一条从CPU硬件内部的信任根，到Intel云端服务的完整、可验证的信任链。</p>
+<p><strong>5. 综述：贯穿始终的合法性验证链</strong></p>
+<p>为了让逻辑更清晰，我们最后可以把整个流程中的”合法性验证”串起来看：</p>
+<ul>
+<li><p><strong>阶段一：Enclave加载时 (<code>EINIT</code>)</strong></p>
+<ul>
+<li><strong>验证什么？</strong> Enclave代码的完整性与开发者的真实性。</li>
+<li><strong>如何验证？</strong> CPU硬件使用<code>SIGSTRUCT</code>中的开发者公钥，验证对<code>MRENCLAVE</code>的签名。</li>
+<li><strong>结论：</strong> 确认了”软件（Enclave）是开发者原版”。</li>
+</ul>
+</li>
+<li><p><strong>阶段二：本地认证时 (<code>EREPORT</code> &#x2F; PCE验证QE)</strong></p>
+<ul>
+<li><strong>验证什么？</strong> Enclave A的报告对于Enclave B的真实性。</li>
+<li><strong>如何验证？</strong> B使用CPU授予的、与A定向生成的密钥，验证报告的MAC。</li>
+<li><strong>结论：</strong> 确认了”报告（REPORT）是本机同伴真实、未篡改的意图表达”。</li>
+</ul>
+</li>
+<li><p><strong>阶段三：供应密钥时 (PCE请求Intel)</strong></p>
+<ul>
+<li><strong>验证什么？</strong> 发起密钥申请的平台的合法性。</li>
+<li><strong>如何验证？</strong> Intel服务器使用共享的<code>Provisioning Key</code>验证PCE的请求。PCE能拿到此密钥，本身就是因为它通过了CPU硬件烧录哈希的验证。</li>
+<li><strong>结论：</strong> 确认了”平台（CPU+PCE）是Intel正版，有权申请平台密钥”。</li>
+</ul>
+</li>
+<li><p><strong>阶段四：远程认证时 (IAS验证QUOTE)</strong></p>
+<ul>
+<li><strong>验证什么？</strong> <code>QUOTE</code>的真实性与平台的安全性。</li>
+<li><strong>如何验证？</strong> IAS使用公钥体系验证<code>QUOTE</code>由合法的平台私钥签名，并检查平台的TCB版本。</li>
+<li><strong>结论：</strong> 确认了”认证报告（QUOTE）是来自一个安全、正版平台的、可信的声明”。</li>
+</ul>
+</li>
+<li><p><strong>阶段五：最终决策时 (服务商验证IAS报告)</strong></p>
+<ul>
+<li><strong>验证什么？</strong> IAS认证报告的真实性，以及Enclave身份是否符合业务策略。</li>
+<li><strong>如何验证？</strong> 服务商验证IAS报告的签名，并检查报告中的<code>MRENCLAVE</code>&#x2F;<code>MRSIGNER</code>是否是自己期望与之通信的。</li>
+<li><strong>结论：</strong> 确认了”这个Enclave是我要找的那个，并且Intel为它的身份和环境安全背书”。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><em>身份问题解决后，Enclave 内部的数据如果需要被长期保存到硬盘上，又该如何保护呢？下一节，我们将探讨 SGX 的持久化数据保护机制。</em></p>
+<h3 id="4-4-持久化数据保护：数据密封-Data-Sealing"><a href="#4-4-持久化数据保护：数据密封-Data-Sealing" class="headerlink" title="4.4 持久化数据保护：数据密封 (Data Sealing)"></a>4.4 持久化数据保护：数据密封 (Data Sealing)</h3><p>我们已经解决了Enclave运行时和认证时的安全问题，但还剩下最后一个关键环节：<strong>持久化</strong>。Enclave的内存（EPC）是易失的，断电后数据就会消失。如果Enclave需要将一个重要的秘密（如一个解密密钥、一个会话状态、或一份配置文件）保存下来供下次使用，该怎么办？直接写入由不可信OS管理的硬盘，无异于将秘密公之于众。</p>
+<p><strong>数据密封 (Data Sealing) 机制，就是SGX提供的、用于解决”数据安全落盘”问题的硬件级方案。</strong></p>
+<h4 id="a-核心思想与关键要素"><a href="#a-核心思想与关键要素" class="headerlink" title="a) 核心思想与关键要素"></a>a) 核心思想与关键要素</h4><ul>
+<li><strong>核心思想</strong>: 允许Enclave将数据加密后，安全地存储到不可信的外部介质（如硬盘），并确保只有<strong>特定的Enclave</strong>才能解封（Unseal）这些数据。</li>
+<li><strong>硬件指令</strong>: <code>EGETKEY</code>，这是Enclave向CPU申请各种硬件密钥的统一接口。</li>
+<li><strong>信任根源</strong>: 我们在密钥表格中提到的 **<code>Root Seal Key (RSK)</code>**。这个与<code>Report Key</code>并列的、CPU制造时烧录的、每颗芯片唯一的硬件密钥，是所有密封密钥的信任之根。</li>
+</ul>
+<h4 id="b-EGETKEY-与两种密封策略"><a href="#b-EGETKEY-与两种密封策略" class="headerlink" title="b) EGETKEY 与两种密封策略"></a>b) <code>EGETKEY</code> 与两种密封策略</h4><p>当Enclave调用<code>EGETKEY</code>指令请求一个用于密封的密钥（Seal Key）时，它必须做出一个关键的策略选择：这个密钥到底应该和谁的身份绑定？SGX提供了两种策略：</p>
+<p><strong>策略一：绑定Enclave的”DNA指纹” (<code>MRENCLAVE</code>)</strong></p>
+<ul>
+<li><strong>含义</strong>: 密封密钥的派生将与当前Enclave的<code>MRENCLAVE</code>值强绑定。</li>
+<li><strong>效果</strong>: 数据被密封后，<strong>只有拥有完全相同代码和初始数据的Enclave（即拥有相同<code>MRENCLAVE</code>）才能派生出同一个密钥来解封。</strong></li>
+<li><strong>类比</strong>: 这就像一个只认<strong>特定人物DNA指纹</strong>的保险箱。</li>
+<li><strong>优点</strong>: <strong>极致的安全</strong>。它保证了只有”原汁原味”、未经任何修改的Enclave才能访问数据。</li>
+<li><strong>缺点</strong>: <strong>毫无灵活性</strong>。如果开发者修复了一个bug，重新编译的Enclave哪怕只改变了一个比特，其<code>MRENCLAVE</code>就会变化，导致新版Enclave无法读取旧版数据。这对于需要迭代升级的应用是致命的。</li>
+</ul>
+<p><strong>策略二：绑定开发者的”家族徽章” (<code>MRSIGNER</code>)</strong></p>
+<ul>
+<li><strong>含义</strong>: 密封密钥的派生将与当前Enclave的<code>MRSIGNER</code>值强绑定。</li>
+<li><strong>效果</strong>: 数据被密封后，<strong>只要是由同一个开发者（拥有同一个签名私钥，即拥有相同<code>MRSIGNER</code>）签名的任何Enclave，都可以派生出同一个密钥来解封。</strong></li>
+<li><strong>类比</strong>: 这就像一个只认<strong>特定家族徽章</strong>的保险箱，家族里的任何成员（不同版本的Enclave）都能打开。</li>
+<li><strong>优点</strong>: <strong>极佳的灵活性</strong>。开发者可以随意发布新版本的Enclave来修复bug或增加功能。只要签名密钥不变，新版Enclave就能无缝访问和迁移旧版数据，这是应用升级的基石。</li>
+<li><strong>缺点</strong>: <strong>安全边界更广</strong>。其安全性完全依赖于开发者的签名私钥。一旦私钥泄露，攻击者就可以伪造一个属于该开发者的恶意Enclave，从而解封所有由该<code>MRSIGNER</code>绑定的数据。</li>
+</ul>
+<h4 id="c-密钥派生细节与降级攻击防御"><a href="#c-密钥派生细节与降级攻击防御" class="headerlink" title="c) 密钥派生细节与降级攻击防御"></a>c) 密钥派生细节与降级攻击防御</h4><p>实际上，<code>EGETKEY</code>在派生Seal Key时，不仅仅只考虑<code>MRENCLAVE</code>或<code>MRSIGNER</code>。为了提供更精细的安全控制，它还会混入其他安全属性，例如：</p>
+<ul>
+<li><strong><code>ISVSVN</code> (Security Version Number)</strong>: 开发者自己定义的安全版本号。</li>
+<li><strong><code>CPUSVN</code> (CPU Security Version Number)</strong>: CPU微码的安全版本号。</li>
+</ul>
+<p><code>Seal Key = KDF(RSK, Key Policy + ISVSVN + CPUSVN + ...)</code></p>
+<p>这意味着，开发者可以在密封时设定一个策略，比如”只有<code>MRSIGNER</code>相同，且<code>ISVSVN</code>不低于v2的Enclave”才能解封。这可以有效<strong>防止降级攻击</strong>，即防止攻击者用一个存在已知漏洞的旧版Enclave来解封新版Enclave产生的数据。</p>
+<h4 id="d-完整生命周期：密封与解封"><a href="#d-完整生命周期：密封与解封" class="headerlink" title="d) 完整生命周期：密封与解封"></a>d) 完整生命周期：密封与解封</h4><div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  sequenceDiagram
+    participant App_Enclave as Enclave
+    participant CPU_Hardware as CPU Hardware
+    participant Untrusted_Storage as 不可信存储 (硬盘&#x2F;DB)
+
+    Note over App_Enclave, CPU_Hardware: 阶段一：密封 (Sealing)
+    App_Enclave-&gt;&gt;CPU_Hardware: 1. EGETKEY指令&lt;br&gt;请求一个绑定到&#39;MRSIGNER&#39;&lt;br&gt;和特定&#39;ISVSVN&#39;的密封密钥
+    CPU_Hardware--&gt;&gt;CPU_Hardware: 2. 用RSK及相关策略&lt;br&gt;派生出密封密钥(Seal Key)
+    CPU_Hardware--&gt;&gt;App_Enclave: 3. 返回密封密钥
+    
+    App_Enclave-&gt;&gt;App_Enclave: 4. 用密封密钥加密&lt;br&gt;敏感数据(Secret)
+    App_Enclave-&gt;&gt;Untrusted_Storage: 5. (通过OCALL)将&lt;br&gt;加密数据(Sealed Blob)&lt;br&gt;写入外部存储
+
+    Note over App_Enclave, Untrusted_Storage: ...时间流逝，Enclave重启...
+
+    Note over App_Enclave, CPU_Hardware: 阶段二：解封 (Unsealing)
+    App_Enclave-&gt;&gt;Untrusted_Storage: 6. (通过OCALL)读取&lt;br&gt;之前存储的Sealed Blob
+    
+    App_Enclave-&gt;&gt;CPU_Hardware: 7. 再次发起EGETKEY请求&lt;br&gt;使用完全相同的策略
+    CPU_Hardware--&gt;&gt;CPU_Hardware: 8. 硬件重新派生出&lt;br&gt;同一个密封密钥
+    CPU_Hardware--&gt;&gt;App_Enclave: 9. 返回密封密钥
+    
+    App_Enclave-&gt;&gt;App_Enclave: 10. 使用密钥解密&lt;br&gt;Sealed Blob, 恢复Secret
+  </pre></div>
+
+<p><strong>总结</strong>：数据密封机制通过<code>EGETKEY</code>指令，利用CPU内独有的<code>Root Seal Key</code>，并结合Enclave的身份标识（<code>MRENCLAVE</code> 或 <code>MRSIGNER</code>）及其他安全属性，为Enclave数据提供了一种强大的持久化保护方案。它巧妙地将数据的访问权限与Enclave的完整性、作者身份和安全版本绑定在一起，确保了即使数据离开了安全的EPC环境，其保密性依然能够得到硬件级别的保障。</p>
+<hr>
+<p><em>至此，我们已经完整地剖析了 SGX 的三大核心安全机制（真不容易😭）。下一部分，我们将从理论走向实践。</em></p>
+<h2 id="五、概念实践：在思想上构建一个Enclave"><a href="#五、概念实践：在思想上构建一个Enclave" class="headerlink" title="五、概念实践：在思想上构建一个Enclave"></a>五、概念实践：在思想上构建一个Enclave</h2><p>理论知识是根基，但真正的理解升华，来自于观察这些理论如何在实践中被编排和应用——这个是我特别喜欢的一句话。但是因为我的Mac电脑搭建不了一个SGX环境。所以这里我通过思想实验，实现一个案例：通过一个”Hello, World”程序的代码，来反向印证和串联之前学过的所有硬件行为和安全机制，看懂一个SGX程序是如何从代码最终变为一个受硬件保护的可信实体的。</p>
+<h3 id="a-SGX项目的”三国鼎立”架构"><a href="#a-SGX项目的”三国鼎立”架构" class="headerlink" title="a) SGX项目的”三国鼎立”架构"></a>a) SGX项目的”三国鼎立”架构</h3><p>一个典型的SGX项目，由三个核心部分组成，缺一不可：</p>
+<ol>
+<li><p><strong>App (不可信应用)</strong>:</p>
+<ul>
+<li><strong>角色</strong>: 类似与上面提到的”项目经理”与”外交官”。</li>
+<li><strong>本质</strong>: 一个标准的、运行在OS正常环境下的用户态程序。</li>
+<li><strong>职责</strong>:<ul>
+<li>负责加载、初始化、销毁Enclave，是Enclave生命周期的管理者。</li>
+<li>作为Enclave与外部世界（如文件系统、网络、用户界面）沟通的唯一桥梁。</li>
+<li>通过ECALL（Enclave Call）请求Enclave执行可信计算。</li>
+<li>为Enclave提供OCALL（Outside Call）服务，响应其访问外部资源的需求。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Enclave (可信飞地)</strong>:</p>
+<ul>
+<li><strong>角色</strong>: “保险库”与”核心算法专家”。</li>
+<li><strong>本质</strong>: 一个特殊的、将被加密和保护的动态库（<code>.so</code>或<code>.dll</code>）。</li>
+<li><strong>职责</strong>:<ul>
+<li>存放所有需要被保护的敏感代码和数据。</li>
+<li>执行核心的机密计算任务。</li>
+<li>与外界完全隔离，只能通过App定义的接口进行有限的交互。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>EDL (接口定义语言)</strong>:</p>
+<ul>
+<li><strong>角色</strong>: “法律契约”与”海关申报单”。</li>
+<li><strong>本质</strong>: 一个遵循特定语法的<code>.edl</code>文件。</li>
+<li><strong>职责</strong>:<ul>
+<li><strong>严格定义</strong>了App和Enclave之间的通信边界。</li>
+<li>明确声明了哪些函数是ECALL（App可调用Enclave），哪些是OCALL（Enclave可调用App）。</li>
+<li>这个文件是后续自动生成”跨边界通信代码”的唯一蓝图。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="b-神奇的”胶水”：EDL文件与edger8r工具"><a href="#b-神奇的”胶水”：EDL文件与edger8r工具" class="headerlink" title="b) 神奇的”胶水”：EDL文件与edger8r工具"></a>b) 神奇的”胶水”：EDL文件与edger8r工具</h3><p>EDL文件是理解SGX编程的关键。它不仅是定义，更是自动生成安全代码的依据。</p>
+<p><strong>示例 <code>Enclave.edl</code> 文件：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">enclave &#123;</span><br><span class="line">    <span class="comment">// trusted块：声明ECALL</span></span><br><span class="line">    <span class="comment">// App可以调用这些函数进入Enclave</span></span><br><span class="line">    trusted &#123;</span><br><span class="line">        <span class="comment">// public表示该函数是可信入口点</span></span><br><span class="line">        public <span class="type">void</span> <span class="title function_">ecall_process_data</span><span class="params">([in, size=len] <span class="type">const</span> <span class="type">char</span>* data, <span class="type">size_t</span> len)</span>;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// untrusted块：声明OCALL</span></span><br><span class="line">    <span class="comment">// Enclave可以调用这些函数离开Enclave</span></span><br><span class="line">    untrusted &#123;</span><br><span class="line">        <span class="type">void</span> <span class="title function_">ocall_print_log</span><span class="params">([in, <span class="built_in">string</span>] <span class="type">const</span> <span class="type">char</span> *str)</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>[in, string]</code>等属性：它们是**数据封送(Marshalling)**的指令，告诉编译器如何安全地拷贝数据跨越可信&#x2F;不可信边界。</li>
+</ul>
+<p><strong><code>edger8r</code>工具的”魔法”</strong></p>
+<p>当您用SGX SDK编译项目时，一个名为<code>edger8r</code>的工具会读取这个EDL文件，并自动生成一对”胶水”文件：<code>Enclave_u.h</code>&#x2F;<code>c</code>（for App）和<code>Enclave_t.h</code>&#x2F;<code>c</code>（for Enclave）。</p>
+<ul>
+<li><strong>对App而言 (<code>Enclave_u.h</code>)</strong>: <code>edger8r</code>会生成一个与EDL中函数同名的C函数，比如<code>ecall_process_data</code>。但这个函数<strong>不是真正的Enclave代码</strong>，而是一个”代理函数”（Proxy）。当App调用它时，它内部会执行一系列复杂操作：将参数安全打包、触发<code>EENTER</code>指令、并将执行权交给Enclave内的对应函数。</li>
+<li><strong>对Enclave而言 (<code>Enclave_t.h</code>)</strong>: <code>edger8r</code>会生成一个真正的函数体，它负责接收从App传来的数据，解包参数，然后调用您在Enclave中亲手编写的逻辑。</li>
+</ul>
+<p>这层自动生成的胶水代码，将开发者从复杂的边界数据处理和底层指令调用中解放出来，是SGX编程的核心便利性所在。</p>
+<blockquote>
+<p>其实坦率的说如果真的自己开发SGX应用是很麻烦的</p>
+</blockquote>
+<h3 id="c-核心代码导读：理论与实践的交汇"><a href="#c-核心代码导读：理论与实践的交汇" class="headerlink" title="c) 核心代码导读：理论与实践的交汇"></a>c) 核心代码导读：理论与实践的交汇</h3><p>现在，我们来看代码。在阅读时，请时刻回想我们之前学习的硬件机制。</p>
+<p><strong>1. App部分 (<code>App.cpp</code>) - Enclave的”生命周期管理者”</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sgx_urts.h&quot;</span>    <span class="comment">// SGX运行时库</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Enclave_u.h&quot;</span>   <span class="comment">// edger8r为App生成的头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// App必须实现所有在EDL中声明的OCALL函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ocall_print_log</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *str)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; str &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">sgx_enclave_id_t</span> eid = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// ... 其他变量 ...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// --- 理论交汇点 1: Enclave的诞生 ---</span></span><br><span class="line">    <span class="comment">// 这一行代码，触发了整个Enclave的硬件加载生命周期！</span></span><br><span class="line">    <span class="type">sgx_status_t</span> ret = <span class="built_in">sgx_create_enclave</span>(</span><br><span class="line">        <span class="string">&quot;enclave.signed.so&quot;</span>, <span class="comment">// 指向签过名的Enclave文件</span></span><br><span class="line">        SGX_DEBUG_FLAG,      <span class="comment">// 是否允许调试</span></span><br><span class="line">        &amp;token, &amp;updated, </span><br><span class="line">        &amp;eid, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">// 背后发生了什么？</span></span><br><span class="line">    <span class="comment">// 1. ECREATE: 创建SECS。</span></span><br><span class="line">    <span class="comment">// 2. EADD: 逐页加载enclave.signed.so的代码和数据到EPC。</span></span><br><span class="line">    <span class="comment">// 3. EEXTEND: 硬件并行计算MRENCLAVE。</span></span><br><span class="line">    <span class="comment">// 4. EINIT: 硬件用SIGSTRUCT中的公钥，验证MRENCLAVE签名，</span></span><br><span class="line">    <span class="comment">//    并计算、存入MRSIGNER。</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (ret != SGX_SUCCESS) &#123; <span class="comment">/* ... 错误处理 ... */</span> &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// --- 理论交汇点 2: 进入Enclave ---</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* secret_data = <span class="string">&quot;my secret&quot;</span>;</span><br><span class="line">    <span class="comment">// 这个函数调用，实际上触发了EENTER指令！</span></span><br><span class="line">    <span class="built_in">ecall_process_data</span>(eid, secret_data, <span class="built_in">strlen</span>(secret_data));</span><br><span class="line">    <span class="comment">// 背后发生了什么？</span></span><br><span class="line">    <span class="comment">// 1. CPU保存当前App的上下文（寄存器等）。</span></span><br><span class="line">    <span class="comment">// 2. 将执行流跳转到Enclave内部的指定入口点。</span></span><br><span class="line">    <span class="comment">// 3. EPCM硬件确保Enclave只能访问自己的EPC内存。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// --- 理论交汇点 3: 销毁Enclave ---</span></span><br><span class="line">    <span class="built_in">sgx_destroy_enclave</span>(eid); <span class="comment">// 触发EREMOVE指令，擦除SECS</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. Enclave部分 (<code>Enclave.cpp</code>) - “保险库”内的核心逻辑</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Enclave_t.h&quot;</span>   <span class="comment">// edger8r为Enclave生成的头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Enclave实现所有在EDL中声明的ECALL函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ecall_process_data</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* data, <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 此时，代码已在受保护的EPC中执行</span></span><br><span class="line">    <span class="comment">// 参数&#x27;data&#x27;已经被安全地从不可信内存拷贝进来</span></span><br><span class="line">    <span class="type">char</span> log_msg[] = <span class="string">&quot;[Enclave] Data received and processed securely.&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// --- 理论交汇点 4: 退出Enclave ---</span></span><br><span class="line">    <span class="comment">// 这个函数调用，实际上触发了EEXIT指令！</span></span><br><span class="line">    <span class="built_in">ocall_print_log</span>(log_msg);</span><br><span class="line">    <span class="comment">// 背后发生了什么？</span></span><br><span class="line">    <span class="comment">// 1. CPU保存当前Enclave的上下文。</span></span><br><span class="line">    <span class="comment">// 2. 返回到App中，执行App实现的ocall_print_log函数。</span></span><br><span class="line">    <span class="comment">// 3. 从OCALL返回后，CPU会通过ERESUME指令恢复Enclave的执行。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="d-最后的魔法：sgx-sign与SIGSTRUCT"><a href="#d-最后的魔法：sgx-sign与SIGSTRUCT" class="headerlink" title="d) 最后的魔法：sgx_sign与SIGSTRUCT"></a>d) 最后的魔法：<code>sgx_sign</code>与<code>SIGSTRUCT</code></h3><p>您编写的<code>Enclave.so</code>还不能直接被加载，它必须被签名。SDK提供的<code>sgx_sign</code>工具会执行这最后一步关键的”封装”：</p>
+<ol>
+<li><strong>计算MRENCLAVE</strong>: 工具会模拟硬件的<code>EEXTEND</code>过程，对您的<code>Enclave.so</code>内容进行完整性测量，计算出最终的<code>MRENCLAVE</code>值。</li>
+<li><strong>生成签名</strong>: 您需要提供一个RSA私钥。<code>sgx_sign</code>会用这个私钥，对上一步算出的<code>MRENCLAVE</code>进行数字签名。</li>
+<li><strong>打包SIGSTRUCT</strong>: 工具将您的<strong>公钥</strong>、上一步生成的<strong>签名</strong>，以及其他元数据（如<code>ISVSVN</code>）打包成一个<code>SIGSTRUCT</code>结构。</li>
+<li><strong>生成最终文件</strong>: 最后，它将原始的<code>Enclave.so</code>和这个<code>SIGSTRUCT</code>捆绑在一起，生成最终的可加载文件：<code>enclave.signed.so</code>。</li>
+</ol>
+<p>这个<code>enclave.signed.so</code>文件，就是<code>sgx_create_enclave</code>函数真正读取的对象，也是我们所有安全机制的起点。</p>
+<h3 id="e-超越”Hello-World”：一个更真实的思想实验"><a href="#e-超越”Hello-World”：一个更真实的思想实验" class="headerlink" title="e) 超越”Hello World”：一个更真实的思想实验"></a>e) 超越”Hello World”：一个更真实的思想实验</h3><p>想象一个场景：两家互不信任的医院，想联合研究一种罕见病，但又不能将各自的病人隐私数据直接分享给对方。</p>
+<ul>
+<li><strong>SGX解决方案</strong>:<ol>
+<li>一个中立的软件开发者，开发并签名一个数据分析Enclave。<code>MRSIGNER</code>代表了这个算法提供方的可信身份。</li>
+<li>两家医院都通过<strong>远程认证</strong>，验证在云服务器上运行的，确实是那个未经篡改的、由可信方开发的Enclave (<code>MRENCLAVE</code>和<code>MRSIGNER</code>都正确)。</li>
+<li>两家医院各自与Enclave建立端到端的加密信道。</li>
+<li>它们将自己的加密病人数据发送给Enclave。数据只有在Enclave内部才被解密和处理。</li>
+<li>Enclave在内部完成联合统计分析，并将最终的、不含任何个体隐私的统计结果返回给两家医院。</li>
+</ol>
+</li>
+</ul>
+<p>在这个过程中，没有任何一方（包括云服务商、算法开发者、任何一家医院）能看到另一方的原始数据，但联合计算的目标却达成了。这就是SGX在现实世界中发挥其”机密计算”核心价值的典型模式。</p>
+<hr>
+<p>*至此，我们完成了从理论到概念实践的完整旅程。SGX的体系虽然复杂，但其每一个设计都服务于一个明确的安全目标（每次我都会以质疑的目光去看每个组件及流程的意义）</p>
+<h3 id="六、未来挑战：如何尽量预防侧信道攻击"><a href="#六、未来挑战：如何尽量预防侧信道攻击" class="headerlink" title="六、未来挑战：如何尽量预防侧信道攻击"></a>六、未来挑战：如何尽量预防侧信道攻击</h3><blockquote>
+<p>没有任何技术是一定绝对安全的。放宽时间的长度，任何技术在未来都会面临挑战。即使是密码学加密应用的皇冠——非对称加密，也在预防来自量子计算的攻击。</p>
+</blockquote>
+<p>尽管 SGX 在防御直接的软件攻击（如内存读取、代码注入）方面做得非常出色，但它依然面临着一类更为微妙和困难的威胁——<strong>侧信道攻击（Side-Channel Attacks）</strong>。</p>
+<h4 id="10-1-什么是侧信道攻击？"><a href="#10-1-什么是侧信道攻击？" class="headerlink" title="10.1 什么是侧信道攻击？"></a>10.1 什么是侧信道攻击？</h4><p>侧信道攻击不直接攻击加密算法或安全协议本身，而是通过观察计算过程中的<strong>物理信息或副作用（即”侧信道”）</strong>来推断敏感信息。这些”副作用”五花八门，对于 SGX 来说，最主要的威胁来自于：</p>
+<ol>
+<li><strong>缓存攻击（Cache-based Attacks）</strong>：通过精确测量访问某个内存地址的耗时，攻击者可以推断出该地址对应的数据是否在 CPU 缓存中。恶意程序可以通过监控与 Enclave 共享的 CPU 缓存（特别是 L3 Cache），来推断 Enclave 的内存访问模式，从而可能泄露加密密钥等信息。<code>Foreshadow</code>, <code>L1TF</code> 等都是著名的缓存侧信道攻击。</li>
+<li><strong>页表攻击（Page-Fault-based Attacks）</strong>：恶意的 OS 控制着页表。它虽然不能读取 Enclave 的页面内容，但可以通过故意将某个 Enclave 页面标记为”不存在”（Not Present），来观察 Enclave 何时会访问它。当 Enclave 访问该页面时，会触发一次页面错误（Page Fault），OS 就能捕获到这个事件。通过这种方式，OS 可以精确地监控 Enclave 的代码执行流和数据访问模式。</li>
+<li><strong>分支预测攻击（Branch Prediction Attacks）</strong>：像 <code>Spectre</code> 这样的攻击利用了现代 CPU 的分支预测执行单元。攻击者可以”训练”分支预测器，诱导 Enclave 在推测执行（Speculative Execution）的路径上访问其内部的敏感数据，并通过缓存等侧信道将这些信息泄露出来。</li>
+</ol>
+<h4 id="10-2-为何-SGX-难以完全免疫侧信道攻击？"><a href="#10-2-为何-SGX-难以完全免疫侧信道攻击？" class="headerlink" title="10.2 为何 SGX 难以完全免疫侧信道攻击？"></a>10.2 为何 SGX 难以完全免疫侧信道攻击？</h4><p>SGX 的设计理念是将 OS 排除在 TCB 之外，但它无法改变一个基本事实：<strong>Enclave 必须与不可信的 OS 共享底层的物理硬件资源</strong>，如 CPU 缓存、分支预测器、内存控制器等。侧信道攻击正是利用了对这些共享资源的访问和观察能力。SGX 的内存加密和访问控制无法阻止这些”元信息”的泄露。</p>
+<h4 id="10-3-防护策略与未来方向"><a href="#10-3-防护策略与未来方向" class="headerlink" title="10.3 防护策略与未来方向"></a>10.3 防护策略与未来方向</h4><p>预防侧信道攻击是一个持续演进的、系统性的工程，需要软件和硬件的协同努力。</p>
+<ol>
+<li><p><strong>硬件层面改进 (来自 Intel)</strong></p>
+<ul>
+<li><strong>增强隔离</strong>：在新一代的 CPU 中，Intel 已经开始引入更强的硬件隔离机制，例如 L1 缓存的刷新机制、对分支预测器的间接分支限制（IBRS&#x2F;IBPB）等，以减小信息泄露的带宽。</li>
+<li><strong>TCB 更新</strong>：Intel 会定期发布微码（Microcode）更新，修复已知的硬件漏洞。保持 TCB 的更新是防御的基础。</li>
+</ul>
+</li>
+<li><p><strong>软件层面缓解 (来自开发者)</strong></p>
+<ul>
+<li><strong>数据无关的编程范式</strong>：编写代码时，尽量避免让程序的内存访问模式或执行时间与敏感数据直接相关。例如，无论输入是什么，都执行相同的分支和内存访问路径。这被称为”恒定时间编程”（Constant-Time Programming）。</li>
+<li><strong>访问模式混淆</strong>：在代码中插入一些伪随机的、无意义的内存访问指令，以”淹没”真实的内存访问信号，让攻击者难以分析。这被称为”代码混淆”或”噪声注入”。</li>
+<li><strong>使用 SDK&#x2F;编译器提供的防护</strong>：一些先进的 SGX SDK 或专门的安全编译器（如 <code>T-SGX</code>）会尝试自动在代码中插入防护指令。例如，在每次进入或退出 Enclave 时自动刷新分支预测器状态，或在循环的末尾插入 <code>LFENCE</code> 指令来阻止推测执行越过边界。</li>
+<li><strong>减少攻击面</strong>：精心设计 Enclave 的接口（ECALL&#x2F;OCALL），最小化与不可信世界的交互次数和数据量。避免在 Enclave 内部处理过于复杂的逻辑，尤其是那些容易产生复杂分支和内存访问模式的逻辑。</li>
+</ul>
+</li>
+<li><p><strong>操作系统&#x2F;VMM 层面</strong></p>
+<ul>
+<li><strong>资源划分</strong>：在云环境中，可以采用更严格的资源调度策略，例如，将运行敏感 Enclave 的物理核心与运行其他不可信任务的核心分离开，避免共享 L1&#x2F;L2 缓存。</li>
+</ul>
+</li>
+</ol>
+<p><strong>总结</strong>：侧信道攻击是 SGX 乃至所有现代处理器面临的共同挑战。目前没有一劳永逸的”银弹”，防护工作更像是一场持续的”军备竞赛”。我们需要保持对最新攻击方法的关注，并在编程实践中始终贯穿”减少信息泄露”的安全意识，结合使用硬件更新、SDK 防护和数据无关编程等多种策略，来共同构建更健壮的机密计算应用。</p>
+<blockquote>
+<p>世间安得双全法，唯有不断前进</p>
+</blockquote>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>我们从 SGX 的基本概念和 TCB 出发，深入剖析了其核心硬件组件、完整的生命周期、关键的硬件指令集，并详细拆解了内存安全、身份认证、持久化存储这三大核心安全机制。最后，我们还通过一个编程实例展示了如何上手 SG’X 开发，并探讨了侧信道攻击这一前沿挑战。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/')">一起来学Intel SGX</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=一起来学Intel SGX&amp;url=http://example.com/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>机密计算<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/TEE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TEE<span class="tagsPageCount">10</span></a><a class="post-meta__box__tags" href="/tags/Intel-SGX/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Intel SGX<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>硬件安全<span class="tagsPageCount">2</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Intel SGX 设计与安全原理全解析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-26</div><div class="title">Intel SGX 设计与安全原理全解析</div></div></a></div><div><a href="/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/" title="HyperEnclave：一个开放且跨平台的可信执行环境"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-19</div><div class="title">HyperEnclave：一个开放且跨平台的可信执行环境</div></div></a></div><div><a href="/2025/07/18/HyperEnclave%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%9B%BE/" title="HyperEnclave源码学习路线图"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115418384.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-18</div><div class="title">HyperEnclave源码学习路线图</div></div></a></div><div><a href="/2025/06/26/confidential_computing_implementation_guide/" title="机密计算环境实施：从硬件选型到应用部署"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-26</div><div class="title">机密计算环境实施：从硬件选型到应用部署</div></div></a></div><div><a href="/2025/06/24/confidential_computing_overview/" title="从物理攻击到云端信任：让我们一起了解可信执行环境与机密计算技术栈"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-24</div><div class="title">从物理攻击到云端信任：让我们一起了解可信执行环境与机密计算技术栈</div></div></a></div><div><a href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-21</div><div class="title">HyperEnclave启动和初始化流程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E8%B5%B7%E6%9D%A5%E5%AD%A6Intel-SGX"><span class="toc-number">1.</span> <span class="toc-text">一起来学Intel SGX</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81SGX%E5%9F%BA%E7%A1%80%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-number">1.2.</span> <span class="toc-text">一、SGX基础与核心概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-SGX%E7%9A%84%E7%9B%AE%E6%A0%87%EF%BC%9A%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.1 SGX的目标：机密计算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-TCB%EF%BC%88%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97%E5%9F%BA%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2 TCB（可信计算基）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-Enclave%E7%9A%84%E8%BA%AB%E4%BB%BD%E4%B8%89%E8%A6%81%E7%B4%A0%EF%BC%9AMRENCLAVE-SIGSTRUCT-MRSIGNER"><span class="toc-number">1.2.3.</span> <span class="toc-text">1.3 Enclave的身份三要素：MRENCLAVE, SIGSTRUCT, MRSIGNER</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#a-MRENCLAVE-Enclave%E7%9A%84%E2%80%9DDNA%E6%8C%87%E7%BA%B9%E2%80%9D"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">a) MRENCLAVE - Enclave的”DNA指纹”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#b-SIGSTRUCT-Enclave%E7%9A%84%E2%80%9D%E6%95%B0%E5%AD%97%E5%B0%81%E6%9D%A1%E2%80%9D%E4%B8%8E%E8%BA%AB%E4%BB%BD%E5%87%AD%E8%AF%81"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">b) SIGSTRUCT - Enclave的”数字封条”与身份凭证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c-EINIT%E4%B8%8EMRSIGNER-%E2%80%9C%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81%E2%80%9D%E4%B8%8E%E2%80%9D%E8%BA%AB%E4%BB%BD%E6%8E%88%E4%BA%88%E2%80%9D"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">c) EINIT与MRSIGNER - “身份验证”与”身份授予”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#d-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%B8%BA%E4%BD%95%E9%9C%80%E8%A6%81MRSIGNER%EF%BC%9F"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">d) 深度解析：为何需要MRSIGNER？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#e-%E6%88%91%E8%83%BD%E4%BC%AA%E9%80%A0MRSIGNER%E5%90%97%EF%BC%9F"><span class="toc-number">1.2.3.5.</span> <span class="toc-text">e) 我能伪造MRSIGNER吗？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E7%A1%AC%E4%BB%B6%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%A7%A3%E6%9E%90"><span class="toc-number">1.3.</span> <span class="toc-text">二、核心硬件与组件解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-PRM-EPC"><span class="toc-number">1.3.1.</span> <span class="toc-text">2.1 PRM &amp; EPC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-MEE"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.2 MEE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-SECS"><span class="toc-number">1.3.3.</span> <span class="toc-text">2.3 SECS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-EPCM"><span class="toc-number">1.3.4.</span> <span class="toc-text">2.4 EPCM</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81SGX%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E9%83%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">三、SGX工作原理与内部流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Enclave-%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="toc-number">1.4.1.</span> <span class="toc-text">3.1 Enclave 的生命周期管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-1-%E5%88%9B%E5%BB%BA-Creation-ECREATE"><span class="toc-number">1.4.1.1.</span> <span class="toc-text">阶段 1: 创建 (Creation) - ECREATE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-2-%E5%8A%A0%E8%BD%BD%E4%BB%A3%E7%A0%81%E4%B8%8E%E6%95%B0%E6%8D%AE-Content-Loading-EADD-EEXTEND"><span class="toc-number">1.4.1.2.</span> <span class="toc-text">阶段 2: 加载代码与数据 (Content Loading) - EADD &amp; EEXTEND</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-3-%E5%88%9D%E5%A7%8B%E5%8C%96-Initialization-EINIT"><span class="toc-number">1.4.1.3.</span> <span class="toc-text">阶段 3: 初始化 (Initialization) - EINIT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-4-5-%E8%BF%9B%E5%85%A5%E4%B8%8E%E9%80%80%E5%87%BA-Enter-Exit-EENTER-ERESUME-EEXIT"><span class="toc-number">1.4.1.4.</span> <span class="toc-text">阶段 4 &amp; 5: 进入与退出 (Enter &amp; Exit) - EENTER, ERESUME, EEXIT</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-6-%E9%94%80%E6%AF%81-Deletion-EREMOVE"><span class="toc-number">1.4.1.5.</span> <span class="toc-text">阶段 6: 销毁 (Deletion) - EREMOVE</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-SGX-%E7%A1%AC%E4%BB%B6%E6%8C%87%E4%BB%A4%E9%9B%86%E4%B8%8E%E5%86%85%E9%83%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.2.</span> <span class="toc-text">3.2 SGX 硬件指令集与内部执行流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E5%86%85%E9%83%A8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E7%A4%BA%E4%BE%8B-EADD"><span class="toc-number">1.4.2.1.</span> <span class="toc-text">指令内部执行流程示例 (EADD)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%AE%89%E5%85%A8%E5%8A%A0%E8%BD%BD"><span class="toc-number">1.4.3.</span> <span class="toc-text">3.3 安全加载</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E9%98%B2%E7%AA%A5%E6%8E%A2-MEE-%E7%9A%84%E5%AE%9E%E6%97%B6%E5%8A%A0%E5%AF%86"><span class="toc-number">1.4.3.1.</span> <span class="toc-text">步骤 1：防窥探 - MEE 的实时加密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E9%98%B2%E7%AF%A1%E6%94%B9-%E6%B5%8B%E9%87%8F%E6%9C%BA%E5%88%B6%E7%9A%84%E6%A0%B8%E5%BF%83-EEXTEND"><span class="toc-number">1.4.3.2.</span> <span class="toc-text">步骤 2：防篡改 - 测量机制的核心 EEXTEND</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B8%AA%E6%9C%BA%E5%88%B6%E6%98%AF%E5%AE%89%E5%85%A8%E7%9A%84%EF%BC%9F"><span class="toc-number">1.4.3.3.</span> <span class="toc-text">为什么这个机制是安全的？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%85%B3%E9%94%AE%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90"><span class="toc-number">1.5.</span> <span class="toc-text">四、关键安全机制深度剖析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%86%85%E5%AD%98%E5%AE%89%E5%85%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E6%8A%B5%E5%BE%A1%E6%9D%A5%E8%87%AA-OS-%E7%9A%84%E6%94%BB%E5%87%BB"><span class="toc-number">1.5.1.</span> <span class="toc-text">4.1 内存安全：如何抵御来自 OS 的攻击</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-EDMM%EF%BC%9AEnclave-%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">1.5.2.</span> <span class="toc-text">4.2 EDMM：Enclave 动态内存管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%AE%A4%E8%AF%81%E6%9C%BA%E5%88%B6%EF%BC%9A%E6%9E%84%E5%BB%BA%E4%BF%A1%E4%BB%BB%E7%9A%84%E9%98%B6%E6%A2%AF"><span class="toc-number">1.5.3.</span> <span class="toc-text">4.3 认证机制：构建信任的阶梯</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-1-%E4%BF%A1%E4%BB%BB%E9%98%B6%E6%A2%AF%E7%9A%84%E8%B5%B7%E7%82%B9%EF%BC%9ACPU%E5%86%85%E9%83%A8%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%A1%E4%BB%BB-%E6%9C%AC%E5%9C%B0%E8%AE%A4%E8%AF%81"><span class="toc-number">1.5.3.1.</span> <span class="toc-text">4.3.1 信任阶梯的起点：CPU内部的自我信任 (本地认证)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-%E8%BF%9C%E7%A8%8B%E8%AE%A4%E8%AF%81%EF%BC%9A%E6%9E%84%E5%BB%BA%E8%B7%A8%E7%BD%91%E7%BB%9C%E7%9A%84%E4%BF%A1%E4%BB%BB%E9%93%BE"><span class="toc-number">1.5.3.2.</span> <span class="toc-text">4.3.2 远程认证：构建跨网络的信任链</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#a-%E8%BF%9C%E7%A8%8B%E8%AE%A4%E8%AF%81%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">1.5.3.2.1.</span> <span class="toc-text">a) 远程认证的完整流程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#b-%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%BF%A1%E4%BB%BB%E9%93%BE%E7%9A%84%E6%9E%84%E5%BB%BA%E7%BB%86%E8%8A%82"><span class="toc-number">1.5.3.2.2.</span> <span class="toc-text">b) 深度解析：信任链的构建细节</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%AF%86%E5%B0%81-Data-Sealing"><span class="toc-number">1.5.4.</span> <span class="toc-text">4.4 持久化数据保护：数据密封 (Data Sealing)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#a-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E4%B8%8E%E5%85%B3%E9%94%AE%E8%A6%81%E7%B4%A0"><span class="toc-number">1.5.4.1.</span> <span class="toc-text">a) 核心思想与关键要素</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#b-EGETKEY-%E4%B8%8E%E4%B8%A4%E7%A7%8D%E5%AF%86%E5%B0%81%E7%AD%96%E7%95%A5"><span class="toc-number">1.5.4.2.</span> <span class="toc-text">b) EGETKEY 与两种密封策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c-%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E7%BB%86%E8%8A%82%E4%B8%8E%E9%99%8D%E7%BA%A7%E6%94%BB%E5%87%BB%E9%98%B2%E5%BE%A1"><span class="toc-number">1.5.4.3.</span> <span class="toc-text">c) 密钥派生细节与降级攻击防御</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#d-%E5%AE%8C%E6%95%B4%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%9A%E5%AF%86%E5%B0%81%E4%B8%8E%E8%A7%A3%E5%B0%81"><span class="toc-number">1.5.4.4.</span> <span class="toc-text">d) 完整生命周期：密封与解封</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%A6%82%E5%BF%B5%E5%AE%9E%E8%B7%B5%EF%BC%9A%E5%9C%A8%E6%80%9D%E6%83%B3%E4%B8%8A%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAEnclave"><span class="toc-number">1.6.</span> <span class="toc-text">五、概念实践：在思想上构建一个Enclave</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#a-SGX%E9%A1%B9%E7%9B%AE%E7%9A%84%E2%80%9D%E4%B8%89%E5%9B%BD%E9%BC%8E%E7%AB%8B%E2%80%9D%E6%9E%B6%E6%9E%84"><span class="toc-number">1.6.1.</span> <span class="toc-text">a) SGX项目的”三国鼎立”架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#b-%E7%A5%9E%E5%A5%87%E7%9A%84%E2%80%9D%E8%83%B6%E6%B0%B4%E2%80%9D%EF%BC%9AEDL%E6%96%87%E4%BB%B6%E4%B8%8Eedger8r%E5%B7%A5%E5%85%B7"><span class="toc-number">1.6.2.</span> <span class="toc-text">b) 神奇的”胶水”：EDL文件与edger8r工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#c-%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AF%BC%E8%AF%BB%EF%BC%9A%E7%90%86%E8%AE%BA%E4%B8%8E%E5%AE%9E%E8%B7%B5%E7%9A%84%E4%BA%A4%E6%B1%87"><span class="toc-number">1.6.3.</span> <span class="toc-text">c) 核心代码导读：理论与实践的交汇</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#d-%E6%9C%80%E5%90%8E%E7%9A%84%E9%AD%94%E6%B3%95%EF%BC%9Asgx-sign%E4%B8%8ESIGSTRUCT"><span class="toc-number">1.6.4.</span> <span class="toc-text">d) 最后的魔法：sgx_sign与SIGSTRUCT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#e-%E8%B6%85%E8%B6%8A%E2%80%9DHello-World%E2%80%9D%EF%BC%9A%E4%B8%80%E4%B8%AA%E6%9B%B4%E7%9C%9F%E5%AE%9E%E7%9A%84%E6%80%9D%E6%83%B3%E5%AE%9E%E9%AA%8C"><span class="toc-number">1.6.5.</span> <span class="toc-text">e) 超越”Hello World”：一个更真实的思想实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%9C%AA%E6%9D%A5%E6%8C%91%E6%88%98%EF%BC%9A%E5%A6%82%E4%BD%95%E5%B0%BD%E9%87%8F%E9%A2%84%E9%98%B2%E4%BE%A7%E4%BF%A1%E9%81%93%E6%94%BB%E5%87%BB"><span class="toc-number">1.6.6.</span> <span class="toc-text">六、未来挑战：如何尽量预防侧信道攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#10-1-%E4%BB%80%E4%B9%88%E6%98%AF%E4%BE%A7%E4%BF%A1%E9%81%93%E6%94%BB%E5%87%BB%EF%BC%9F"><span class="toc-number">1.6.6.1.</span> <span class="toc-text">10.1 什么是侧信道攻击？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#10-2-%E4%B8%BA%E4%BD%95-SGX-%E9%9A%BE%E4%BB%A5%E5%AE%8C%E5%85%A8%E5%85%8D%E7%96%AB%E4%BE%A7%E4%BF%A1%E9%81%93%E6%94%BB%E5%87%BB%EF%BC%9F"><span class="toc-number">1.6.6.2.</span> <span class="toc-text">10.2 为何 SGX 难以完全免疫侧信道攻击？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#10-3-%E9%98%B2%E6%8A%A4%E7%AD%96%E7%95%A5%E4%B8%8E%E6%9C%AA%E6%9D%A5%E6%96%B9%E5%90%91"><span class="toc-number">1.6.6.3.</span> <span class="toc-text">10.3 防护策略与未来方向</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">1.7.</span> <span class="toc-text">结语</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一起来学Intel SGX"/></a><div class="content"><a class="title" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX">一起来学Intel SGX</a><time datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intel SGX 设计与安全原理全解析"/></a><div class="content"><a class="title" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析">Intel SGX 设计与安全原理全解析</a><time datetime="2025-07-26T14:00:00.000Z" title="发表于 2025-07-26 22:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3564d61e60e59786c3e06fbcb40d0aad.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave">Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-26T11:00:00.000Z" title="发表于 2025-07-26 19:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解RSA：加密与签名的艺术"/></a><div class="content"><a class="title" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术">深入理解RSA：加密与签名的艺术</a><time datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

@@ -1,0 +1,1401 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>程序化广告数据处理与投放技术架构与业务模式 | 凌霄的博客</title><meta name="keywords" content="广告投放,RTB,DSP"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="程序化广告数据处理与投放技术架构与业务模式"><meta name="application-name" content="程序化广告数据处理与投放技术架构与业务模式"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="程序化广告数据处理与投放技术架构与业务模式"><meta property="og:url" content="http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="深入解析程序化广告的核心概念、业务流程、数据处理机制和技术实现方案，涵盖RTB竞价、DSP平台、DMP数据管理等"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625170909952.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625170909952.png"><meta name="description" content="深入解析程序化广告的核心概念、业务流程、数据处理机制和技术实现方案，涵盖RTB竞价、DSP平台、DMP数据管理等"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '程序化广告数据处理与投放技术架构与业务模式',
+  postAI: '',
+  pageFillDescription: '程序化广告数据处理与投放业务模式与技术架构, 目录, 第一章：程序化广告概述, 1.1 为什么需要程序化广告？, 1.2 核心价值与业务影响, 1. 精准投放：从广撒网到精准狙击, 2. 实时优化：从设置后等待到实时调整, 3. 规模化操作：从人工管理到算法驱动, 4. 数据驱动：从经验决策到数据决策, 第二章：核心概念与角色, 2.1 程序化广告的商业生态：谁出钱谁赚钱谁负责, 2.3 主要参与方及其利益关系, 1. 广告主（Advertiser）- 出钱的一方, 2. DSP（Demand Side Platform）- 需求方平台（服务广告主）, 3. 媒体方（Publisher）- 出售流量的一方, 4. SSP（Supply Side Platform）- 供应方平台（服务媒体方）, 5. AdX（Ad Exchange）- 广告交易平台（撮合交易）, 6. DMP（Data Management Platform）- 数据管理平台（提供数据服务）, 2.4 资金流向与利益分配, 2.5 服务关系与责任链, 谁对谁负责？, 2.6 实际商业案例解析, 2.2 技术生态图, 第三章：业务流程详解, 3.1 RTB实时竞价流程, 3.2 数据处理流程, 第四章：数据处理架构, 4.1 大数据处理架构, 4.2 实时数据处理链路, 第五章：技术架构设计, 5.1 DSP核心系统架构, 竞价决策引擎：广告投放的大脑, 用户画像服务：用户的数字化身, 5.2 实时数据处理：让数据活起来, 5.3 高性能竞价系统架构, 竞价系统架构设计, 系统设计要点, 第六章：性能优化策略, 6.1 缓存策略, 缓存策略的业务价值, 6.2 数据预处理和预计算策略, 6.3 模型优化和AB测试体系, 第七章：实际应用案例, 7.1 案例1：电商平台程序化广告系统, 业务场景, 技术架构, 核心实现策略, 7.2 案例2：视频平台程序化广告, 业务特点, 核心优化策略, 第八章：总结与业务价值, 8.1 程序化广告的商业价值, 8.2 技术实现的关键成功因素, 1. 技术要点, 2. 业务价值实现路径, 3. 关键业务指标, 8.3 未来发展趋势与机遇, 1. 技术发展方向, 2. 业务发展机遇, 3. 挑战与应对, 8.4 结语程序化广告数据处理与投放业务模式与技术架构目录第一章程序化广告概述第二章核心概念与角色第三章业务流程详解第四章数据处理架构第五章技术架构设计第六章性能优化策略第七章实际应用案例第八章总结与业务价值第一章程序化广告概述程序化广告是一种利用软件和算法自动化购买和投放广告的技术它通过实时竞价数据驱动决策和机器学习算法实现广告投放的精准化自动化和规模化为什么需要程序化广告传统广告投放的痛点效率低下需要人工洽谈签约排期周期长达数天甚至数周精准度差只能基于媒体整体用户画像无法做到个性化投放透明度低广告主无法实时了解投放效果和资金使用情况规模受限人工操作难以管理大量媒体资源和广告位程序化广告的解决方案毫秒级决策从广告请求到展示决策在内完成个性化定向基于用户实时行为和画像进行精准投放实时透明投放数据效果指标预算消耗实时可见规模化管理单个平台可管理数万个广告计划和数千万用户核心价值与业务影响精准投放从广撒网到精准狙击业务场景一个电商平台想推广运动鞋传统方式在体育网站购买横幅广告覆盖所有访问者程序化方式只对岁男性近期搜索过运动鞋收入中等的用户展示广告技术实现通过分析用户行为构建精准人群包根据用户标签实时决策实时优化从设置后等待到实时调整业务场景发现某个创意素材点击率偏低传统方式需要等到投放结束后分析数据下次投放时调整程序化方式实时监测自动减少低效创意的展示频率增加高效创意的投放技术实现通过流式数据处理实时计算效果指标竞价算法动态调整出价策略规模化操作从人工管理到算法驱动业务场景管理个不同的广告计划传统方式需要大量运营人员逐个监控和调整程序化方式算法自动根据预设规则和学习结果进行优化技术实现通过机器学习算法预测自动化竞价和预算分配数据驱动从经验决策到数据决策业务场景确定最佳投放时间段传统方式基于运营经验推测用户活跃时间程序化方式分析目标用户群体的历史行为数据找出最佳投放时机技术实现通过大数据分析用户行为模式为每个用户群体定制投放策略第二章核心概念与角色程序化广告的商业生态谁出钱谁赚钱谁负责在了解技术细节之前我们需要先理解程序化广告的商业逻辑简单来说广告主出钱买流量获得曝光和转化媒体方出流量赚取广告费技术平台提供服务从中收取服务费主要参与方及其利益关系广告主出钱的一方角色定位花钱买广告效果的企业或个人付费对象向平台付费购买广告投放服务核心诉求用最少的钱获得最好的广告效果高高转化率典型客户电商平台游戏公司金融机构品牌厂商举例某手机品牌要推广新款手机预算万元希望精准投放给岁收入中等关注数码产品的用户群体需求方平台服务广告主服务对象广告主盈利模式收取广告投放服务费通常是广告花费的核心价值帮助广告主花更少的钱获得更好的效果主要工作竞价决策预算管理效果优化报告分析举例平台帮手机品牌管理万预算通过算法优化最终花费万获得了预期效果收取万服务费媒体方出售流量的一方角色定位拥有用户流量的网站等收入来源出售广告位获得广告收入核心诉求在不影响用户体验的前提下最大化广告收入典型媒体新闻网站视频平台社交媒体工具举例某新闻每天有万活跃用户通过展示广告每天可以获得万元广告收入供应方平台服务媒体方服务对象媒体方盈利模式从媒体广告收入中抽取分成通常是核心价值帮助媒体方获得更高的广告收入主要工作库存管理价格优化反作弊收益分析举例帮新闻优化广告展示策略将日收入从万元提升到万元抽取分成元广告交易平台撮合交易服务对象和双方盈利模式收取交易手续费每次交易收取小额费用核心价值提供透明高效的交易撮合服务主要工作实时竞价撮合资金结算数据传输举例每天撮合数百万次广告交易每次交易收取元手续费数据管理平台提供数据服务服务对象广告主盈利模式出售数据服务或按使用量收费核心价值提供精准的用户数据和画像服务主要工作数据收集用户画像人群定向举例向提供用户标签数据按每千次查询收取元费用资金流向与利益分配广告主投放预算万平台服务费万竞价万交易平台手续费万广告费万平台分成万广告收入万媒体方平台数据服务万数据费用万收入分配收入万服务费收入万分成收入万手续费收入万数据费媒体收入万广告费服务关系与责任链谁对谁负责对广告主负责责任确保广告投放效果合理使用预算考核指标点击率转化率获客成本问责机制效果不达标需要退款或补量对媒体方负责责任确保媒体方广告收入最大化保护媒体品牌考核指标千次展示收入填充率用户体验问责机制收入下降或品牌受损需要赔偿对交易双方负责责任确保交易公平透明安全考核指标交易成功率资金安全数据保护问责机制交易纠纷需要仲裁和赔付对数据使用方负责责任确保数据准确性和合规性考核指标数据质量隐私合规服务稳定性问责机制数据错误或泄露需要承担法律责任实际商业案例解析案例电商平台双广告投放参与方角色广告主某电商平台预算万元某程序化广告平台服务费媒体方各大新闻视频社交平台各媒体自有或第三方变现平台统一的广告交易平台提供双用户购物意向数据资金流向电商平台向支付万预算收取万服务费用万进行投放通过平台最终万到达各媒体方各环节平台按约定比例分成效果评估电商平台获得万新用户注册平均获客成本元媒体方获得万广告收入用户体验未受影响各技术平台获得合理服务费技术能力得到验证这个生态系统的核心是多方共赢广告主获得精准流量媒体方获得广告收入技术平台获得服务费用户看到相关性更高的广告技术生态图广告主需求方平台广告交易平台供应方平台媒体方数据管理平台用户数据源第三方数据实时竞价生态实时竞价竞价响应广告展示数据流转用户行为数据广告效果数据媒体库存数据第三章业务流程详解实时竞价流程用户媒体网站平台交易平台平台平台广告主访问网页发起广告请求提交广告位信息发送竞价请求查询用户画像返回用户标签竞价决策算法返回竞价响应竞价排序和选择返回获胜广告返回广告创意展示广告整个流程通常在内完成数据处理流程数据采集数据清洗数据标准化数据整合用户画像构建标签体系建设人群定向投放策略制定实时竞价效果监测数据反馈数据源第一方数据第二方数据第三方数据公开数据机器学习特征工程模型训练模型评估模型部署第四章数据处理架构大数据处理架构数据采集层埋点服务器日志第三方数据数据传输层消息队列日志收集数据同步数据存储层分布式存储实时数据库缓存搜索数据计算层批处理流处理交互查询数据服务层用户画像服务实时推荐服务竞价决策服务效果分析服务实时数据处理链路用户行为数据采集消息队列流式处理实时存储竞价决策广告投放效果回传数据更新实时处理组件第五章技术架构设计核心系统架构竞价决策引擎广告投放的大脑为什么需要竞价决策算法竞价决策算法是程序化广告的核心它要在极短时间内回答三个关键问题要不要投放用户是否匹配目标人群投放什么选择哪个广告创意出价多少在竞争中获胜又不浪费预算解决的核心业务问题问题海量流量的实时筛选业务场景每秒收到数万个竞价请求但只有很小比例符合广告主要求传统难点人工无法实时判断每个用户是否值得投放算法解决毫秒级匹配用户画像与广告定向条件问题动态价格竞争业务场景同一个广告位可能有数十个广告主竞价传统难点出价太低无法获胜出价太高浪费预算算法解决基于历史数据和实时反馈动态调整出价策略问题预算优化分配业务场景广告主有限的预算需要在最有价值的用户上花费传统难点难以预测哪些用户更可能产生转化算法解决通过机器学习预估用户价值优先投放高价值用户竞价决策的业务逻辑收到竞价请求用户画像匹配不匹配放弃竞价匹配预算充足不足充足计算用户价值价值超过阈值否是选择最佳创意计算最优出价提交竞价核心算法用户价值预估预测模型出价策略优化动态定价算法创意匹配算法个性化推荐用户画像服务用户的数字化身为什么需要用户画像用户画像是程序化广告精准投放的基础它要解决这个用户是谁喜欢什么会买什么的问题解决的核心业务问题问题用户身份识别业务挑战同一用户在不同设备不同时间访问如何识别为同一人业务价值避免对同一用户重复投放提升广告效果技术方案通过设备指纹同步登录态关联等技术建立用户统一问题兴趣偏好挖掘业务挑战用户不会主动告诉你喜欢什么如何从行为中推断兴趣业务价值投放用户真正感兴趣的广告提升点击率和转化率技术方案分析浏览内容停留时间互动行为等构建兴趣标签问题购买能力评估业务挑战如何判断用户的消费能力和购买意向业务价值高价值商品优先投放给高消费能力用户提升技术方案分析购买历史浏览商品价位收入水平等特征用户画像的分层结构静态属性层人口统计学特征年龄性别地域收入教育职业动态行为层浏览行为特征搜索关键词内容偏好时间模式兴趣偏好层兴趣标签品牌偏好价格敏感度购买周期价值评估层生命周期价值转化概率活跃度指数风险等级实际业务应用场景场景电商用户画像标签体系品类偏好价格敏感度购买频次品牌忠诚度应用价值新品推荐促销活动定向复购提醒场景金融用户画像标签体系风险偏好投资经验资产规模信用等级应用价值理财产品推荐风险控制精准营销场景内容平台用户画像标签体系内容偏好活跃时间社交属性付费意愿应用价值内容推荐会员推广广告定向实时数据处理让数据活起来为什么需要实时数据处理在程序化广告中数据的时效性直接影响投放效果一个用户刚刚搜索了如果能在几分钟内投放相关广告转化率会比几小时后投放高出数倍解决的核心业务问题问题用户兴趣的时效性业务场景用户刚搜索了旅游攻略此时投放旅游广告效果最佳传统问题批处理延迟数小时错过最佳投放时机实时方案流处理几秒内更新用户兴趣标签立即调整投放策略问题广告效果的快速反馈业务场景某个广告创意异常低需要立即暂停传统问题等待日报发现问题时已浪费大量预算实时方案实时监控效果指标自动触发预警和调整问题库存动态管理业务场景电商大促期间商品库存快速变化传统问题推广已售罄商品影响用户体验实时方案实时同步库存状态动态调整广告投放实时处理的业务价值链用户行为发生毫秒级数据采集秒级流式处理实时标签更新投放策略调整效果立即反馈策略持续优化业务价值提升转化率降低获客成本快速止损预算保护用户体验优化品牌形象提升不同业务场景的实时性要求业务场景实时性要求业务影响技术方案搜索广告毫秒级直接影响搜索结果展示内存缓存预计算信息流广告秒级影响个性化推荐效果流处理效果监控分钟级影响投放策略调整速度流式聚合实时告警用户画像小时级影响长期投放精准度批流结合处理高性能竞价系统架构竞价系统架构设计接入层负载均衡器网关业务层竞价决策服务用户画像服务广告匹配服务定价策略服务缓存层本地缓存存储层用户数据广告数据日志数据消息层集群系统设计要点高并发处理能力挑战单个每秒需要处理数万次竞价请求解决方案异步处理专用线程池连接池优化技术选型自定义极低延迟要求挑战协议要求内完成竞价决策解决方案多级缓存预计算算法优化性能目标请求在内完成高可用保障挑战小时不间断服务单点故障影响收入解决方案多机房部署熔断降级故障转移可用性目标以上第六章性能优化策略缓存策略请求本地缓存命中返回结果未命中缓存命中更新本地缓存未命中数据库查询更新缓存本地缓存容量小速度极快毫秒级响应缓存容量大速度快毫秒到十毫秒级数据库容量最大速度慢十毫秒到百毫秒级缓存策略的业务价值为什么需要多级缓存程序化广告面临的核心挑战是极致的响应时间要求协议要求在内完成整个竞价流程用户画像查询广告匹配定价计算都需要在这内完成传统数据库查询无法满足时延要求解决的业务问题响应时延问题数据库查询时间过长导致竞价失败并发压力问题单个每秒需要处理数万次竞价请求数据一致性问题用户画像数据需要在多个服务间快速共享成本控制问题降低数据库查询压力减少基础设施成本数据预处理和预计算策略为什么需要预计算在竞价决策的时间限制内很多复杂计算无法实时完成需要通过预计算来提升响应速度预计算的核心策略策略用户画像预计算场景活跃用户的画像更新频率高实时计算压力大方案定期批量更新活跃用户画像存储到缓存频率每分钟更新一次覆盖最近小时内活跃用户策略广告定向规则预计算场景复杂的定向规则匹配耗时较长方案预先计算广告定向规则建立倒排索引频率每天凌晨更新同步最新的广告计划配置策略特征工程预计算场景机器学习特征计算复杂度高方案预计算常用特征实时组合使用频率实时增量更新离线全量重建模型优化和测试体系模型持续优化的业务价值程序化广告的效果直接影响收入的提升可能带来数百万的额外收入因此需要建立完善的模型优化体系测试驱动的模型迭代阶段离线评估基于历史数据评估新模型性能关键指标精准率召回率通过阈值相比基准模型提升以上阶段小流量验证在的流量上测试新模型观察指标验证周期天阶段全量发布逐步扩大新模型的流量比例持续监控核心业务指标建立快速回滚机制模型优化的关键技术特征工程优化自动化特征选择和组合算法模型升级从到再到深度学习在线学习能力实时根据反馈调整模型参数第七章实际应用案例案例电商平台程序化广告系统业务场景某大型电商平台需要构建程序化广告系统实现商品推广的精准投放用户行为数据的实时处理多渠道广告资源的统一管理技术架构前端展示层前端小程序网关层业务服务层广告服务推荐服务用户服务商品服务数据处理层实时计算离线计算机器学习存储层核心实现策略用户行为实时分析购物车行为追踪实时分析用户加购收藏浏览行为兴趣衰减模型根据时间衰减调整用户兴趣权重购买意图识别通过行为序列识别用户购买意图强弱商品智能匹配协同过滤算法基于相似用户行为推荐商品内容过滤算法基于商品属性和用户偏好匹配库存状态实时同步避免推广缺货商品动态定价策略竞争对手价格监控实时获取市场价格信息转化率预估模型预测不同价格下的转化可能性利润最大化算法在转化率和利润间寻找平衡点案例视频平台程序化广告业务特点视频内容的上下文理解分析视频类型情绪受众群体用户观看行为的深度分析观看时长跳出点互动行为创意素材的动态优化根据视频内容和用户特征选择最佳广告形式核心优化策略视频内容智能分析内容标签提取自动识别视频的类型主题情感色彩受众画像匹配分析视频观众的人群特征广告植入时机识别视频中的自然广告插入点用户观看行为建模注意力模型预测用户在不同时刻的注意力集中度流失预警识别用户可能跳出的时间点互动偏好分析分析用户对不同广告形式的反应创意素材智能优化测试驱动持续测试不同创意素材的效果实时个性化根据用户特征动态调整广告内容跨屏适配针对不同设备优化广告展示形式第八章总结与业务价值程序化广告的商业价值程序化广告不仅是一项技术创新更是一场商业革命它重新定义了广告投放的效率和精准度量化的业务提升提升相比传统展示广告平均提升倍优化通过精准定向和实时优化平均提升成本降低自动化运营减少人工成本投放速度从传统的数天缩短至数分钟内启动投放行业影响力媒体行业帮助媒体最大化广告收益提升填充率品牌广告主提供精准的品牌曝光和效果转化中小企业降低广告投放门槛实现精准营销消费者减少无关广告干扰提升浏览体验技术实现的关键成功因素技术要点高并发处理能力要求内完成竞价决策实时数据处理用户行为数据的实时收集和处理机器学习应用预估用户画像构建系统稳定性小时不间断服务数据安全用户隐私保护和数据合规业务价值实现路径数据采集与整合用户画像构建精准定向能力实时竞价决策投放效果优化商业价值实现技术支撑大数据平台机器学习算法实时计算引擎高并发架构业务成果提升降低提升增强用户体验关键业务指标指标类型核心指标业务意义技术实现效果指标广告投放效果机器学习预测模型成本指标投放成本控制动态定价算法效率指标填充率响应时间系统运行效率高并发架构设计质量指标品牌安全用户体验投放质量保障反作弊和内容审核未来发展趋势与机遇技术发展方向技术深度应用深度学习强化学习在广告优化中的应用隐私计算技术联邦学习多方安全计算保护用户隐私实时个性化更加精细化的个性化广告投放跨媒体整合统一的跨媒体广告投放和效果衡量业务发展机遇新兴媒体形态短视频直播等新场景的程序化广告下沉市场三四线城市用户的精准营销需求领域企业级客户的程序化营销需求增长出海业务中国企业海外营销的程序化广告需求挑战与应对隐私保护挑战问题各国隐私法规日趋严格第三方逐步退出应对发展第一方数据能力建设隐私友好的技术方案技术复杂度挑战问题系统复杂度持续增加技术门槛提高应对标准化技术组件降低技术实现复杂度市场竞争挑战问题行业巨头垄断中小企业难以竞争应对专注细分领域提供差异化技术服务结语程序化广告作为数字营销的核心基础设施正在重塑整个广告行业的格局它不仅提升了广告投放的效率和精准度更重要的是为广告主媒体方和最终用户创造了多赢的价值随着人工智能大数据云计算等技术的不断发展程序化广告将向更加智能化自动化个性化的方向演进同时在隐私保护和数据安全日益重要的今天如何在保护用户隐私的前提下实现精准营销将是行业发展的重要课题对于技术从业者而言程序化广告领域提供了丰富的技术挑战和发展机遇从大数据处理到机器学习从实时计算到高并发架构每一个技术环节都需要精益求精只有深入理解业务需求掌握核心技术才能在这个快速发展的领域中立足并创造价值',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-06-29 18:08:16',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>广告投放</span></a><a class="article-meta__tags" href="/tags/RTB/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>RTB</span></a><a class="article-meta__tags" href="/tags/DSP/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>DSP</span></a></span></div></div><h1 class="post-title" itemprop="name headline">程序化广告数据处理与投放技术架构与业务模式</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-06-26T16:00:00.000Z" title="发表于 2025-06-27 00:00:00">2025-06-27</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-06-29T10:08:16.210Z" title="更新于 2025-06-29 18:08:16">2025-06-29</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="程序化广告数据处理与投放技术架构与业务模式"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625170909952.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/"><header><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a><a href="/tags/%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE/" tabindex="-1" itemprop="url">广告投放</a><a href="/tags/RTB/" tabindex="-1" itemprop="url">RTB</a><a href="/tags/DSP/" tabindex="-1" itemprop="url">DSP</a><h1 id="CrawlerTitle" itemprop="name headline">程序化广告数据处理与投放技术架构与业务模式</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-06-26T16:00:00.000Z" title="发表于 2025-06-27 00:00:00">2025-06-27</time><time itemprop="dateCreated datePublished" datetime="2025-06-29T10:08:16.210Z" title="更新于 2025-06-29 18:08:16">2025-06-29</time></header><h1 id="程序化广告数据处理与投放业务模式与技术架构"><a href="#程序化广告数据处理与投放业务模式与技术架构" class="headerlink" title="程序化广告数据处理与投放业务模式与技术架构"></a>程序化广告数据处理与投放业务模式与技术架构</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%A6%82%E8%BF%B0">第一章：程序化广告概述</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E8%A7%92%E8%89%B2">第二章：核心概念与角色</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E7%AB%A0%E4%B8%9A%E5%8A%A1%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3">第三章：业务流程详解</a></li>
+<li><a href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%9E%B6%E6%9E%84">第四章：数据处理架构</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%94%E7%AB%A0%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1">第五章：技术架构设计</a></li>
+<li><a href="#%E7%AC%AC%E5%85%AD%E7%AB%A0%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5">第六章：性能优化策略</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%83%E7%AB%A0%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B">第七章：实际应用案例</a></li>
+<li><a href="#%E7%AC%AC%E5%85%AB%E7%AB%A0%E6%80%BB%E7%BB%93%E4%B8%8E%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC">第八章：总结与业务价值</a></li>
+</ol>
+<h1 id="第一章：程序化广告概述"><a href="#第一章：程序化广告概述" class="headerlink" title="第一章：程序化广告概述"></a>第一章：程序化广告概述</h1><p>程序化广告（Programmatic Advertising）是一种利用软件和算法自动化购买和投放广告的技术。它通过实时竞价（RTB）、数据驱动决策和机器学习算法，实现广告投放的精准化、自动化和规模化。</p>
+<h2 id="1-1-为什么需要程序化广告？"><a href="#1-1-为什么需要程序化广告？" class="headerlink" title="1.1 为什么需要程序化广告？"></a>1.1 为什么需要程序化广告？</h2><p><strong>传统广告投放的痛点：</strong></p>
+<ol>
+<li><strong>效率低下</strong>：需要人工洽谈、签约、排期，周期长达数天甚至数周</li>
+<li><strong>精准度差</strong>：只能基于媒体整体用户画像，无法做到个性化投放</li>
+<li><strong>透明度低</strong>：广告主无法实时了解投放效果和资金使用情况</li>
+<li><strong>规模受限</strong>：人工操作难以管理大量媒体资源和广告位</li>
+</ol>
+<p><strong>程序化广告的解决方案：</strong></p>
+<ul>
+<li><strong>毫秒级决策</strong>：从广告请求到展示决策在100ms内完成</li>
+<li><strong>个性化定向</strong>：基于用户实时行为和画像进行精准投放</li>
+<li><strong>实时透明</strong>：投放数据、效果指标、预算消耗实时可见</li>
+<li><strong>规模化管理</strong>：单个平台可管理数万个广告计划和数千万用户</li>
+</ul>
+<h2 id="1-2-核心价值与业务影响"><a href="#1-2-核心价值与业务影响" class="headerlink" title="1.2 核心价值与业务影响"></a>1.2 核心价值与业务影响</h2><h4 id="1-精准投放：从”广撒网”到”精准狙击”"><a href="#1-精准投放：从”广撒网”到”精准狙击”" class="headerlink" title="1. 精准投放：从”广撒网”到”精准狙击”"></a>1. 精准投放：从”广撒网”到”精准狙击”</h4><p><strong>业务场景：</strong> 一个电商平台想推广运动鞋</p>
+<ul>
+<li><strong>传统方式：</strong> 在体育网站购买横幅广告，覆盖所有访问者</li>
+<li><strong>程序化方式：</strong> 只对”25-35岁男性+近期搜索过运动鞋+收入中等”的用户展示广告</li>
+</ul>
+<p><strong>技术实现：</strong> 通过DMP分析用户行为，构建精准人群包，DSP根据用户标签实时决策</p>
+<h4 id="2-实时优化：从”设置后等待”到”实时调整”"><a href="#2-实时优化：从”设置后等待”到”实时调整”" class="headerlink" title="2. 实时优化：从”设置后等待”到”实时调整”"></a>2. 实时优化：从”设置后等待”到”实时调整”</h4><p><strong>业务场景：</strong> 发现某个创意素材CTR（点击率）偏低</p>
+<ul>
+<li><strong>传统方式：</strong> 需要等到投放结束后分析数据，下次投放时调整</li>
+<li><strong>程序化方式：</strong> 实时监测CTR，自动减少低效创意的展示频率，增加高效创意的投放</li>
+</ul>
+<p><strong>技术实现：</strong> 通过流式数据处理实时计算效果指标，竞价算法动态调整出价策略</p>
+<h4 id="3-规模化操作：从”人工管理”到”算法驱动”"><a href="#3-规模化操作：从”人工管理”到”算法驱动”" class="headerlink" title="3. 规模化操作：从”人工管理”到”算法驱动”"></a>3. 规模化操作：从”人工管理”到”算法驱动”</h4><p><strong>业务场景：</strong> 管理1000个不同的广告计划</p>
+<ul>
+<li><strong>传统方式：</strong> 需要大量运营人员逐个监控和调整</li>
+<li><strong>程序化方式：</strong> 算法自动根据预设规则和学习结果进行优化</li>
+</ul>
+<p><strong>技术实现：</strong> 通过机器学习算法预测CTR&#x2F;CVR，自动化竞价和预算分配</p>
+<h4 id="4-数据驱动：从”经验决策”到”数据决策”"><a href="#4-数据驱动：从”经验决策”到”数据决策”" class="headerlink" title="4. 数据驱动：从”经验决策”到”数据决策”"></a>4. 数据驱动：从”经验决策”到”数据决策”</h4><p><strong>业务场景：</strong> 确定最佳投放时间段</p>
+<ul>
+<li><strong>传统方式：</strong> 基于运营经验推测用户活跃时间</li>
+<li><strong>程序化方式：</strong> 分析目标用户群体的历史行为数据，找出最佳投放时机</li>
+</ul>
+<p><strong>技术实现：</strong> 通过大数据分析用户行为模式，为每个用户群体定制投放策略</p>
+<h1 id="第二章：核心概念与角色"><a href="#第二章：核心概念与角色" class="headerlink" title="第二章：核心概念与角色"></a>第二章：核心概念与角色</h1><h2 id="2-1-程序化广告的商业生态：谁出钱，谁赚钱，谁负责"><a href="#2-1-程序化广告的商业生态：谁出钱，谁赚钱，谁负责" class="headerlink" title="2.1 程序化广告的商业生态：谁出钱，谁赚钱，谁负责"></a>2.1 程序化广告的商业生态：谁出钱，谁赚钱，谁负责</h2><p>在了解技术细节之前，我们需要先理解程序化广告的商业逻辑。简单来说：</p>
+<ul>
+<li><strong>广告主出钱</strong>买流量获得曝光和转化</li>
+<li><strong>媒体方出流量</strong>赚取广告费</li>
+<li><strong>技术平台提供服务</strong>从中收取服务费</li>
+</ul>
+<h2 id="2-3-主要参与方及其利益关系"><a href="#2-3-主要参与方及其利益关系" class="headerlink" title="2.3 主要参与方及其利益关系"></a>2.3 主要参与方及其利益关系</h2><h4 id="1-广告主（Advertiser）-出钱的一方"><a href="#1-广告主（Advertiser）-出钱的一方" class="headerlink" title="1. 广告主（Advertiser）- 出钱的一方"></a>1. 广告主（Advertiser）- 出钱的一方</h4><ul>
+<li><strong>角色定位</strong>：花钱买广告效果的企业或个人</li>
+<li><strong>付费对象</strong>：向DSP平台付费购买广告投放服务</li>
+<li><strong>核心诉求</strong>：用最少的钱获得最好的广告效果（高CTR、高转化率）</li>
+<li><strong>典型客户</strong>：电商平台、游戏公司、金融机构、品牌厂商</li>
+</ul>
+<p><strong>举例</strong>：某手机品牌要推广新款手机，预算100万元，希望精准投放给”25-35岁、收入中等、关注数码产品”的用户群体。</p>
+<h4 id="2-DSP（Demand-Side-Platform）-需求方平台（服务广告主）"><a href="#2-DSP（Demand-Side-Platform）-需求方平台（服务广告主）" class="headerlink" title="2. DSP（Demand Side Platform）- 需求方平台（服务广告主）"></a>2. DSP（Demand Side Platform）- 需求方平台（服务广告主）</h4><ul>
+<li><strong>服务对象</strong>：广告主</li>
+<li><strong>盈利模式</strong>：收取广告投放服务费（通常是广告花费的10-20%）</li>
+<li><strong>核心价值</strong>：帮助广告主花更少的钱获得更好的效果</li>
+<li><strong>主要工作</strong>：竞价决策、预算管理、效果优化、报告分析</li>
+</ul>
+<p><strong>举例</strong>：DSP平台帮手机品牌管理100万预算，通过算法优化，最终花费95万获得了预期效果，DSP收取15万服务费。</p>
+<h4 id="3-媒体方（Publisher）-出售流量的一方"><a href="#3-媒体方（Publisher）-出售流量的一方" class="headerlink" title="3. 媒体方（Publisher）- 出售流量的一方"></a>3. 媒体方（Publisher）- 出售流量的一方</h4><ul>
+<li><strong>角色定位</strong>：拥有用户流量的网站、APP等</li>
+<li><strong>收入来源</strong>：出售广告位获得广告收入</li>
+<li><strong>核心诉求</strong>：在不影响用户体验的前提下最大化广告收入</li>
+<li><strong>典型媒体</strong>：新闻网站、视频平台、社交媒体、工具APP</li>
+</ul>
+<p><strong>举例</strong>：某新闻APP每天有100万活跃用户，通过展示广告每天可以获得1万元广告收入。</p>
+<h4 id="4-SSP（Supply-Side-Platform）-供应方平台（服务媒体方）"><a href="#4-SSP（Supply-Side-Platform）-供应方平台（服务媒体方）" class="headerlink" title="4. SSP（Supply Side Platform）- 供应方平台（服务媒体方）"></a>4. SSP（Supply Side Platform）- 供应方平台（服务媒体方）</h4><ul>
+<li><strong>服务对象</strong>：媒体方</li>
+<li><strong>盈利模式</strong>：从媒体广告收入中抽取分成（通常是10-30%）</li>
+<li><strong>核心价值</strong>：帮助媒体方获得更高的广告收入</li>
+<li><strong>主要工作</strong>：库存管理、价格优化、反作弊、收益分析</li>
+</ul>
+<p><strong>举例</strong>：SSP帮新闻APP优化广告展示策略，将日收入从1万元提升到1.3万元，SSP抽取20%分成（2600元）。</p>
+<h4 id="5-AdX（Ad-Exchange）-广告交易平台（撮合交易）"><a href="#5-AdX（Ad-Exchange）-广告交易平台（撮合交易）" class="headerlink" title="5. AdX（Ad Exchange）- 广告交易平台（撮合交易）"></a>5. AdX（Ad Exchange）- 广告交易平台（撮合交易）</h4><ul>
+<li><strong>服务对象</strong>：DSP和SSP双方</li>
+<li><strong>盈利模式</strong>：收取交易手续费（每次交易收取小额费用）</li>
+<li><strong>核心价值</strong>：提供透明、高效的交易撮合服务</li>
+<li><strong>主要工作</strong>：实时竞价撮合、资金结算、数据传输</li>
+</ul>
+<p><strong>举例</strong>：AdX每天撮合数百万次广告交易，每次交易收取0.01元手续费。</p>
+<h4 id="6-DMP（Data-Management-Platform）-数据管理平台（提供数据服务）"><a href="#6-DMP（Data-Management-Platform）-数据管理平台（提供数据服务）" class="headerlink" title="6. DMP（Data Management Platform）- 数据管理平台（提供数据服务）"></a>6. DMP（Data Management Platform）- 数据管理平台（提供数据服务）</h4><ul>
+<li><strong>服务对象</strong>：DSP、SSP、广告主</li>
+<li><strong>盈利模式</strong>：出售数据服务或按使用量收费</li>
+<li><strong>核心价值</strong>：提供精准的用户数据和画像服务</li>
+<li><strong>主要工作</strong>：数据收集、用户画像、人群定向</li>
+</ul>
+<p><strong>举例</strong>：DMP向DSP提供用户标签数据，按每千次查询收取10元费用。</p>
+<h2 id="2-4-资金流向与利益分配"><a href="#2-4-资金流向与利益分配" class="headerlink" title="2.4 资金流向与利益分配"></a>2.4 资金流向与利益分配</h2><pre class="mermaid">flowchart TD
+    A[广告主] -->|投放预算100万| B[DSP平台]
+    B -->|服务费15万| A
+    B -->|竞价85万| C[AdX交易平台]
+    C -->|手续费1万| B
+    C -->|广告费84万| D[SSP平台]
+    D -->|分成17万| C
+    D -->|广告收入67万| E[媒体方]
+    
+    F[DMP平台] -->|数据服务5万| B
+    B -->|数据费用5万| F
+    
+    subgraph "收入分配"
+        G[DSP收入: 15万服务费]
+        H[SSP收入: 17万分成]
+        I[AdX收入: 1万手续费]
+        J[DMP收入: 5万数据费]
+        K[媒体收入: 67万广告费]
+    end
+    
+    style A fill:#ff9999
+    style E fill:#99ff99
+    style B fill:#99ccff
+    style D fill:#99ccff
+    style C fill:#ffcc99
+    style F fill:#cc99ff</pre>
+
+<h2 id="2-5-服务关系与责任链"><a href="#2-5-服务关系与责任链" class="headerlink" title="2.5 服务关系与责任链"></a>2.5 服务关系与责任链</h2><h4 id="谁对谁负责？"><a href="#谁对谁负责？" class="headerlink" title="谁对谁负责？"></a>谁对谁负责？</h4><p><strong>1. DSP对广告主负责</strong></p>
+<ul>
+<li><strong>责任</strong>：确保广告投放效果，合理使用预算</li>
+<li><strong>考核指标</strong>：CTR（点击率）、CVR（转化率）、CPA（获客成本）</li>
+<li><strong>问责机制</strong>：效果不达标需要退款或补量</li>
+</ul>
+<p><strong>2. SSP对媒体方负责</strong></p>
+<ul>
+<li><strong>责任</strong>：确保媒体方广告收入最大化，保护媒体品牌</li>
+<li><strong>考核指标</strong>：CPM（千次展示收入）、填充率、用户体验</li>
+<li><strong>问责机制</strong>：收入下降或品牌受损需要赔偿</li>
+</ul>
+<p><strong>3. AdX对交易双方负责</strong></p>
+<ul>
+<li><strong>责任</strong>：确保交易公平、透明、安全</li>
+<li><strong>考核指标</strong>：交易成功率、资金安全、数据保护</li>
+<li><strong>问责机制</strong>：交易纠纷需要仲裁和赔付</li>
+</ul>
+<p><strong>4. DMP对数据使用方负责</strong></p>
+<ul>
+<li><strong>责任</strong>：确保数据准确性和合规性</li>
+<li><strong>考核指标</strong>：数据质量、隐私合规、服务稳定性</li>
+<li><strong>问责机制</strong>：数据错误或泄露需要承担法律责任</li>
+</ul>
+<h2 id="2-6-实际商业案例解析"><a href="#2-6-实际商业案例解析" class="headerlink" title="2.6 实际商业案例解析"></a>2.6 实际商业案例解析</h2><p><strong>案例：电商平台双11广告投放</strong></p>
+<p><strong>参与方角色：</strong></p>
+<ul>
+<li><strong>广告主</strong>：某电商平台，预算5000万元</li>
+<li><strong>DSP</strong>：某程序化广告平台，服务费15%</li>
+<li><strong>媒体方</strong>：各大新闻、视频、社交平台</li>
+<li><strong>SSP</strong>：各媒体自有或第三方变现平台</li>
+<li><strong>AdX</strong>：统一的广告交易平台</li>
+<li><strong>DMP</strong>：提供双11用户购物意向数据</li>
+</ul>
+<p><strong>资金流向：</strong></p>
+<ol>
+<li>电商平台向DSP支付5000万预算</li>
+<li>DSP收取750万服务费，用4250万进行投放</li>
+<li>通过AdX平台，最终4000万到达各媒体方</li>
+<li>各环节平台按约定比例分成</li>
+</ol>
+<p><strong>效果评估：</strong></p>
+<ul>
+<li>电商平台获得1000万新用户注册，平均获客成本50元</li>
+<li>媒体方获得4000万广告收入，用户体验未受影响  </li>
+<li>各技术平台获得合理服务费，技术能力得到验证</li>
+</ul>
+<p>这个生态系统的核心是<strong>多方共赢</strong>：广告主获得精准流量，媒体方获得广告收入，技术平台获得服务费，用户看到相关性更高的广告。</p>
+<h2 id="2-2-技术生态图"><a href="#2-2-技术生态图" class="headerlink" title="2.2 技术生态图"></a>2.2 技术生态图</h2><pre class="mermaid">graph TB
+    A[广告主] --> B[DSP需求方平台]
+    B --> C[AdX广告交易平台]
+    D[SSP供应方平台] --> C
+    E[媒体方] --> D
+    F[DMP数据管理平台] --> B
+    F --> D
+    G[用户数据源] --> F
+    H[第三方数据] --> F
+    
+    subgraph "实时竞价生态"
+        C --> I[RTB实时竞价]
+        I --> J[竞价响应]
+        J --> K[广告展示]
+    end
+    
+    subgraph "数据流转"
+        L[用户行为数据] --> F
+        M[广告效果数据] --> F
+        N[媒体库存数据] --> D
+    end</pre>
+
+<h1 id="第三章：业务流程详解"><a href="#第三章：业务流程详解" class="headerlink" title="第三章：业务流程详解"></a>第三章：业务流程详解</h1><h2 id="3-1-RTB实时竞价流程"><a href="#3-1-RTB实时竞价流程" class="headerlink" title="3.1 RTB实时竞价流程"></a>3.1 RTB实时竞价流程</h2><pre class="mermaid">sequenceDiagram
+    participant User as 用户
+    participant Media as 媒体网站
+    participant SSP as SSP平台
+    participant AdX as AdX交易平台
+    participant DSP as DSP平台
+    participant DMP as DMP平台
+    participant Advertiser as 广告主
+    
+    User->>Media: 访问网页
+    Media->>SSP: 发起广告请求
+    SSP->>AdX: 提交广告位信息
+    AdX->>DSP: 发送竞价请求（Bid Request）
+    DSP->>DMP: 查询用户画像
+    DMP-->>DSP: 返回用户标签
+    DSP->>DSP: 竞价决策算法
+    DSP-->>AdX: 返回竞价响应（Bid Response）
+    AdX->>AdX: 竞价排序和选择
+    AdX-->>SSP: 返回获胜广告
+    SSP-->>Media: 返回广告创意
+    Media-->>User: 展示广告
+    
+    Note over AdX: 整个RTB流程通常在100ms内完成</pre>
+
+<h2 id="3-2-数据处理流程"><a href="#3-2-数据处理流程" class="headerlink" title="3.2 数据处理流程"></a>3.2 数据处理流程</h2><pre class="mermaid">flowchart TD
+    A[数据采集] --> B[数据清洗]
+    B --> C[数据标准化]
+    C --> D[数据整合]
+    D --> E[用户画像构建]
+    E --> F[标签体系建设]
+    F --> G[人群定向]
+    G --> H[投放策略制定]
+    H --> I[实时竞价]
+    I --> J[效果监测]
+    J --> K[数据反馈]
+    K --> A
+    
+    subgraph "数据源"
+        L[第一方数据]
+        M[第二方数据]
+        N[第三方数据]
+        O[公开数据]
+    end
+    
+    L --> A
+    M --> A
+    N --> A
+    O --> A
+    
+    subgraph "机器学习"
+        P[特征工程]
+        Q[模型训练]
+        R[模型评估]
+        S[模型部署]
+    end
+    
+    F --> P
+    P --> Q
+    Q --> R
+    R --> S
+    S --> H</pre>
+
+<h1 id="第四章：数据处理架构"><a href="#第四章：数据处理架构" class="headerlink" title="第四章：数据处理架构"></a>第四章：数据处理架构</h1><h2 id="4-1-大数据处理架构"><a href="#4-1-大数据处理架构" class="headerlink" title="4.1 大数据处理架构"></a>4.1 大数据处理架构</h2><pre class="mermaid">graph TB
+    subgraph "数据采集层"
+        A1[Web埋点]
+        A2[App SDK]
+        A3[服务器日志]
+        A4[第三方数据]
+    end
+    
+    subgraph "数据传输层"
+        B1[Kafka消息队列]
+        B2[Flume日志收集]
+        B3[Canal数据同步]
+    end
+    
+    subgraph "数据存储层"
+        C1[HDFS分布式存储]
+        C2[HBase实时数据库]
+        C3[Redis缓存]
+        C4[Elasticsearch搜索]
+    end
+    
+    subgraph "数据计算层"
+        D1[Spark批处理]
+        D2[Flink流处理]
+        D3[Presto交互查询]
+    end
+    
+    subgraph "数据服务层"
+        E1[用户画像服务]
+        E2[实时推荐服务]
+        E3[竞价决策服务]
+        E4[效果分析服务]
+    end
+    
+    A1 --> B1
+    A2 --> B1
+    A3 --> B2
+    A4 --> B3
+    
+    B1 --> C1
+    B1 --> C2
+    B2 --> C1
+    B3 --> C2
+    
+    C1 --> D1
+    C2 --> D2
+    C1 --> D3
+    
+    D1 --> E1
+    D2 --> E2
+    D2 --> E3
+    D3 --> E4
+    
+    C3 --> E1
+    C3 --> E2
+    C3 --> E3
+    C4 --> E4</pre>
+
+<h2 id="4-2-实时数据处理链路"><a href="#4-2-实时数据处理链路" class="headerlink" title="4.2 实时数据处理链路"></a>4.2 实时数据处理链路</h2><pre class="mermaid">flowchart LR
+    A[用户行为] --> B[数据采集]
+    B --> C[消息队列]
+    C --> D[流式处理]
+    D --> E[实时存储]
+    E --> F[竞价决策]
+    F --> G[广告投放]
+    G --> H[效果回传]
+    H --> I[数据更新]
+    I --> D
+    
+    subgraph "实时处理组件"
+        J[Kafka]
+        K[Flink]
+        L[Redis]
+        M[HBase]
+    end
+    
+    C -.-> J
+    D -.-> K
+    E -.-> L
+    E -.-> M</pre>
+
+<h1 id="第五章：技术架构设计"><a href="#第五章：技术架构设计" class="headerlink" title="第五章：技术架构设计"></a>第五章：技术架构设计</h1><h2 id="5-1-DSP核心系统架构"><a href="#5-1-DSP核心系统架构" class="headerlink" title="5.1 DSP核心系统架构"></a>5.1 DSP核心系统架构</h2><h4 id="竞价决策引擎：广告投放的”大脑”"><a href="#竞价决策引擎：广告投放的”大脑”" class="headerlink" title="竞价决策引擎：广告投放的”大脑”"></a>竞价决策引擎：广告投放的”大脑”</h4><p><strong>为什么需要竞价决策算法？</strong></p>
+<p>竞价决策算法是程序化广告的核心，它要在极短时间内回答三个关键问题：</p>
+<ol>
+<li><strong>要不要投放？</strong> （用户是否匹配目标人群）</li>
+<li><strong>投放什么？</strong> （选择哪个广告创意）</li>
+<li><strong>出价多少？</strong> （在竞争中获胜又不浪费预算）</li>
+</ol>
+<p><strong>解决的核心业务问题：</strong></p>
+<p><strong>问题1：海量流量的实时筛选</strong></p>
+<ul>
+<li><strong>业务场景：</strong> DSP每秒收到数万个竞价请求，但只有很小比例符合广告主要求</li>
+<li><strong>传统难点：</strong> 人工无法实时判断每个用户是否值得投放</li>
+<li><strong>算法解决：</strong> 毫秒级匹配用户画像与广告定向条件</li>
+</ul>
+<p><strong>问题2：动态价格竞争</strong></p>
+<ul>
+<li><strong>业务场景：</strong> 同一个广告位可能有数十个广告主竞价</li>
+<li><strong>传统难点：</strong> 出价太低无法获胜，出价太高浪费预算</li>
+<li><strong>算法解决：</strong> 基于历史数据和实时反馈动态调整出价策略</li>
+</ul>
+<p><strong>问题3：预算优化分配</strong></p>
+<ul>
+<li><strong>业务场景：</strong> 广告主有限的预算需要在最有价值的用户上花费</li>
+<li><strong>传统难点：</strong> 难以预测哪些用户更可能产生转化</li>
+<li><strong>算法解决：</strong> 通过机器学习预估用户价值，优先投放高价值用户</li>
+</ul>
+<p><strong>竞价决策的业务逻辑：</strong></p>
+<pre class="mermaid">flowchart TD
+    A[收到竞价请求] --> B{用户画像匹配}
+    B -->|不匹配| C[放弃竞价]
+    B -->|匹配| D{预算充足?}
+    D -->|不足| C
+    D -->|充足| E[计算用户价值]
+    E --> F{价值超过阈值?}
+    F -->|否| C
+    F -->|是| G[选择最佳创意]
+    G --> H[计算最优出价]
+    H --> I[提交竞价]
+    
+    subgraph "核心算法"
+        J[用户价值预估<br/>CTR预测模型]
+        K[出价策略优化<br/>动态定价算法]
+        L[创意匹配算法<br/>个性化推荐]
+    end
+    
+    E -.-> J
+    H -.-> K
+    G -.-> L</pre>
+
+<h4 id="用户画像服务：用户的”数字化身”"><a href="#用户画像服务：用户的”数字化身”" class="headerlink" title="用户画像服务：用户的”数字化身”"></a>用户画像服务：用户的”数字化身”</h4><p><strong>为什么需要用户画像？</strong></p>
+<p>用户画像是程序化广告精准投放的基础，它要解决”这个用户是谁，喜欢什么，会买什么”的问题。</p>
+<p><strong>解决的核心业务问题：</strong></p>
+<p><strong>问题1：用户身份识别</strong></p>
+<ul>
+<li><strong>业务挑战：</strong> 同一用户在不同设备、不同时间访问，如何识别为同一人？</li>
+<li><strong>业务价值：</strong> 避免对同一用户重复投放，提升广告效果</li>
+<li><strong>技术方案：</strong> 通过设备指纹、Cookie同步、登录态关联等技术建立用户统一ID</li>
+</ul>
+<p><strong>问题2：兴趣偏好挖掘</strong></p>
+<ul>
+<li><strong>业务挑战：</strong> 用户不会主动告诉你喜欢什么，如何从行为中推断兴趣？</li>
+<li><strong>业务价值：</strong> 投放用户真正感兴趣的广告，提升点击率和转化率</li>
+<li><strong>技术方案：</strong> 分析浏览内容、停留时间、互动行为等，构建兴趣标签</li>
+</ul>
+<p><strong>问题3：购买能力评估</strong></p>
+<ul>
+<li><strong>业务挑战：</strong> 如何判断用户的消费能力和购买意向？</li>
+<li><strong>业务价值：</strong> 高价值商品优先投放给高消费能力用户，提升ROI</li>
+<li><strong>技术方案：</strong> 分析购买历史、浏览商品价位、收入水平等特征</li>
+</ul>
+<p><strong>用户画像的分层结构：</strong></p>
+<pre class="mermaid">flowchart TD
+    subgraph Layer1 ["静态属性层"]
+        A1[人口统计学特征]
+        A2[年龄性别地域]
+        A3[收入教育职业]
+    end
+    
+    subgraph Layer2 ["动态行为层"]
+        B1[浏览行为特征]
+        B2[搜索关键词]
+        B3[内容偏好]
+        B4[时间模式]
+    end
+    
+    subgraph Layer3 ["兴趣偏好层"]
+        C1[兴趣标签]
+        C2[品牌偏好]
+        C3[价格敏感度]
+        C4[购买周期]
+    end
+    
+    subgraph Layer4 ["价值评估层"]
+        D1[生命周期价值]
+        D2[转化概率]
+        D3[活跃度指数]
+        D4[风险等级]
+    end
+    
+    Layer1 --> Layer2
+    Layer2 --> Layer3
+    Layer3 --> Layer4</pre>
+
+<p><strong>实际业务应用场景：</strong></p>
+<p><strong>场景1：电商用户画像</strong></p>
+<ul>
+<li><strong>标签体系：</strong> 品类偏好、价格敏感度、购买频次、品牌忠诚度</li>
+<li><strong>应用价值：</strong> 新品推荐、促销活动定向、复购提醒</li>
+</ul>
+<p><strong>场景2：金融用户画像</strong></p>
+<ul>
+<li><strong>标签体系：</strong> 风险偏好、投资经验、资产规模、信用等级</li>
+<li><strong>应用价值：</strong> 理财产品推荐、风险控制、精准营销</li>
+</ul>
+<p><strong>场景3：内容平台用户画像</strong></p>
+<ul>
+<li><strong>标签体系：</strong> 内容偏好、活跃时间、社交属性、付费意愿</li>
+<li><strong>应用价值：</strong> 内容推荐、会员推广、广告定向</li>
+</ul>
+<h2 id="5-2-实时数据处理：让数据”活”起来"><a href="#5-2-实时数据处理：让数据”活”起来" class="headerlink" title="5.2 实时数据处理：让数据”活”起来"></a>5.2 实时数据处理：让数据”活”起来</h2><p><strong>为什么需要实时数据处理？</strong></p>
+<p>在程序化广告中，数据的时效性直接影响投放效果。一个用户刚刚搜索了”iPhone 15”，如果能在几分钟内投放相关广告，转化率会比几小时后投放高出数倍。</p>
+<p><strong>解决的核心业务问题：</strong></p>
+<p><strong>问题1：用户兴趣的时效性</strong></p>
+<ul>
+<li><strong>业务场景：</strong> 用户刚搜索了旅游攻略，此时投放旅游广告效果最佳</li>
+<li><strong>传统问题：</strong> 批处理延迟数小时，错过最佳投放时机</li>
+<li><strong>实时方案：</strong> 流处理几秒内更新用户兴趣标签，立即调整投放策略</li>
+</ul>
+<p><strong>问题2：广告效果的快速反馈</strong></p>
+<ul>
+<li><strong>业务场景：</strong> 某个广告创意CTR异常低，需要立即暂停</li>
+<li><strong>传统问题：</strong> 等待日报发现问题时已浪费大量预算</li>
+<li><strong>实时方案：</strong> 实时监控效果指标，自动触发预警和调整</li>
+</ul>
+<p><strong>问题3：库存动态管理</strong></p>
+<ul>
+<li><strong>业务场景：</strong> 电商大促期间商品库存快速变化</li>
+<li><strong>传统问题：</strong> 推广已售罄商品，影响用户体验</li>
+<li><strong>实时方案：</strong> 实时同步库存状态，动态调整广告投放</li>
+</ul>
+<p><strong>实时处理的业务价值链：</strong></p>
+<pre class="mermaid">flowchart LR
+    A[用户行为发生] --> B[毫秒级数据采集]
+    B --> C[秒级流式处理]
+    C --> D[实时标签更新]
+    D --> E[投放策略调整]
+    E --> F[效果立即反馈]
+    F --> G[策略持续优化]
+    
+    subgraph "业务价值"
+        H[提升转化率<br/>降低获客成本]
+        I[快速止损<br/>预算保护]
+        J[用户体验优化<br/>品牌形象提升]
+    end
+    
+    E -.-> H
+    F -.-> I
+    G -.-> J</pre>
+
+<p><strong>不同业务场景的实时性要求：</strong></p>
+<table>
+<thead>
+<tr>
+<th>业务场景</th>
+<th>实时性要求</th>
+<th>业务影响</th>
+<th>技术方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>搜索广告</td>
+<td>毫秒级</td>
+<td>直接影响搜索结果展示</td>
+<td>内存缓存+预计算</td>
+</tr>
+<tr>
+<td>信息流广告</td>
+<td>秒级</td>
+<td>影响个性化推荐效果</td>
+<td>Kafka+Flink流处理</td>
+</tr>
+<tr>
+<td>效果监控</td>
+<td>分钟级</td>
+<td>影响投放策略调整速度</td>
+<td>流式聚合+实时告警</td>
+</tr>
+<tr>
+<td>用户画像</td>
+<td>小时级</td>
+<td>影响长期投放精准度</td>
+<td>批流结合处理</td>
+</tr>
+</tbody></table>
+<h2 id="5-3-高性能竞价系统架构"><a href="#5-3-高性能竞价系统架构" class="headerlink" title="5.3 高性能竞价系统架构"></a>5.3 高性能竞价系统架构</h2><h4 id="竞价系统架构设计"><a href="#竞价系统架构设计" class="headerlink" title="竞价系统架构设计"></a>竞价系统架构设计</h4><pre class="mermaid">graph TB
+    subgraph "接入层"
+        A1[负载均衡器]
+        A2[API网关]
+    end
+    
+    subgraph "业务层"
+        B1[竞价决策服务]
+        B2[用户画像服务]
+        B3[广告匹配服务]
+        B4[定价策略服务]
+    end
+    
+    subgraph "缓存层"
+        C1[Redis Cluster]
+        C2[本地缓存]
+    end
+    
+    subgraph "存储层"
+        D1[HBase用户数据]
+        D2[MySQL广告数据]
+        D3[MongoDB日志数据]
+    end
+    
+    subgraph "消息层"
+        E1[Kafka集群]
+    end
+    
+    A1 --> A2
+    A2 --> B1
+    B1 --> B2
+    B1 --> B3
+    B1 --> B4
+    
+    B2 --> C1
+    B2 --> C2
+    B3 --> C1
+    B4 --> C1
+    
+    C1 --> D1
+    B3 --> D2
+    B1 --> D3
+    
+    B1 --> E1
+    E1 --> D3</pre>
+
+<h4 id="系统设计要点"><a href="#系统设计要点" class="headerlink" title="系统设计要点"></a>系统设计要点</h4><p><strong>1. 高并发处理能力</strong></p>
+<ul>
+<li><strong>挑战：</strong> 单个DSP每秒需要处理数万次竞价请求</li>
+<li><strong>解决方案：</strong> 异步处理 + 专用线程池 + 连接池优化</li>
+<li><strong>技术选型：</strong> CompletableFuture + 自定义ThreadPoolExecutor</li>
+</ul>
+<p><strong>2. 极低延迟要求</strong></p>
+<ul>
+<li><strong>挑战：</strong> RTB协议要求100ms内完成竞价决策</li>
+<li><strong>解决方案：</strong> 多级缓存 + 预计算 + 算法优化</li>
+<li><strong>性能目标：</strong> 95%请求在50ms内完成</li>
+</ul>
+<p><strong>3. 高可用保障</strong></p>
+<ul>
+<li><strong>挑战：</strong> 7×24小时不间断服务，单点故障影响收入</li>
+<li><strong>解决方案：</strong> 多机房部署 + 熔断降级 + 故障转移</li>
+<li><strong>可用性目标：</strong> 99.95%以上</li>
+</ul>
+<h1 id="第六章：性能优化策略"><a href="#第六章：性能优化策略" class="headerlink" title="第六章：性能优化策略"></a>第六章：性能优化策略</h1><h2 id="6-1-缓存策略"><a href="#6-1-缓存策略" class="headerlink" title="6.1 缓存策略"></a>6.1 缓存策略</h2><pre class="mermaid">flowchart TD
+    A[请求] --> B{本地缓存}
+    B -->|命中| C[返回结果]
+    B -->|未命中| D{Redis缓存}
+    D -->|命中| E[更新本地缓存]
+    E --> C
+    D -->|未命中| F[数据库查询]
+    F --> G[更新Redis缓存]
+    G --> E
+    
+    subgraph L1["L1本地缓存"]
+        H1[容量小速度极快]
+        H2[毫秒级响应]
+    end
+    
+    subgraph L2["L2Redis缓存"]
+        I1[容量大速度快]
+        I2[毫秒到十毫秒级]
+    end
+    
+    subgraph L3["L3数据库"]
+        J1[容量最大速度慢]
+        J2[十毫秒到百毫秒级]
+    end</pre>
+
+<h4 id="缓存策略的业务价值"><a href="#缓存策略的业务价值" class="headerlink" title="缓存策略的业务价值"></a>缓存策略的业务价值</h4><p><strong>为什么需要多级缓存？</strong></p>
+<p>程序化广告面临的核心挑战是<strong>极致的响应时间要求</strong>：</p>
+<ul>
+<li>RTB协议要求在100ms内完成整个竞价流程</li>
+<li>用户画像查询、广告匹配、定价计算都需要在这100ms内完成</li>
+<li>传统数据库查询（50-200ms）无法满足时延要求</li>
+</ul>
+<p><strong>解决的业务问题：</strong></p>
+<ol>
+<li><strong>响应时延问题</strong>：数据库查询时间过长导致竞价失败</li>
+<li><strong>并发压力问题</strong>：单个DSP每秒需要处理数万次竞价请求</li>
+<li><strong>数据一致性问题</strong>：用户画像数据需要在多个服务间快速共享</li>
+<li><strong>成本控制问题</strong>：降低数据库查询压力，减少基础设施成本</li>
+</ol>
+<h2 id="6-2-数据预处理和预计算策略"><a href="#6-2-数据预处理和预计算策略" class="headerlink" title="6.2 数据预处理和预计算策略"></a>6.2 数据预处理和预计算策略</h2><p><strong>为什么需要预计算？</strong></p>
+<p>在竞价决策的100ms时间限制内，很多复杂计算无法实时完成，需要通过预计算来提升响应速度。</p>
+<p><strong>预计算的核心策略：</strong></p>
+<p><strong>策略1：用户画像预计算</strong></p>
+<ul>
+<li><strong>场景：</strong> 活跃用户的画像更新频率高，实时计算压力大</li>
+<li><strong>方案：</strong> 定期批量更新活跃用户画像，存储到Redis缓存</li>
+<li><strong>频率：</strong> 每5分钟更新一次，覆盖最近1小时内活跃用户</li>
+</ul>
+<p><strong>策略2：广告定向规则预计算</strong></p>
+<ul>
+<li><strong>场景：</strong> 复杂的定向规则匹配耗时较长</li>
+<li><strong>方案：</strong> 预先计算广告定向规则，建立倒排索引</li>
+<li><strong>频率：</strong> 每天凌晨更新，同步最新的广告计划配置</li>
+</ul>
+<p><strong>策略3：特征工程预计算</strong></p>
+<ul>
+<li><strong>场景：</strong> 机器学习特征计算复杂度高</li>
+<li><strong>方案：</strong> 预计算常用特征，实时组合使用</li>
+<li><strong>频率：</strong> 实时增量更新 + 离线全量重建</li>
+</ul>
+<h2 id="6-3-模型优化和AB测试体系"><a href="#6-3-模型优化和AB测试体系" class="headerlink" title="6.3 模型优化和AB测试体系"></a>6.3 模型优化和AB测试体系</h2><p><strong>模型持续优化的业务价值：</strong></p>
+<p>程序化广告的效果直接影响收入，1%的CTR提升可能带来数百万的额外收入。因此需要建立完善的模型优化体系。</p>
+<p><strong>AB测试驱动的模型迭代：</strong></p>
+<p><strong>阶段1：离线评估</strong></p>
+<ul>
+<li>基于历史数据评估新模型性能</li>
+<li>关键指标：AUC、精准率、召回率</li>
+<li>通过阈值：相比基准模型提升5%以上</li>
+</ul>
+<p><strong>阶段2：小流量验证</strong></p>
+<ul>
+<li>在10%的流量上测试新模型</li>
+<li>观察指标：CTR、CVR、ROI</li>
+<li>验证周期：7-14天</li>
+</ul>
+<p><strong>阶段3：全量发布</strong></p>
+<ul>
+<li>逐步扩大新模型的流量比例</li>
+<li>持续监控核心业务指标</li>
+<li>建立快速回滚机制</li>
+</ul>
+<p><strong>模型优化的关键技术：</strong></p>
+<ul>
+<li><strong>特征工程优化</strong>：自动化特征选择和组合</li>
+<li><strong>算法模型升级</strong>：从LR到XGBoost再到深度学习</li>
+<li><strong>在线学习能力</strong>：实时根据反馈调整模型参数</li>
+</ul>
+<h1 id="第七章：实际应用案例"><a href="#第七章：实际应用案例" class="headerlink" title="第七章：实际应用案例"></a>第七章：实际应用案例</h1><h2 id="7-1-案例1：电商平台程序化广告系统"><a href="#7-1-案例1：电商平台程序化广告系统" class="headerlink" title="7.1 案例1：电商平台程序化广告系统"></a>7.1 案例1：电商平台程序化广告系统</h2><h4 id="业务场景"><a href="#业务场景" class="headerlink" title="业务场景"></a>业务场景</h4><p>某大型电商平台需要构建程序化广告系统，实现：</p>
+<ul>
+<li>商品推广的精准投放</li>
+<li>用户行为数据的实时处理</li>
+<li>多渠道广告资源的统一管理</li>
+</ul>
+<h4 id="技术架构"><a href="#技术架构" class="headerlink" title="技术架构"></a>技术架构</h4><pre class="mermaid">graph TB
+    subgraph "前端展示层"
+        A1[Web前端]
+        A2[Mobile App]
+        A3[小程序]
+    end
+    
+    subgraph "网关层"
+        B1[API Gateway]
+        B2[CDN]
+    end
+    
+    subgraph "业务服务层"
+        C1[广告服务]
+        C2[推荐服务]
+        C3[用户服务]
+        C4[商品服务]
+    end
+    
+    subgraph "数据处理层"
+        D1[实时计算]
+        D2[离线计算]
+        D3[机器学习]
+    end
+    
+    subgraph "存储层"
+        E1[MySQL]
+        E2[Redis]
+        E3[HBase]
+        E4[HDFS]
+    end
+    
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    B1 --> C1
+    C1 --> C2
+    C1 --> C3
+    C1 --> C4
+    C1 --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> E1
+    C1 --> E2
+    D1 --> E3
+    D2 --> E4</pre>
+
+<h4 id="核心实现策略"><a href="#核心实现策略" class="headerlink" title="核心实现策略"></a>核心实现策略</h4><p><strong>1. 用户行为实时分析</strong></p>
+<ul>
+<li><strong>购物车行为追踪</strong>：实时分析用户加购、收藏、浏览行为</li>
+<li><strong>兴趣衰减模型</strong>：根据时间衰减调整用户兴趣权重</li>
+<li><strong>购买意图识别</strong>：通过行为序列识别用户购买意图强弱</li>
+</ul>
+<p><strong>2. 商品智能匹配</strong></p>
+<ul>
+<li><strong>协同过滤算法</strong>：基于相似用户行为推荐商品</li>
+<li><strong>内容过滤算法</strong>：基于商品属性和用户偏好匹配</li>
+<li><strong>库存状态实时同步</strong>：避免推广缺货商品</li>
+</ul>
+<p><strong>3. 动态定价策略</strong></p>
+<ul>
+<li><strong>竞争对手价格监控</strong>：实时获取市场价格信息</li>
+<li><strong>转化率预估模型</strong>：预测不同价格下的转化可能性</li>
+<li><strong>利润最大化算法</strong>：在转化率和利润间寻找平衡点</li>
+</ul>
+<h2 id="7-2-案例2：视频平台程序化广告"><a href="#7-2-案例2：视频平台程序化广告" class="headerlink" title="7.2 案例2：视频平台程序化广告"></a>7.2 案例2：视频平台程序化广告</h2><h4 id="业务特点"><a href="#业务特点" class="headerlink" title="业务特点"></a>业务特点</h4><ul>
+<li><strong>视频内容的上下文理解</strong>：分析视频类型、情绪、受众群体</li>
+<li><strong>用户观看行为的深度分析</strong>：观看时长、跳出点、互动行为</li>
+<li><strong>创意素材的动态优化</strong>：根据视频内容和用户特征选择最佳广告形式</li>
+</ul>
+<h4 id="核心优化策略"><a href="#核心优化策略" class="headerlink" title="核心优化策略"></a>核心优化策略</h4><p><strong>1. 视频内容智能分析</strong></p>
+<ul>
+<li><strong>内容标签提取</strong>：自动识别视频的类型、主题、情感色彩</li>
+<li><strong>受众画像匹配</strong>：分析视频观众的人群特征</li>
+<li><strong>广告植入时机</strong>：识别视频中的自然广告插入点</li>
+</ul>
+<p><strong>2. 用户观看行为建模</strong></p>
+<ul>
+<li><strong>注意力模型</strong>：预测用户在不同时刻的注意力集中度</li>
+<li><strong>流失预警</strong>：识别用户可能跳出的时间点</li>
+<li><strong>互动偏好分析</strong>：分析用户对不同广告形式的反应</li>
+</ul>
+<p><strong>3. 创意素材智能优化</strong></p>
+<ul>
+<li><strong>A&#x2F;B测试驱动</strong>：持续测试不同创意素材的效果</li>
+<li><strong>实时个性化</strong>：根据用户特征动态调整广告内容</li>
+<li><strong>跨屏适配</strong>：针对不同设备优化广告展示形式</li>
+</ul>
+<h1 id="第八章：总结与业务价值"><a href="#第八章：总结与业务价值" class="headerlink" title="第八章：总结与业务价值"></a>第八章：总结与业务价值</h1><h2 id="8-1-程序化广告的商业价值"><a href="#8-1-程序化广告的商业价值" class="headerlink" title="8.1 程序化广告的商业价值"></a>8.1 程序化广告的商业价值</h2><p>程序化广告不仅是一项技术创新，更是一场商业革命。它重新定义了广告投放的效率和精准度。</p>
+<p><strong>量化的业务提升：</strong></p>
+<ul>
+<li><strong>CTR提升</strong>：相比传统展示广告，CTR平均提升2-5倍</li>
+<li><strong>ROI优化</strong>：通过精准定向和实时优化，ROI平均提升30-50%</li>
+<li><strong>成本降低</strong>：自动化运营减少人工成本60-80%</li>
+<li><strong>投放速度</strong>：从传统的数天缩短至数分钟内启动投放</li>
+</ul>
+<p><strong>行业影响力：</strong></p>
+<ul>
+<li><strong>媒体行业</strong>：帮助媒体最大化广告收益，提升填充率</li>
+<li><strong>品牌广告主</strong>：提供精准的品牌曝光和效果转化</li>
+<li><strong>中小企业</strong>：降低广告投放门槛，实现精准营销</li>
+<li><strong>消费者</strong>：减少无关广告干扰，提升浏览体验</li>
+</ul>
+<h2 id="8-2-技术实现的关键成功因素"><a href="#8-2-技术实现的关键成功因素" class="headerlink" title="8.2 技术实现的关键成功因素"></a>8.2 技术实现的关键成功因素</h2><h4 id="1-技术要点"><a href="#1-技术要点" class="headerlink" title="1. 技术要点"></a>1. 技术要点</h4><ol>
+<li><strong>高并发处理能力</strong>：RTB要求100ms内完成竞价决策</li>
+<li><strong>实时数据处理</strong>：用户行为数据的实时收集和处理</li>
+<li><strong>机器学习应用</strong>：CTR&#x2F;CVR预估、用户画像构建</li>
+<li><strong>系统稳定性</strong>：7×24小时不间断服务</li>
+<li><strong>数据安全</strong>：用户隐私保护和数据合规</li>
+</ol>
+<h4 id="2-业务价值实现路径"><a href="#2-业务价值实现路径" class="headerlink" title="2. 业务价值实现路径"></a>2. 业务价值实现路径</h4><pre class="mermaid">flowchart TD
+    A[数据采集与整合] --> B[用户画像构建]
+    B --> C[精准定向能力]
+    C --> D[实时竞价决策]
+    D --> E[投放效果优化]
+    E --> F[商业价值实现]
+    
+    subgraph "技术支撑"
+        G[大数据平台]
+        H[机器学习算法]
+        I[实时计算引擎]
+        J[高并发架构]
+    end
+    
+    subgraph "业务成果"
+        K[提升CTR/CVR]
+        L[降低CPC/CPA]
+        M[提升ROI]
+        N[增强用户体验]
+    end
+    
+    A -.-> G
+    B -.-> H
+    D -.-> I
+    E -.-> J
+    
+    F --> K
+    F --> L
+    F --> M
+    F --> N</pre>
+
+<h4 id="3-关键业务指标"><a href="#3-关键业务指标" class="headerlink" title="3. 关键业务指标"></a>3. 关键业务指标</h4><table>
+<thead>
+<tr>
+<th>指标类型</th>
+<th>核心指标</th>
+<th>业务意义</th>
+<th>技术实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>效果指标</td>
+<td>CTR、CVR</td>
+<td>广告投放效果</td>
+<td>机器学习预测模型</td>
+</tr>
+<tr>
+<td>成本指标</td>
+<td>CPC、CPA</td>
+<td>投放成本控制</td>
+<td>动态定价算法</td>
+</tr>
+<tr>
+<td>效率指标</td>
+<td>填充率、响应时间</td>
+<td>系统运行效率</td>
+<td>高并发架构设计</td>
+</tr>
+<tr>
+<td>质量指标</td>
+<td>品牌安全、用户体验</td>
+<td>投放质量保障</td>
+<td>反作弊和内容审核</td>
+</tr>
+</tbody></table>
+<h2 id="8-3-未来发展趋势与机遇"><a href="#8-3-未来发展趋势与机遇" class="headerlink" title="8.3 未来发展趋势与机遇"></a>8.3 未来发展趋势与机遇</h2><h4 id="1-技术发展方向"><a href="#1-技术发展方向" class="headerlink" title="1. 技术发展方向"></a>1. 技术发展方向</h4><ol>
+<li><strong>AI技术深度应用</strong>：深度学习、强化学习在广告优化中的应用</li>
+<li><strong>隐私计算技术</strong>：联邦学习、多方安全计算保护用户隐私</li>
+<li><strong>实时个性化</strong>：更加精细化的个性化广告投放</li>
+<li><strong>跨媒体整合</strong>：统一的跨媒体广告投放和效果衡量</li>
+</ol>
+<h4 id="2-业务发展机遇"><a href="#2-业务发展机遇" class="headerlink" title="2. 业务发展机遇"></a>2. 业务发展机遇</h4><ol>
+<li><strong>新兴媒体形态</strong>：短视频、直播、AR&#x2F;VR等新场景的程序化广告</li>
+<li><strong>下沉市场</strong>：三四线城市用户的精准营销需求</li>
+<li><strong>B2B领域</strong>：企业级客户的程序化营销需求增长</li>
+<li><strong>出海业务</strong>：中国企业海外营销的程序化广告需求</li>
+</ol>
+<h4 id="3-挑战与应对"><a href="#3-挑战与应对" class="headerlink" title="3. 挑战与应对"></a>3. 挑战与应对</h4><p><strong>隐私保护挑战</strong></p>
+<ul>
+<li><strong>问题：</strong> 各国隐私法规日趋严格，第三方Cookie逐步退出</li>
+<li><strong>应对：</strong> 发展第一方数据能力，建设隐私友好的技术方案</li>
+</ul>
+<p><strong>技术复杂度挑战</strong></p>
+<ul>
+<li><strong>问题：</strong> 系统复杂度持续增加，技术门槛提高</li>
+<li><strong>应对：</strong> 标准化技术组件，降低技术实现复杂度</li>
+</ul>
+<p><strong>市场竞争挑战</strong></p>
+<ul>
+<li><strong>问题：</strong> 行业巨头垄断，中小企业难以竞争</li>
+<li><strong>应对：</strong> 专注细分领域，提供差异化技术服务</li>
+</ul>
+<h2 id="8-4-结语"><a href="#8-4-结语" class="headerlink" title="8.4 结语"></a>8.4 结语</h2><p>程序化广告作为数字营销的核心基础设施，正在重塑整个广告行业的格局。它不仅提升了广告投放的效率和精准度，更重要的是为广告主、媒体方和最终用户创造了多赢的价值。</p>
+<p>随着人工智能、大数据、云计算等技术的不断发展，程序化广告将向更加智能化、自动化、个性化的方向演进。同时，在隐私保护和数据安全日益重要的今天，如何在保护用户隐私的前提下实现精准营销，将是行业发展的重要课题。</p>
+<p>对于技术从业者而言，程序化广告领域提供了丰富的技术挑战和发展机遇。从大数据处理到机器学习，从实时计算到高并发架构，每一个技术环节都需要精益求精。只有深入理解业务需求，掌握核心技术，才能在这个快速发展的领域中立足并创造价值。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/')">程序化广告数据处理与投放技术架构与业务模式</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=程序化广告数据处理与投放技术架构与业务模式&amp;url=http://example.com/2025/06/27/%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625170909952.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>广告投放<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/RTB/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>RTB<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/DSP/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>DSP<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/06/26/confidential_computing_implementation_guide/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">机密计算环境实施：从硬件选型到应用部署</div></div></a></div><div class="next-post pull-right"><a href="/2025/06/27/DNS%E8%A7%A3%E9%94%81%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3%EF%BC%9A%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%BA%94%E7%94%A8/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">DNS解锁技术原理、实现</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%8A%95%E6%94%BE%E4%B8%9A%E5%8A%A1%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">程序化广告数据处理与投放业务模式与技术架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-number">1.1.</span> <span class="toc-text">目录</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%9A%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">第一章：程序化广告概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%EF%BC%9F"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 为什么需要程序化广告？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E4%B8%8E%E4%B8%9A%E5%8A%A1%E5%BD%B1%E5%93%8D"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 核心价值与业务影响</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%B2%BE%E5%87%86%E6%8A%95%E6%94%BE%EF%BC%9A%E4%BB%8E%E2%80%9D%E5%B9%BF%E6%92%92%E7%BD%91%E2%80%9D%E5%88%B0%E2%80%9D%E7%B2%BE%E5%87%86%E7%8B%99%E5%87%BB%E2%80%9D"><span class="toc-number">2.2.0.1.</span> <span class="toc-text">1. 精准投放：从”广撒网”到”精准狙击”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%AE%9E%E6%97%B6%E4%BC%98%E5%8C%96%EF%BC%9A%E4%BB%8E%E2%80%9D%E8%AE%BE%E7%BD%AE%E5%90%8E%E7%AD%89%E5%BE%85%E2%80%9D%E5%88%B0%E2%80%9D%E5%AE%9E%E6%97%B6%E8%B0%83%E6%95%B4%E2%80%9D"><span class="toc-number">2.2.0.2.</span> <span class="toc-text">2. 实时优化：从”设置后等待”到”实时调整”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%A7%84%E6%A8%A1%E5%8C%96%E6%93%8D%E4%BD%9C%EF%BC%9A%E4%BB%8E%E2%80%9D%E4%BA%BA%E5%B7%A5%E7%AE%A1%E7%90%86%E2%80%9D%E5%88%B0%E2%80%9D%E7%AE%97%E6%B3%95%E9%A9%B1%E5%8A%A8%E2%80%9D"><span class="toc-number">2.2.0.3.</span> <span class="toc-text">3. 规模化操作：从”人工管理”到”算法驱动”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%EF%BC%9A%E4%BB%8E%E2%80%9D%E7%BB%8F%E9%AA%8C%E5%86%B3%E7%AD%96%E2%80%9D%E5%88%B0%E2%80%9D%E6%95%B0%E6%8D%AE%E5%86%B3%E7%AD%96%E2%80%9D"><span class="toc-number">2.2.0.4.</span> <span class="toc-text">4. 数据驱动：从”经验决策”到”数据决策”</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E8%A7%92%E8%89%B2"><span class="toc-number">3.</span> <span class="toc-text">第二章：核心概念与角色</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E7%9A%84%E5%95%86%E4%B8%9A%E7%94%9F%E6%80%81%EF%BC%9A%E8%B0%81%E5%87%BA%E9%92%B1%EF%BC%8C%E8%B0%81%E8%B5%9A%E9%92%B1%EF%BC%8C%E8%B0%81%E8%B4%9F%E8%B4%A3"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 程序化广告的商业生态：谁出钱，谁赚钱，谁负责</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E4%B8%BB%E8%A6%81%E5%8F%82%E4%B8%8E%E6%96%B9%E5%8F%8A%E5%85%B6%E5%88%A9%E7%9B%8A%E5%85%B3%E7%B3%BB"><span class="toc-number">3.2.</span> <span class="toc-text">2.3 主要参与方及其利益关系</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%B9%BF%E5%91%8A%E4%B8%BB%EF%BC%88Advertiser%EF%BC%89-%E5%87%BA%E9%92%B1%E7%9A%84%E4%B8%80%E6%96%B9"><span class="toc-number">3.2.0.1.</span> <span class="toc-text">1. 广告主（Advertiser）- 出钱的一方</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-DSP%EF%BC%88Demand-Side-Platform%EF%BC%89-%E9%9C%80%E6%B1%82%E6%96%B9%E5%B9%B3%E5%8F%B0%EF%BC%88%E6%9C%8D%E5%8A%A1%E5%B9%BF%E5%91%8A%E4%B8%BB%EF%BC%89"><span class="toc-number">3.2.0.2.</span> <span class="toc-text">2. DSP（Demand Side Platform）- 需求方平台（服务广告主）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%AA%92%E4%BD%93%E6%96%B9%EF%BC%88Publisher%EF%BC%89-%E5%87%BA%E5%94%AE%E6%B5%81%E9%87%8F%E7%9A%84%E4%B8%80%E6%96%B9"><span class="toc-number">3.2.0.3.</span> <span class="toc-text">3. 媒体方（Publisher）- 出售流量的一方</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-SSP%EF%BC%88Supply-Side-Platform%EF%BC%89-%E4%BE%9B%E5%BA%94%E6%96%B9%E5%B9%B3%E5%8F%B0%EF%BC%88%E6%9C%8D%E5%8A%A1%E5%AA%92%E4%BD%93%E6%96%B9%EF%BC%89"><span class="toc-number">3.2.0.4.</span> <span class="toc-text">4. SSP（Supply Side Platform）- 供应方平台（服务媒体方）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-AdX%EF%BC%88Ad-Exchange%EF%BC%89-%E5%B9%BF%E5%91%8A%E4%BA%A4%E6%98%93%E5%B9%B3%E5%8F%B0%EF%BC%88%E6%92%AE%E5%90%88%E4%BA%A4%E6%98%93%EF%BC%89"><span class="toc-number">3.2.0.5.</span> <span class="toc-text">5. AdX（Ad Exchange）- 广告交易平台（撮合交易）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-DMP%EF%BC%88Data-Management-Platform%EF%BC%89-%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0%EF%BC%88%E6%8F%90%E4%BE%9B%E6%95%B0%E6%8D%AE%E6%9C%8D%E5%8A%A1%EF%BC%89"><span class="toc-number">3.2.0.6.</span> <span class="toc-text">6. DMP（Data Management Platform）- 数据管理平台（提供数据服务）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E8%B5%84%E9%87%91%E6%B5%81%E5%90%91%E4%B8%8E%E5%88%A9%E7%9B%8A%E5%88%86%E9%85%8D"><span class="toc-number">3.3.</span> <span class="toc-text">2.4 资金流向与利益分配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%9C%8D%E5%8A%A1%E5%85%B3%E7%B3%BB%E4%B8%8E%E8%B4%A3%E4%BB%BB%E9%93%BE"><span class="toc-number">3.4.</span> <span class="toc-text">2.5 服务关系与责任链</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%81%E5%AF%B9%E8%B0%81%E8%B4%9F%E8%B4%A3%EF%BC%9F"><span class="toc-number">3.4.0.1.</span> <span class="toc-text">谁对谁负责？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E5%AE%9E%E9%99%85%E5%95%86%E4%B8%9A%E6%A1%88%E4%BE%8B%E8%A7%A3%E6%9E%90"><span class="toc-number">3.5.</span> <span class="toc-text">2.6 实际商业案例解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E6%8A%80%E6%9C%AF%E7%94%9F%E6%80%81%E5%9B%BE"><span class="toc-number">3.6.</span> <span class="toc-text">2.2 技术生态图</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E4%B8%9A%E5%8A%A1%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3"><span class="toc-number">4.</span> <span class="toc-text">第三章：业务流程详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-RTB%E5%AE%9E%E6%97%B6%E7%AB%9E%E4%BB%B7%E6%B5%81%E7%A8%8B"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 RTB实时竞价流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 数据处理流程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%9E%B6%E6%9E%84"><span class="toc-number">5.</span> <span class="toc-text">第四章：数据处理架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%9E%B6%E6%9E%84"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 大数据处理架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E9%93%BE%E8%B7%AF"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 实时数据处理链路</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.</span> <span class="toc-text">第五章：技术架构设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-DSP%E6%A0%B8%E5%BF%83%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-number">6.1.</span> <span class="toc-text">5.1 DSP核心系统架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AB%9E%E4%BB%B7%E5%86%B3%E7%AD%96%E5%BC%95%E6%93%8E%EF%BC%9A%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE%E7%9A%84%E2%80%9D%E5%A4%A7%E8%84%91%E2%80%9D"><span class="toc-number">6.1.0.1.</span> <span class="toc-text">竞价决策引擎：广告投放的”大脑”</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E6%9C%8D%E5%8A%A1%EF%BC%9A%E7%94%A8%E6%88%B7%E7%9A%84%E2%80%9D%E6%95%B0%E5%AD%97%E5%8C%96%E8%BA%AB%E2%80%9D"><span class="toc-number">6.1.0.2.</span> <span class="toc-text">用户画像服务：用户的”数字化身”</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%EF%BC%9A%E8%AE%A9%E6%95%B0%E6%8D%AE%E2%80%9D%E6%B4%BB%E2%80%9D%E8%B5%B7%E6%9D%A5"><span class="toc-number">6.2.</span> <span class="toc-text">5.2 实时数据处理：让数据”活”起来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-%E9%AB%98%E6%80%A7%E8%83%BD%E7%AB%9E%E4%BB%B7%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-number">6.3.</span> <span class="toc-text">5.3 高性能竞价系统架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AB%9E%E4%BB%B7%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.3.0.1.</span> <span class="toc-text">竞价系统架构设计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%A6%81%E7%82%B9"><span class="toc-number">6.3.0.2.</span> <span class="toc-text">系统设计要点</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="toc-number">7.</span> <span class="toc-text">第六章：性能优化策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5"><span class="toc-number">7.1.</span> <span class="toc-text">6.1 缓存策略</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5%E7%9A%84%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC"><span class="toc-number">7.1.0.1.</span> <span class="toc-text">缓存策略的业务价值</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86%E5%92%8C%E9%A2%84%E8%AE%A1%E7%AE%97%E7%AD%96%E7%95%A5"><span class="toc-number">7.2.</span> <span class="toc-text">6.2 数据预处理和预计算策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E5%92%8CAB%E6%B5%8B%E8%AF%95%E4%BD%93%E7%B3%BB"><span class="toc-number">7.3.</span> <span class="toc-text">6.3 模型优化和AB测试体系</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E7%AB%A0%EF%BC%9A%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">8.</span> <span class="toc-text">第七章：实际应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-1-%E6%A1%88%E4%BE%8B1%EF%BC%9A%E7%94%B5%E5%95%86%E5%B9%B3%E5%8F%B0%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E7%B3%BB%E7%BB%9F"><span class="toc-number">8.1.</span> <span class="toc-text">7.1 案例1：电商平台程序化广告系统</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="toc-number">8.1.0.1.</span> <span class="toc-text">业务场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="toc-number">8.1.0.2.</span> <span class="toc-text">技术架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E7%AD%96%E7%95%A5"><span class="toc-number">8.1.0.3.</span> <span class="toc-text">核心实现策略</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-2-%E6%A1%88%E4%BE%8B2%EF%BC%9A%E8%A7%86%E9%A2%91%E5%B9%B3%E5%8F%B0%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A"><span class="toc-number">8.2.</span> <span class="toc-text">7.2 案例2：视频平台程序化广告</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E7%89%B9%E7%82%B9"><span class="toc-number">8.2.0.1.</span> <span class="toc-text">业务特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="toc-number">8.2.0.2.</span> <span class="toc-text">核心优化策略</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E5%85%AB%E7%AB%A0%EF%BC%9A%E6%80%BB%E7%BB%93%E4%B8%8E%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC"><span class="toc-number">9.</span> <span class="toc-text">第八章：总结与业务价值</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-1-%E7%A8%8B%E5%BA%8F%E5%8C%96%E5%B9%BF%E5%91%8A%E7%9A%84%E5%95%86%E4%B8%9A%E4%BB%B7%E5%80%BC"><span class="toc-number">9.1.</span> <span class="toc-text">8.1 程序化广告的商业价值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-2-%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%85%B3%E9%94%AE%E6%88%90%E5%8A%9F%E5%9B%A0%E7%B4%A0"><span class="toc-number">9.2.</span> <span class="toc-text">8.2 技术实现的关键成功因素</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%8A%80%E6%9C%AF%E8%A6%81%E7%82%B9"><span class="toc-number">9.2.0.1.</span> <span class="toc-text">1. 技术要点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC%E5%AE%9E%E7%8E%B0%E8%B7%AF%E5%BE%84"><span class="toc-number">9.2.0.2.</span> <span class="toc-text">2. 业务价值实现路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%85%B3%E9%94%AE%E4%B8%9A%E5%8A%A1%E6%8C%87%E6%A0%87"><span class="toc-number">9.2.0.3.</span> <span class="toc-text">3. 关键业务指标</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-3-%E6%9C%AA%E6%9D%A5%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF%E4%B8%8E%E6%9C%BA%E9%81%87"><span class="toc-number">9.3.</span> <span class="toc-text">8.3 未来发展趋势与机遇</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E6%96%B9%E5%90%91"><span class="toc-number">9.3.0.1.</span> <span class="toc-text">1. 技术发展方向</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%B8%9A%E5%8A%A1%E5%8F%91%E5%B1%95%E6%9C%BA%E9%81%87"><span class="toc-number">9.3.0.2.</span> <span class="toc-text">2. 业务发展机遇</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%8C%91%E6%88%98%E4%B8%8E%E5%BA%94%E5%AF%B9"><span class="toc-number">9.3.0.3.</span> <span class="toc-text">3. 挑战与应对</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-4-%E7%BB%93%E8%AF%AD"><span class="toc-number">9.4.</span> <span class="toc-text">8.4 结语</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一起来学Intel SGX"/></a><div class="content"><a class="title" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX">一起来学Intel SGX</a><time datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intel SGX 设计与安全原理全解析"/></a><div class="content"><a class="title" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析">Intel SGX 设计与安全原理全解析</a><time datetime="2025-07-26T14:00:00.000Z" title="发表于 2025-07-26 22:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3564d61e60e59786c3e06fbcb40d0aad.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave">Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-26T11:00:00.000Z" title="发表于 2025-07-26 19:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解RSA：加密与签名的艺术"/></a><div class="content"><a class="title" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术">深入理解RSA：加密与签名的艺术</a><time datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

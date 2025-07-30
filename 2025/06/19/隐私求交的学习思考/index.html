@@ -1,0 +1,833 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>关于隐私集合求交 (PSI) 的认识 | 凌霄的博客</title><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="关于隐私集合求交 (PSI) 的认识"><meta name="application-name" content="关于隐私集合求交 (PSI) 的认识"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="关于隐私集合求交 (PSI) 的认识"><meta property="og:url" content="http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="关于隐私集合求交 (PSI) 的认识"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250607203155245.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250607203155245.png"><meta name="description" content="关于隐私集合求交 (PSI) 的认识"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '关于隐私集合求交 (PSI) 的认识',
+  postAI: '',
+  pageFillDescription: '关于隐私集合求交 (PSI) 的认识, 核心密码学概念：安全模型, 方案一：基础哈希方案 - 简单但脆弱, 方案二：布隆过滤器 - 高性能的概率方案, 方案三：基于公钥密码学的安全方案, 3.1 基于 Diffie-Hellman 的 PSI, 3.2 基于不经意传输 (OT) 的 PSI, 3.3 关于同态加密 (HE) 的说明, PSI 协议变种, 方案对比与选择, 如何选择？一份决策指南, 未来展望, 资源与库, 业界产品关于隐私集合求交的认识隐私集合求交是密码学和数据工程交叉领域中的一个经典问题两个或多个参与方如何在不泄露各自私有数据的前提下计算出他们数据集的交集这个需求在现实世界中非常普遍例如广告归因广告平台和广告主需要知道哪些观看了广告的用户最终完成了购买但双方都不想直接暴露自己的全部用户列表联系人发现手机应用想知道你的通讯录里有哪些人也注册了该应用但你不想上传整个通讯录安全情报共享多个情报机构希望找出共同的嫌疑人名单但各自的名单都是高度机密的本文将梳理几种主流的实现方案分析它们的设计思路性能安全性以及各自的适用场景核心密码学概念安全模型在深入了解各种协议之前我们必须先理解评估其安全性的两个基本模型这决定了一个协议能抵御什么样的攻击者半诚实模型定义这是密码学协议中最常见的威胁模型在此模型中参与方会完全遵守协议的每一步指令如同一个诚实的学生但是他们会保留协议执行过程中收到的所有信息例如中间计算结果并试图在协议结束后通过分析这些信息来推断出超出协议规定泄露范围的对方的额外隐私类比一个好奇的合作伙伴他会按合同办事但会试图从你给他的文件中分析出你的商业秘密意义绝大多数高性能的协议如都是在半诚实模型下被证明安全的这意味着只要大家都遵守规则就不可能泄露交集之外的任何信息恶意模型定义这是一个更强大更符合现实世界某些场景的威胁模型恶意攻击者不遵守协议他们可以采取任何行动来破坏协议或窃取信息例如发送伪造的数据提前中止协议或者根据自己的输入来改变协议流程类比一个不择手段的商业间谍他不仅想分析文件还可能伪造文件贿赂你的员工以达到目的意义防御恶意攻击者需要引入更复杂的密码学工具如零知识证明来强制验证每一步的正确性这通常会导致协议性能大幅下降因此恶意安全的协议通常用在金融政府等高风险领域结论在选择方案时首先要评估你的安全需求对于大多数商业合作场景半诚实模型下的安全通常已经足够方案一基础哈希方案简单但脆弱最直观的想法是避免明文传输利用哈希函数的单向性核心原理单向哈希函数如可以将任意输入数据转换成一个固定长度的独一无二的指纹关键在于从指纹反推出原始输入在计算上是不可行的协议流程约定哈希和双方约定一个标准的哈希函数如本地计算将自己的数据集内每个元素进行哈希得到哈希列表也同样计算出交换与比较双方交换哈希列表然后本地比较和找出相同的哈希值这些就代表了原始数据的交集实现伪代码分析优点实现极其简单计算速度飞快网络通信只有一轮缺点安全性极低如果元素的空间有限且已知如手机号身份证号日期攻击者可以轻松构建一个彩虹表通过预计算的哈希值反推出原始输入即使对每个元素加盐也只能增加暴力破解的难度无法从根本上解决问题结论该方案仅适用于内部系统或完全可信的环境绝对不能用于对抗任何有动机的外部攻击者方案二布隆过滤器高性能的概率方案布隆过滤器是一种空间效率极高的概率型数据结构它以牺牲一小部分准确性为代价换取了巨大的性能和空间优势核心原理位数组与哈希函数布隆过滤器由一个很长的位数组初始化全为和多个独立的哈希函数组成添加元素当你向过滤器中添加一个元素时你会用所有哈希函数对这个元素进行计算得到多个不同的位置索引然后将位数组中这些位置的比特值设为查询元素查询一个元素是否存在时你用同样的哈希函数再次计算出所有位置索引只有当所有这些位置的比特值都为时过滤器才报告元素可能存在只要有一个位置是那么该元素绝对不存在假阳性当一个本不存在的元素其哈希到的所有位置恰好都被其他元素置为时就会发生误判假阳性率可以通过调整位数组大小和哈希函数数量来控制协议流程阶段一构建并发送过滤器数据量较小的一方根据自己的数据集创建一个布隆过滤器将这个紧凑的位数组发送给数据量较大的一方通信量极小一个几的过滤器就能代表上亿条数据阶段二查询并返回候选集遍历自己的数据集用与相同的哈希函数去查询收到的布隆过滤器将所有在布隆过滤器中显示可能存在的元素构成一个候选交集这个集合由于假阳性的存在会比真实交集更大将这个候选集的原始或其哈希发回给阶段三确认最终交集收到候选集后在自己的原始数据中进行精确匹配剔除掉所有假阳性成员得到最终的真实交集分析优点性能极高计算哈希和位操作非常快是所有方案中速度最快的之一通信效率极高只需要发送一个紧凑的位数组通信成本是其最大亮点缺点有误报必须有一个额外的交互步骤来剔除误报结果安全性有限过滤器本身虽然不是明文但仍然泄露了关于数据集的统计学特征如果是恶意的它可以利用过滤器测试它猜测的元素是否存在于的集合中因此它只在半诚实模型下提供有限的隐私保护结论在追求极致性能能接受多轮交互且安全要求不是最高级别的场景下布隆过滤器是业界大规模数据求交的常用方案它是性能和隐私之间一个出色的工程平衡方案三基于公钥密码学的安全方案为了实现数学上可证明的安全性即除了交集本身不泄露任何额外信息我们需要引入公钥密码学工具这些方案通常在半诚实模型下是安全的基于的该方案巧妙地利用了密钥交换协议的交换律构建了一个优雅的协议前置知识密钥交换该协议的核心是让两个互不信任的人和通过公开信道协商出一个共享的秘密密钥双方约定公共参数和生成私钥计算公钥发送给生成私钥计算公钥发送给计算共享密钥计算共享密钥由于幂运算的交换律双方得到了完全相同的密钥而窃听者无法从公开的和中计算出它协议流程此协议将每个数据项都视作一次独立的密钥交换各自准备和各自生成一个私钥随机数和方计算与发送对自己的每个元素先哈希到椭圆曲线上的一个点然后用私钥计算公钥将所有组成的列表发送给方计算与发送收到列表后用自己的私钥对列表中的每个元素进行二次加密得到同时对自己的每个元素计算将所有组成的列表发送给方计算收到发送的列表后用自己的私钥对每个元素计算得到找出交集此时如果和有一个共同元素那么在的本地她计算出了在的本地他计算出了由于交换律这两个值是相等的将自己计算出的集合与发回的集合可以在本地重新计算求交即可找出交集对应的秘密值从而确定交集通常为了不让也知道交集最后一步比较只在方进行分析优点安全性高基于成熟的公钥密码体系无误报在半诚实模型下是安全的缺点计算开销大涉及大量的椭圆曲线点乘运算比模幂更快但仍是重计算比简单哈希慢得多通信成本也较高需要交换两轮数据结论一个优雅的教科书式的方案适合中等大小数据集或作为理解更复杂协议的起点基于不经意传输的这是当前兼顾顶级安全和顶级性能的黄金标准是现代隐私计算框架如的核心它虽然复杂但理解其构件是理解现代密码学的关键核心构件一不经意传输是什么一个两方协议其中发送方有个消息接收方有一个索引协议结束后接收方只得到了消息而发送方完全不知道接收方取走了第几个消息邮局信箱类比想从邮递员那里拿到封信中的第封但他不想让知道他取了哪封有一把只能打开第号信箱的钥匙他把这把锁已打开状态但钥匙不给交给拿到后用它和其他把她自己准备的锁分别锁上对应的封信然后把所有个信箱都交给只能用自己的钥匙打开第号信箱拿到信件始终不知道的选择不经意传输扩展基础的协议执行一次开销很大技术可以用很少的种子实例以极低的成本生成海量的实例这使得在大数据场景下变得实用核心构件二布谷鸟哈希是什么一种特殊的哈希表它为每个元素分配两个或多个备选存储位置布谷鸟占巢类比想象一排鸟巢一个大数组和一群布谷鸟数据项每只鸟都有两个固定的巢可以去由两个哈希函数决定当一只新鸟飞来它检查第一个家如果空着就住进去如果被占了它就把里面的原住民踢出去自己住进去被踢出去的鸟现在飞向它的另一个备选家这个过程会像链式反应一样继续下去直到所有鸟都找到家在中的作用服务端大数据方将自己的数据存入布谷鸟哈希表这样客户端小数据方想查询一个元素它就明确地知道只可能存在于和这两个位置这避免了全表扫描将查询范围缩小到常数级别是高性能的关键协议流程高度简化我们将参与方称为客户端数据量小和服务端数据量大目标是客户端得到交集服务端一无所知服务端准备离线将自己的数据集存入一个布谷鸟哈希表中表的每个槽位要么是要么是空对布谷鸟哈希表中的每个位置都填充一个随机生成的秘密值交互与查询在线对于自己的每个元素也用相同的哈希函数计算出它在布谷鸟表中的所有可能位置如作为协议的接收方作为发送方双方执行协议将上一步计算出的所有位置作为查询索引通过不经意地从获取了它想查询的所有位置上的秘密值整个过程不知道查询了哪些位置也不知道其他位置的值客户端计算离线为了找出交集协议有一个巧妙的设计客户端不仅获取秘密值还能通过另一个函数计算出自己元素的期望秘密值客户端检查取回的秘密值中是否存在一个与它为计算出的期望值相匹配如果匹配就属于交集客户端在本地完成所有匹配最终得到完整的交集而服务端对结果一无所知服务端大数据集客户端小数据集阶段一离线准备将数据集存入布谷鸟哈希表为哈希表中每个槽位填充随机秘密值阶段二在线交互对客户端每个元素计算的两个查询地址执行协议批量查询作为接收方将作为选择比特作为发送方返回加密的秘密值阶段三本地计算将获取的秘密值与本地期望值比对找出所有匹配成功的元素构成交集分析优点通过复杂的密码学工程实现了极高的安全半诚实模型和极高的性能通信轮次少基本一轮计算速度远超其他公钥方案缺点实现极为复杂个人难以从零开始正确构建必须依赖成熟的经过同行评审的密码学库结论这是业界前沿的选择适用于对安全和性能都有着严苛要求的大规模场景关于同态加密的说明同态加密允许在密文上进行计算得到的结果解密后与在明文上计算的结果相同核心原理一个函数和加密算法满足实现思路将自己的集合每个元素加密并发送给利用同态性质在密文上执行一个比较操作找出哪些与自己的某个相等这个过程非常复杂远不止是简单的比较优点安全性极高理论上可以支持非常复杂的数据分析缺点性能极差同态运算比明文运算慢数个数量级且密文膨胀严重对于简单的集合求交任务其开销远大于专用的等协议如同用大炮打蚊子结论是解决更复杂隐私计算问题的强大工具如隐私联邦学习中的模型聚合但对于单纯的任务通常不是性价比最高的选择协议变种标准的解决的是找出交集成员的问题但在现实中我们常常有更细化的需求交集基数计算目标只计算交集的大小不暴露任何交集成员场景两家公司想知道他们有多少共同客户但不想知道具体是哪些客户实现通常比标准更高效因为需要泄露的信息更少可以基于布隆过滤器发送过滤器查询后返回一个计数值或专用的密码学协议构建带标签的目标一方通常是客户端拥有数据集另一方服务端拥有带标签的数据集协议结束后得到与交集相关的标签除了数据集大小外一无所知场景广告归因广告平台有用户转化价值数据广告主有用户数据通过广告主可以知道自己哪些用户产生了转化以及具体的价值而平台方无需暴露所有用户的价值信息实现通常是的一个扩展多方目标三个或更多参与方共同计算他们数据集的交集场景多个安全机构希望找出他们共同的嫌疑人名单但任何两方之间都不想暴露自己的私有名单实现复杂度显著提高常见的方法有两类基于中心协调者所有参与方都与一个可信或不可信的中心服务器进行两方去中心化参与方形成一个环例如每一方都将自己与上一方计算的中间结果传递给下一方最终完成计算方案对比与选择方案安全模型性能通信成本核心原理实现复杂度核心场景简单哈希不安全极高中单向哈希低内部或完全可信环境布隆过滤器弱半诚实极高极低概率数据结构中性能敏感能接受额外交互半诚实中高密钥交换高安全要求高数据集不大教学半诚实高中不经意传输极高兼顾高性能和高安全的前沿选择半诚实极低极高同态加密极高学术研究或复杂计算场景如何选择一份决策指南第一步评估安全威胁与信任模型你的对手是会遵守规则的好奇宝宝半诚实还是可能作弊的破坏者恶意对于绝大多数商业应用半诚实安全已经足够如果需要对抗恶意攻击你需要寻找明确支持的库并接受显著的性能下降第二步明确你的输出需求你真的需要交集的具体成员吗还是只需要它的数量你是否需要在求交的同时从对方获取关联数据参与方是两个还是多个第三步评估性能成本与数据规模性能和通信成本是唯一瓶颈数据量巨大但安全要求不高且可以容忍多一轮交互来消除误报布隆过滤器安全是首要考虑但数据规模不大数据集在十万到百万级别希望有一个可靠易于理解的强安全方案安全和性能缺一不可数据规模在百万级以上需要半诚实安全保证并且对性能有很高要求并使用现有库第四步考虑工程实现对于所有公钥方案永远不要自己从零实现密码学实现中的任何微小错误都可能导致灾难性的安全漏洞优先使用封装好的高级库如它们提供了易于使用的接口需要极致定制或研究可以深入更底层的库如未来展望隐私集合求交是一个活跃的研究领域仍在不断演进抗量子密码当前主流的公钥方案都基于传统数论难题在未来可能受到量子计算机的威胁学术界正在积极研究基于格密码等抗量子困难问题的新范式硬件加速为了进一步突破性能瓶颈研究者们正在探索使用等专用硬件来加速底层复杂的密码学运算如椭圆曲线点乘以满足更大规模更低延迟的实时计算需求资源与库要亲手实现安全的协议建议直接使用经过同行评审和社区考验的开源库而不是自己造轮子目前最知名和最高性能的库之一是许多其他库的基础一个封装了多种协议包括基于的的开源库相对易于使用微软研究院等机构推出的高性能库业界产品',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-06-19 09:56:08',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a></span><span class="article-meta tags"></span></div></div><h1 class="post-title" itemprop="name headline">关于隐私集合求交 (PSI) 的认识</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-06-18T16:00:00.000Z" title="发表于 2025-06-19 00:00:00">2025-06-19</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-06-19T01:56:08.703Z" title="更新于 2025-06-19 09:56:08">2025-06-19</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="关于隐私集合求交 (PSI) 的认识"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250607203155245.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/"><header><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a><h1 id="CrawlerTitle" itemprop="name headline">关于隐私集合求交 (PSI) 的认识</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-06-18T16:00:00.000Z" title="发表于 2025-06-19 00:00:00">2025-06-19</time><time itemprop="dateCreated datePublished" datetime="2025-06-19T01:56:08.703Z" title="更新于 2025-06-19 09:56:08">2025-06-19</time></header><h1 id="关于隐私集合求交-PSI-的认识"><a href="#关于隐私集合求交-PSI-的认识" class="headerlink" title="关于隐私集合求交 (PSI) 的认识"></a>关于隐私集合求交 (PSI) 的认识</h1><p>隐私集合求交（Private Set Intersection, PSI）是密码学和数据工程交叉领域中的一个经典问题：<strong>两个或多个参与方，如何在不泄露各自私有数据的前提下，计算出他们数据集的交集？</strong></p>
+<p>这个需求在现实世界中非常普遍，例如：</p>
+<ul>
+<li><strong>广告归因</strong>：广告平台和广告主需要知道哪些观看了广告的用户最终完成了购买，但双方都不想直接暴露自己的全部用户列表。</li>
+<li><strong>联系人发现</strong>：手机应用想知道你的通讯录里有哪些人也注册了该应用，但你不想上传整个通讯录。</li>
+<li><strong>安全情报共享</strong>：多个情报机构希望找出共同的嫌疑人名单，但各自的名单都是高度机密的。</li>
+</ul>
+<p>本文将梳理几种主流的 PSI 实现方案，分析它们的设计思路、性能、安全性，以及各自的适用场景。</p>
+<hr>
+<h2 id="核心密码学概念：安全模型"><a href="#核心密码学概念：安全模型" class="headerlink" title="核心密码学概念：安全模型"></a>核心密码学概念：安全模型</h2><p>在深入了解各种 PSI 协议之前，我们必须先理解评估其安全性的两个基本模型。这决定了一个协议能抵御什么样的攻击者。</p>
+<ul>
+<li><p><strong>半诚实模型 (Semi-Honest &#x2F; Honest-but-Curious)</strong></p>
+<ul>
+<li><strong>定义</strong>：这是密码学协议中最常见的威胁模型。在此模型中，参与方会<strong>完全遵守</strong>协议的每一步指令，如同一个诚实的学生。但是，他们会保留协议执行过程中收到的所有信息（例如，中间计算结果），并试图在协议结束后，通过分析这些信息来推断出超出协议规定泄露范围的、对方的额外隐私。</li>
+<li><strong>类比</strong>：一个“好奇的”合作伙伴。他会按合同办事，但会试图从你给他的文件中分析出你的商业秘密。</li>
+<li><strong>意义</strong>：绝大多数高性能的 PSI 协议（如 OT-PSI）都是在半诚实模型下被证明安全的。这意味着，只要大家都遵守规则，就不可能泄露交集之外的任何信息。</li>
+</ul>
+</li>
+<li><p><strong>恶意模型 (Malicious)</strong></p>
+<ul>
+<li><strong>定义</strong>：这是一个更强大、更符合现实世界某些场景的威胁模型。恶意攻击者<strong>不遵守</strong>协议，他们可以采取任何行动来破坏协议或窃取信息，例如：发送伪造的数据、提前中止协议、或者根据自己的输入来改变协议流程。</li>
+<li><strong>类比</strong>：一个“不择手段的”商业间谍。他不仅想分析文件，还可能伪造文件、贿赂你的员工，以达到目的。</li>
+<li><strong>意义</strong>：防御恶意攻击者需要引入更复杂的密码学工具，如**零知识证明 (Zero-Knowledge Proofs)**，来强制验证每一步的正确性。这通常会导致协议性能大幅下降。因此，恶意安全的 PSI 协议通常用在金融、政府等高风险领域。</li>
+</ul>
+</li>
+</ul>
+<p><strong>结论</strong>：在选择 PSI 方案时，首先要评估你的安全需求。对于大多数商业合作场景，半诚实模型下的安全通常已经足够。</p>
+<hr>
+<h2 id="方案一：基础哈希方案-简单但脆弱"><a href="#方案一：基础哈希方案-简单但脆弱" class="headerlink" title="方案一：基础哈希方案 - 简单但脆弱"></a>方案一：基础哈希方案 - 简单但脆弱</h2><p>最直观的想法是避免明文传输，利用哈希函数的单向性。</p>
+<p><strong>核心原理</strong></p>
+<ul>
+<li>**单向哈希函数 (One-way Hash Function)**：如 SHA-256，可以将任意输入数据转换成一个固定长度的、独一无二的“指纹”。关键在于，从指纹反推出原始输入在计算上是不可行的。</li>
+</ul>
+<p><strong>协议流程</strong></p>
+<ol>
+<li><strong>约定哈希</strong>: A 和 B 双方约定一个标准的哈希函数（如 SHA-256）。</li>
+<li><strong>本地计算</strong>: A 将自己的数据集内每个元素进行哈希，得到哈希列表 <code>Hash(A)</code>。B 也同样计算出 <code>Hash(B)</code>。</li>
+<li><strong>交换与比较</strong>: 双方交换哈希列表，然后本地比较 <code>Hash(A)</code> 和 <code>Hash(B)</code>，找出相同的哈希值，这些就代表了原始数据的交集。</li>
+</ol>
+<p><strong>实现伪代码 (Python)</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">hash_items</span>(<span class="params">items</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;hashlib.sha256(item.encode()).hexdigest() <span class="keyword">for</span> item <span class="keyword">in</span> items&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Client A&#x27;s data</span></span><br><span class="line">data_A = &#123;<span class="string">&quot;apple&quot;</span>, <span class="string">&quot;banana&quot;</span>, <span class="string">&quot;cherry&quot;</span>&#125;</span><br><span class="line"><span class="comment"># Client B&#x27;s data</span></span><br><span class="line">data_B = &#123;<span class="string">&quot;banana&quot;</span>, <span class="string">&quot;date&quot;</span>, <span class="string">&quot;grape&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. Both parties hash their data</span></span><br><span class="line">hashed_A = hash_items(data_A)</span><br><span class="line">hashed_B = hash_items(data_B)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. They exchange these hashed sets</span></span><br><span class="line"><span class="comment"># 3. B finds the intersection of the hashed sets</span></span><br><span class="line">intersection_hashes = hashed_A.intersection(hashed_B)</span><br><span class="line"></span><br><span class="line"><span class="comment"># B might send these back to A for final confirmation, or if hashes are identifiers,</span></span><br><span class="line"><span class="comment"># the process might end here.</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Intersection Hashes: <span class="subst">&#123;intersection_hashes&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>分析</strong></p>
+<ul>
+<li><strong>优点</strong>：实现极其简单，计算速度飞快，网络通信只有一轮。</li>
+<li><strong>缺点</strong>：安全性极低。如果元素的空间有限且已知（如手机号、身份证号、日期），攻击者可以轻松构建一个“彩虹表”，通过预计算的哈希值反推出原始输入。即使对每个元素加盐（Salt），也只能增加暴力破解的难度，无法从根本上解决问题。</li>
+</ul>
+<p><strong>结论</strong>：该方案仅适用于内部系统或完全可信的环境，<strong>绝对不能</strong>用于对抗任何有动机的外部攻击者。</p>
+<hr>
+<h2 id="方案二：布隆过滤器-高性能的概率方案"><a href="#方案二：布隆过滤器-高性能的概率方案" class="headerlink" title="方案二：布隆过滤器 - 高性能的概率方案"></a>方案二：布隆过滤器 - 高性能的概率方案</h2><p>布隆过滤器（Bloom Filter）是一种空间效率极高的概率型数据结构，它以牺牲一小部分准确性为代价，换取了巨大的性能和空间优势。</p>
+<p><strong>核心原理</strong></p>
+<ul>
+<li><strong>位数组与哈希函数</strong>: 布隆过滤器由一个很长的位数组（初始化全为0）和多个独立的哈希函数组成。</li>
+<li><strong>添加元素</strong>: 当你向过滤器中添加一个元素时，你会用所有哈希函数对这个元素进行计算，得到多个不同的位置索引，然后将位数组中这些位置的比特值设为 1。</li>
+<li><strong>查询元素</strong>: 查询一个元素是否存在时，你用同样的哈希函数再次计算出所有位置索引。只有当所有这些位置的比特值都为 1 时，过滤器才报告“元素<strong>可能</strong>存在”。只要有一个位置是 0，那么该元素<strong>绝对不</strong>存在。</li>
+<li><strong>假阳性 (False Positive)</strong>: 当一个本不存在的元素，其哈希到的所有位置恰好都被其他元素置为 1 时，就会发生误判。假阳性率可以通过调整位数组大小和哈希函数数量来控制。</li>
+</ul>
+<p><strong>协议流程</strong></p>
+<ol>
+<li><p><strong>阶段一：A 构建并发送过滤器</strong></p>
+<ul>
+<li>数据量较小的一方（A），根据自己的数据集创建一个布隆过滤器。</li>
+<li>A 将这个紧凑的位数组发送给数据量较大的一方（B）。通信量极小，一个几MB的过滤器就能代表上亿条数据。</li>
+</ul>
+</li>
+<li><p><strong>阶段二：B 查询并返回候选集</strong></p>
+<ul>
+<li>B 遍历自己的数据集，用与 A 相同的哈希函数去查询收到的布隆过滤器。</li>
+<li>B 将所有在布隆过滤器中显示“可能存在”的元素，构成一个<strong>候选交集</strong>。这个集合由于假阳性的存在，会比真实交集更大。</li>
+<li>B 将这个<strong>候选集的原始 ID</strong>（或其哈希）发回给 A。</li>
+</ul>
+</li>
+<li><p><strong>阶段三：A 确认最终交集</strong></p>
+<ul>
+<li>A 收到候选集后，在自己的原始数据中进行精确匹配，剔除掉所有假阳性成员，得到最终的真实交集。</li>
+</ul>
+</li>
+</ol>
+<p><strong>分析</strong></p>
+<ul>
+<li><strong>优点</strong>:<ul>
+<li><strong>性能极高</strong>：计算哈希和位操作非常快，是所有方案中速度最快的之一。</li>
+<li><strong>通信效率极高</strong>：A 只需要发送一个紧凑的位数组，通信成本是其最大亮点。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>:<ul>
+<li><strong>有误报</strong>：必须有一个额外的交互步骤（B -&gt; A）来剔除误报结果。</li>
+<li><strong>安全性有限</strong>：过滤器本身虽然不是明文，但仍然泄露了关于数据集的统计学特征。如果 B 是恶意的，它可以利用过滤器测试它猜测的元素是否存在于 A 的集合中。因此，它只在半诚实模型下提供有限的隐私保护。</li>
+</ul>
+</li>
+</ul>
+<p><strong>结论</strong>：在追求极致性能、能接受多轮交互、且安全要求不是最高级别的场景下，布隆过滤器是业界大规模数据求交的常用方案。它是性能和隐私之间一个出色的工程平衡。</p>
+<hr>
+<h2 id="方案三：基于公钥密码学的安全方案"><a href="#方案三：基于公钥密码学的安全方案" class="headerlink" title="方案三：基于公钥密码学的安全方案"></a>方案三：基于公钥密码学的安全方案</h2><p>为了实现数学上可证明的安全性（即除了交集本身，不泄露任何额外信息），我们需要引入公钥密码学工具。这些方案通常在半诚实模型下是安全的。</p>
+<h3 id="3-1-基于-Diffie-Hellman-的-PSI"><a href="#3-1-基于-Diffie-Hellman-的-PSI" class="headerlink" title="3.1 基于 Diffie-Hellman 的 PSI"></a>3.1 基于 Diffie-Hellman 的 PSI</h3><p>该方案巧妙地利用了 Diffie-Hellman 密钥交换协议的交换律，构建了一个优雅的 PSI 协议。</p>
+<p><strong>前置知识：Diffie-Hellman 密钥交换</strong><br>该协议的核心是让两个互不信任的人（Alice 和 Bob）通过公开信道协商出一个共享的秘密密钥。</p>
+<ol>
+<li>双方约定公共参数 <code>g</code> 和 <code>p</code>。</li>
+<li>Alice 生成私钥 <code>a</code>，计算公钥 <code>A = g^a mod p</code>，发送给 Bob。</li>
+<li>Bob 生成私钥 <code>b</code>，计算公钥 <code>B = g^b mod p</code>，发送给 Alice。</li>
+<li>Alice 计算共享密钥 <code>S = B^a mod p = (g^b)^a mod p</code>。</li>
+<li>Bob 计算共享密钥 <code>S = A^b mod p = (g^a)^b mod p</code>。<br>由于幂运算的交换律，双方得到了完全相同的密钥 <code>S</code>，而窃听者无法从公开的 <code>A</code> 和 <code>B</code> 中计算出它。</li>
+</ol>
+<p><strong>协议流程</strong><br>此 PSI 协议将每个数据项都视作一次独立的密钥交换。</p>
+<ol>
+<li><strong>各自准备</strong>: A 和 B 各自生成一个私钥（随机数 <code>a</code> 和 <code>b</code>）。</li>
+<li><strong>A 方计算与发送</strong>: A 对自己的每个元素 <code>x</code>，先哈希到椭圆曲线上的一个点 <code>H(x)</code>，然后用私钥 <code>a</code> 计算“公钥” <code>P_x = a * H(x)</code>。A 将所有 <code>P_x</code> 组成的列表发送给 B。</li>
+<li><strong>B 方计算与发送</strong>: B 收到列表后，用自己的私钥 <code>b</code> 对列表中的每个元素进行二次“加密”，得到 <code>S_x = b * P_x = b * a * H(x)</code>。同时，B 对自己的每个元素 <code>y</code> 计算 <code>P_y = b * H(y)</code>。B 将所有 <code>P_y</code> 组成的列表发送给 A。</li>
+<li><strong>A 方计算</strong>: A 收到 B 发送的 <code>P_y</code> 列表后，用自己的私钥 <code>a</code> 对每个元素计算，得到 <code>S_y = a * P_y = a * b * H(y)</code>。</li>
+<li><strong>找出交集</strong>: 此时，如果 A 和 B 有一个共同元素 <code>z</code>，那么在 A 的本地，她计算出了 <code>S_z = a*b*H(z)</code>；在 B 的本地，他计算出了 <code>S_z = b*a*H(z)</code>。由于交换律，这两个值是相等的。A 将自己计算出的 <code>S_y</code> 集合与 B 发回的 <code>S_x</code> 集合（A可以在本地重新计算）求交，即可找出交集对应的秘密值，从而确定交集。通常，为了不让 B 也知道交集，最后一步比较只在 A 方进行。</li>
+</ol>
+<p><strong>分析</strong></p>
+<ul>
+<li><strong>优点</strong>：安全性高，基于成熟的公钥密码体系，无误报。在半诚实模型下是安全的。</li>
+<li><strong>缺点</strong>：计算开销大，涉及大量的椭圆曲线点乘运算（比模幂更快，但仍是重计算），比简单哈希慢得多。通信成本也较高，需要交换两轮数据。</li>
+</ul>
+<p><strong>结论</strong>：一个优雅的、教科书式的 PSI 方案。适合中等大小数据集，或作为理解更复杂协议的起点。</p>
+<h3 id="3-2-基于不经意传输-OT-的-PSI"><a href="#3-2-基于不经意传输-OT-的-PSI" class="headerlink" title="3.2 基于不经意传输 (OT) 的 PSI"></a>3.2 基于不经意传输 (OT) 的 PSI</h3><p>这是当前兼顾<strong>顶级安全</strong>和<strong>顶级性能</strong>的黄金标准，是现代隐私计算框架（如 FATE, SecretFlow）的核心。它虽然复杂，但理解其构件是理解现代密码学的关键。</p>
+<p><strong>核心构件一：不经意传输 (Oblivious Transfer, OT)</strong></p>
+<ul>
+<li><strong>是什么</strong>：一个两方协议，其中发送方 (Sender) 有 <code>N</code> 个消息 <code>(m_1, m_2, ..., m_n)</code>，接收方 (Receiver) 有一个索引 <code>i</code>。协议结束后，接收方只得到了消息 <code>m_i</code>，而发送方完全不知道接收方取走了第几个消息。</li>
+<li><strong>“邮局信箱”类比</strong>: Bob 想从邮递员 Alice 那里拿到 N 封信中的第 <code>i</code> 封，但他不想让 Alice 知道他取了哪封。Bob 有一把只能打开第 <code>i</code> 号信箱的钥匙。他把这把锁（已打开状态，但钥匙不给 Alice）交给 Alice。Alice 拿到后，用它和其他 N-1 把她自己准备的锁，分别锁上对应的 N 封信，然后把所有 N 个信箱都交给 Bob。Bob 只能用自己的钥匙打开第 <code>i</code> 号信箱，拿到信件。Alice 始终不知道 Bob 的选择。</li>
+<li>**不经意传输扩展 (OTe)**：基础的 OT 协议执行一次开销很大。OTe 技术可以用很少的“种子”OT 实例，以极低的成本生成海量的 OT 实例，这使得 OT 在大数据场景下变得实用。</li>
+</ul>
+<p><strong>核心构件二：布谷鸟哈希 (Cuckoo Hashing)</strong></p>
+<ul>
+<li><strong>是什么</strong>：一种特殊的哈希表，它为每个元素分配<strong>两个或多个</strong>备选存储位置。</li>
+<li><strong>“布谷鸟占巢”类比</strong>: 想象一排鸟巢（一个大数组）和一群布谷鸟（数据项）。每只鸟都有两个固定的巢可以去（由两个哈希函数 <code>h1(x)</code>, <code>h2(x)</code> 决定）。当一只新鸟飞来，它检查第一个家 <code>h1(x)</code>。如果空着，就住进去。如果被占了，它就把里面的“原住民”踢出去，自己住进去。被踢出去的鸟，现在飞向它的<em>另一个</em>备选家 <code>h2(x)</code>… 这个过程会像链式反应一样继续下去，直到所有鸟都找到家。</li>
+<li><strong>在PSI中的作用</strong>: 服务端（大数据方）将自己的数据存入布谷鸟哈希表。这样，客户端（小数据方）想查询一个元素 <code>x</code>，它就<strong>明确地知道</strong> <code>x</code> 只可能存在于 <code>h1(x)</code> 和 <code>h2(x)</code> 这两个位置。这避免了全表扫描，将查询范围缩小到常数级别，是 OT-PSI 高性能的关键。</li>
+</ul>
+<p><strong>协议流程 (高度简化)</strong><br>我们将参与方称为客户端 C (数据量小)和服务端 S (数据量大)。目标是客户端得到交集，服务端一无所知。</p>
+<ol>
+<li><p><strong>服务端准备 (离线)</strong>:</p>
+<ul>
+<li>S 将自己的数据集 <code>Y</code> 存入一个布谷鸟哈希表中。表的每个槽位要么是 <code>y</code>，要么是空。</li>
+<li>S 对布谷鸟哈希表中的每个位置，都填充一个随机生成的秘密值。</li>
+</ul>
+</li>
+<li><p><strong>交互与查询 (在线)</strong>:</p>
+<ul>
+<li>C 对于自己的每个元素 <code>x</code>，也用相同的哈希函数计算出它在布谷鸟表中的所有可能位置（如 <code>h1(x)</code>, <code>h2(x)</code>）。</li>
+<li>C 作为 OT 协议的接收方，S 作为发送方，双方执行 OTe 协议。C 将上一步计算出的所有位置作为查询索引。</li>
+<li>通过 OTe，C “不经意地”从 S 获取了它想查询的所有位置上的秘密值。整个过程 S 不知道 C 查询了哪些位置，C 也不知道其他位置的值。</li>
+</ul>
+</li>
+<li><p><strong>客户端计算 (离线)</strong>:</p>
+<ul>
+<li>为了找出交集，协议有一个巧妙的设计：客户端不仅获取秘密值，还能通过另一个函数 <code>F</code> 计算出自己元素的“期望秘密值”。</li>
+<li>客户端检查取回的秘密值中，是否存在一个与它为 <code>x</code> 计算出的期望值相匹配。如果匹配，<code>x</code> 就属于交集。</li>
+<li>客户端在本地完成所有匹配，最终得到完整的交集，而服务端对结果一无所知。</li>
+</ul>
+</li>
+</ol>
+<div class="mermaid-wrap"><pre class="mermaid-src" hidden>
+  sequenceDiagram
+    participant Server as 服务端 (大数据集 Y)
+    participant Client as 客户端 (小数据集 X)
+
+    Note over Server: 阶段一：离线准备 (Cuckoo Hashing)
+    Server-&gt;&gt;Server: 1. 将数据集 Y 存入布谷鸟哈希表
+    Server-&gt;&gt;Server: 2. 为哈希表中每个槽位填充随机秘密值
+
+    Note over Client,Server: 阶段二：在线交互 (OTe)
+    loop 对客户端每个元素 x
+        Client-&gt;&gt;Client: 3. 计算 x 的两个查询地址 h1(x), h2(x)
+    end
+    Note over Client,Server: 4. 执行 OTe 协议批量查询
+    Client-&gt;&gt;Server: 作为接收方，将 h1(x), h2(x)... 作为选择比特
+    Server--&gt;&gt;Client: 作为发送方，返回加密的秘密值
+
+    Note over Client: 阶段三：本地计算
+    Client-&gt;&gt;Client: 5. 将获取的秘密值与本地期望值比对
+    Client-&gt;&gt;Client: 6. 找出所有匹配成功的元素，构成交集
+  </pre></div>
+
+<p><strong>分析</strong></p>
+<ul>
+<li><strong>优点</strong>：通过复杂的密码学工程，实现了极高的安全（半诚实模型）和极高的性能，通信轮次少（基本一轮），计算速度远超其他公钥方案。</li>
+<li><strong>缺点</strong>：实现极为复杂，个人难以从零开始正确构建，必须依赖成熟的、经过同行评审的密码学库。</li>
+</ul>
+<p><strong>结论</strong>：这是业界前沿的选择，适用于对安全和性能都有着严苛要求的大规模场景。</p>
+<h3 id="3-3-关于同态加密-HE-的说明"><a href="#3-3-关于同态加密-HE-的说明" class="headerlink" title="3.3 关于同态加密 (HE) 的说明"></a>3.3 关于同态加密 (HE) 的说明</h3><p>同态加密允许在密文上进行计算，得到的结果解密后与在明文上计算的结果相同。</p>
+<p><strong>核心原理</strong></p>
+<ul>
+<li><p>一个函数 <code>f</code> 和加密算法 <code>Enc</code>，满足 <code>Dec(f(Enc(a), Enc(b))) = f(a, b)</code>。</p>
+</li>
+<li><p><strong>实现思路</strong>: A 将自己的集合 <code>&#123;x&#125;</code> 每个元素加密 <code>Enc(x)</code> 并发送给 B。B 利用同态性质，在密文上执行一个“比较”操作，找出哪些 <code>Enc(x)</code> 与自己的某个 <code>Enc(y)</code> 相等。这个过程非常复杂，远不止是简单的 <code>==</code> 比较。</p>
+</li>
+<li><p><strong>优点</strong>：安全性极高，理论上可以支持非常复杂的数据分析。</p>
+</li>
+<li><p><strong>缺点</strong>：性能极差。同态运算比明文运算慢数个数量级，且密文膨胀严重。对于简单的集合求交任务，其开销远大于专用的 OT-PSI 等协议，如同“用大炮打蚊子”。</p>
+</li>
+</ul>
+<p><strong>结论</strong>：HE 是解决更复杂隐私计算问题的强大工具（如隐私联邦学习中的模型聚合），但对于单纯的 PSI 任务，通常不是性价比最高的选择。</p>
+<hr>
+<h2 id="PSI-协议变种"><a href="#PSI-协议变种" class="headerlink" title="PSI 协议变种"></a>PSI 协议变种</h2><p>标准的 PSI 解决的是“找出交集成员”的问题，但在现实中，我们常常有更细化的需求。</p>
+<ul>
+<li><p><strong>PSI-Cardinality (交集基数计算)</strong></p>
+<ul>
+<li><strong>目标</strong>：只计算交集的大小 <code>|X ∩ Y|</code>，不暴露任何交集成员。</li>
+<li><strong>场景</strong>：两家公司想知道他们有多少共同客户，但不想知道具体是哪些客户。</li>
+<li><strong>实现</strong>：通常比标准 PSI 更高效，因为需要泄露的信息更少。可以基于布隆过滤器（A 发送过滤器，B 查询后返回一个计数值）、或专用的密码学协议构建。</li>
+</ul>
+</li>
+<li><p><strong>Labeled PSI (带标签的 PSI)</strong></p>
+<ul>
+<li><strong>目标</strong>：一方（通常是客户端 A）拥有数据集 <code>X</code>，另一方（服务端 B）拥有带标签的数据集 <code>&#123;(y, l_y)&#125;</code>。协议结束后，A 得到与交集相关的标签 <code>&#123; (x, l_x) | x ∈ X ∩ Y &#125;</code>。B 除了数据集大小外，一无所知。</li>
+<li><strong>场景</strong>：广告归因。广告平台（B）有<code>（用户ID, 转化价值）</code>数据，广告主（A）有<code>（用户ID）</code>数据。通过 Labeled PSI，广告主可以知道自己哪些用户产生了转化，以及具体的价值，而平台方无需暴露所有用户的价值信息。</li>
+<li><strong>实现</strong>：通常是 OT-PSI 的一个扩展。</li>
+</ul>
+</li>
+<li><p><strong>Multi-Party PSI (多方 PSI)</strong></p>
+<ul>
+<li><strong>目标</strong>：三个或更多参与方，共同计算他们数据集的交集 <code>X1 ∩ X2 ∩ ... ∩ Xn</code>。</li>
+<li><strong>场景</strong>：多个安全机构希望找出他们共同的嫌疑人名单，但任何两方之间都不想暴露自己的私有名单。</li>
+<li><strong>实现</strong>：复杂度显著提高。常见的方法有两类：<ol>
+<li><strong>基于中心协调者</strong>：所有参与方都与一个（可信或不可信的）中心服务器进行两方 PSI。</li>
+<li><strong>去中心化</strong>：参与方形成一个环，例如 <code>P1 -&gt; P2 -&gt; ... -&gt; Pn -&gt; P1</code>，每一方都将自己与上一方计算的中间结果传递给下一方，最终完成计算。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="方案对比与选择"><a href="#方案对比与选择" class="headerlink" title="方案对比与选择"></a>方案对比与选择</h2><table>
+<thead>
+<tr>
+<th align="left">方案</th>
+<th align="left">安全模型</th>
+<th align="left">性能</th>
+<th align="left">通信成本</th>
+<th align="left">核心原理</th>
+<th align="left">实现复杂度</th>
+<th align="left">核心场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>简单哈希</strong></td>
+<td align="left">不安全</td>
+<td align="left">极高</td>
+<td align="left">中</td>
+<td align="left">单向哈希</td>
+<td align="left">低</td>
+<td align="left">内部或完全可信环境</td>
+</tr>
+<tr>
+<td align="left"><strong>布隆过滤器</strong></td>
+<td align="left">弱&#x2F;半诚实</td>
+<td align="left">极高</td>
+<td align="left"><strong>极低</strong></td>
+<td align="left">概率数据结构</td>
+<td align="left">中</td>
+<td align="left">性能敏感，能接受额外交互</td>
+</tr>
+<tr>
+<td align="left"><strong>DH-PSI</strong></td>
+<td align="left"><strong>半诚实</strong></td>
+<td align="left">中</td>
+<td align="left">高</td>
+<td align="left">密钥交换</td>
+<td align="left">高</td>
+<td align="left">安全要求高，数据集不大，教学</td>
+</tr>
+<tr>
+<td align="left"><strong>OT-PSI</strong></td>
+<td align="left"><strong>半诚实</strong></td>
+<td align="left"><strong>高</strong></td>
+<td align="left">中</td>
+<td align="left">不经意传输</td>
+<td align="left"><strong>极高</strong></td>
+<td align="left">兼顾高性能和高安全的前沿选择</td>
+</tr>
+<tr>
+<td align="left"><strong>HE-PSI</strong></td>
+<td align="left"><strong>半诚实</strong></td>
+<td align="left">极低</td>
+<td align="left">极高</td>
+<td align="left">同态加密</td>
+<td align="left">极高</td>
+<td align="left">学术研究或复杂计算场景</td>
+</tr>
+</tbody></table>
+<h3 id="如何选择？一份决策指南"><a href="#如何选择？一份决策指南" class="headerlink" title="如何选择？一份决策指南"></a>如何选择？一份决策指南</h3><ol>
+<li><p><strong>第一步：评估安全威胁与信任模型</strong></p>
+<ul>
+<li>你的对手是会遵守规则的“好奇宝宝”（半诚实），还是可能作弊的“破坏者”（恶意）？</li>
+<li>对于绝大多数商业应用，<strong>半诚实安全</strong>已经足够。如果需要对抗恶意攻击，你需要寻找明确支持<code>Malicious Secure</code>的库，并接受显著的性能下降。</li>
+</ul>
+</li>
+<li><p><strong>第二步：明确你的输出需求</strong></p>
+<ul>
+<li>你真的需要交集的<strong>具体成员</strong>吗？还是只需要它的<strong>数量</strong>（-&gt; PSI-Cardinality）？</li>
+<li>你是否需要在求交的同时，从对方获取关联<strong>数据</strong>（-&gt; Labeled PSI）？</li>
+<li>参与方是两个还是多个（-&gt; Multi-Party PSI）？</li>
+</ul>
+</li>
+<li><p><strong>第三步：评估性能、成本与数据规模</strong></p>
+<ul>
+<li><strong>性能和通信成本是唯一瓶颈</strong>：数据量巨大，但安全要求不高，且可以容忍多一轮交互来消除误报 -&gt; <strong>布隆过滤器</strong>。</li>
+<li><strong>安全是首要考虑，但数据规模不大</strong>：数据集在十万到百万级别，希望有一个可靠、易于理解的强安全方案 -&gt; <strong>DH-PSI</strong>。</li>
+<li><strong>安全和性能缺一不可</strong>：数据规模在百万级以上，需要半诚实安全保证，并且对性能有很高要求 -&gt; <strong>OT-PSI</strong> (并使用现有库)。</li>
+</ul>
+</li>
+<li><p><strong>第四步：考虑工程实现</strong></p>
+<ul>
+<li>对于所有公钥方案，<strong>永远不要自己从零实现</strong>。密码学实现中的任何微小错误都可能导致灾难性的安全漏洞。</li>
+<li><strong>优先使用封装好的高级库</strong>：如 <code>OpenPSI</code>, <code>FALCON-PSI</code>，它们提供了易于使用的接口。</li>
+<li><strong>需要极致定制或研究</strong>：可以深入更底层的库，如 <code>libOTe</code>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h2><p>隐私集合求交是一个活跃的研究领域，仍在不断演进。</p>
+<ul>
+<li>**抗量子密码 (Post-Quantum PSI)**：当前主流的公钥方案（DH, OT）都基于传统数论难题，在未来可能受到量子计算机的威胁。学术界正在积极研究基于格密码（Lattices）等抗量子困难问题的 PSI 新范式。</li>
+<li>**硬件加速 (Hardware Acceleration)**：为了进一步突破性能瓶颈，研究者们正在探索使用 GPU、FPGA 等专用硬件来加速底层复杂的密码学运算（如OTe、椭圆曲线点乘），以满足更大规模、更低延迟的实时计算需求。</li>
+</ul>
+<hr>
+<h2 id="资源与库"><a href="#资源与库" class="headerlink" title="资源与库"></a>资源与库</h2><p>要亲手实现安全的 PSI 协议，建议直接使用经过同行评审和社区考验的开源库，而不是自己造轮子。</p>
+<ul>
+<li><strong>libOTe (C++)</strong>: 目前最知名和最高性能的 OT 库之一，是许多其他库的基础。</li>
+<li><strong>OpenPSI (C++)</strong>: 一个封装了多种 PSI 协议（包括基于 OT 的）的开源库，相对易于使用。</li>
+<li><strong>FALCON-PSI (Python&#x2F;C++)</strong>: 微软研究院等机构推出的高性能 PSI 库。</li>
+</ul>
+<h2 id="业界产品"><a href="#业界产品" class="headerlink" title="业界产品"></a>业界产品</h2><p><a target="_blank" rel="noopener" href="https://m.jrj.com.cn/toutiao/2022/3/17/34839331.shtml">https://m.jrj.com.cn/toutiao/2022/3/17/34839331.shtml</a></p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/')">关于隐私集合求交 (PSI) 的认识</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=关于隐私集合求交 (PSI) 的认识&amp;url=http://example.com/2025/06/19/%E9%9A%90%E7%A7%81%E6%B1%82%E4%BA%A4%E7%9A%84%E5%AD%A6%E4%B9%A0%E6%80%9D%E8%80%83/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250607203155245.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/06/18/hadoop-ecosystem-explained/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250619194740317.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？</div></div></a></div><div class="next-post pull-right"><a href="/2025/06/22/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AF%86%E7%A0%81%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%EF%BC%9ALinux-macOS-Windows%E5%AF%86%E7%A0%81%E7%AE%A1%E7%90%86%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">操作系统密码存储机制详解：Linux、macOS、Windows密码管理深度分析</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E9%9A%90%E7%A7%81%E9%9B%86%E5%90%88%E6%B1%82%E4%BA%A4-PSI-%E7%9A%84%E8%AE%A4%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">关于隐私集合求交 (PSI) 的认识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%AF%86%E7%A0%81%E5%AD%A6%E6%A6%82%E5%BF%B5%EF%BC%9A%E5%AE%89%E5%85%A8%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">核心密码学概念：安全模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E5%93%88%E5%B8%8C%E6%96%B9%E6%A1%88-%E7%AE%80%E5%8D%95%E4%BD%86%E8%84%86%E5%BC%B1"><span class="toc-number">1.2.</span> <span class="toc-text">方案一：基础哈希方案 - 简单但脆弱</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9A%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8-%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E6%A6%82%E7%8E%87%E6%96%B9%E6%A1%88"><span class="toc-number">1.3.</span> <span class="toc-text">方案二：布隆过滤器 - 高性能的概率方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E4%B8%89%EF%BC%9A%E5%9F%BA%E4%BA%8E%E5%85%AC%E9%92%A5%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%AE%89%E5%85%A8%E6%96%B9%E6%A1%88"><span class="toc-number">1.4.</span> <span class="toc-text">方案三：基于公钥密码学的安全方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9F%BA%E4%BA%8E-Diffie-Hellman-%E7%9A%84-PSI"><span class="toc-number">1.4.1.</span> <span class="toc-text">3.1 基于 Diffie-Hellman 的 PSI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%9F%BA%E4%BA%8E%E4%B8%8D%E7%BB%8F%E6%84%8F%E4%BC%A0%E8%BE%93-OT-%E7%9A%84-PSI"><span class="toc-number">1.4.2.</span> <span class="toc-text">3.2 基于不经意传输 (OT) 的 PSI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%85%B3%E4%BA%8E%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86-HE-%E7%9A%84%E8%AF%B4%E6%98%8E"><span class="toc-number">1.4.3.</span> <span class="toc-text">3.3 关于同态加密 (HE) 的说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PSI-%E5%8D%8F%E8%AE%AE%E5%8F%98%E7%A7%8D"><span class="toc-number">1.5.</span> <span class="toc-text">PSI 协议变种</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E6%8B%A9"><span class="toc-number">1.6.</span> <span class="toc-text">方案对比与选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%EF%BC%9F%E4%B8%80%E4%BB%BD%E5%86%B3%E7%AD%96%E6%8C%87%E5%8D%97"><span class="toc-number">1.6.1.</span> <span class="toc-text">如何选择？一份决策指南</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B"><span class="toc-number">1.7.</span> <span class="toc-text">未来展望</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E4%B8%8E%E5%BA%93"><span class="toc-number">1.8.</span> <span class="toc-text">资源与库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%9A%E7%95%8C%E4%BA%A7%E5%93%81"><span class="toc-number">1.9.</span> <span class="toc-text">业界产品</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一起来学Intel SGX"/></a><div class="content"><a class="title" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX">一起来学Intel SGX</a><time datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intel SGX 设计与安全原理全解析"/></a><div class="content"><a class="title" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析">Intel SGX 设计与安全原理全解析</a><time datetime="2025-07-26T14:00:00.000Z" title="发表于 2025-07-26 22:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3564d61e60e59786c3e06fbcb40d0aad.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave">Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-26T11:00:00.000Z" title="发表于 2025-07-26 19:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解RSA：加密与签名的艺术"/></a><div class="content"><a class="title" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术">深入理解RSA：加密与签名的艺术</a><time datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

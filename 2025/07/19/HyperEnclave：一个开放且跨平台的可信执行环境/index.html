@@ -1,0 +1,627 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>HyperEnclave：一个开放且跨平台的可信执行环境 | 凌霄的博客</title><meta name="keywords" content="HyperEnclave,机密计算,TEE,虚拟化,论文翻译"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="HyperEnclave：一个开放且跨平台的可信执行环境"><meta name="application-name" content="HyperEnclave：一个开放且跨平台的可信执行环境"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="HyperEnclave：一个开放且跨平台的可信执行环境"><meta property="og:url" content="http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="本文是HyperEnclave论文的中文翻译"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png"><meta name="description" content="本文是HyperEnclave论文的中文翻译"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'HyperEnclave：一个开放且跨平台的可信执行环境',
+  postAI: '',
+  pageFillDescription: 'HyperEnclave：一个开放且跨平台的可信执行环境, 摘要, 1 引言, 2 背景, 2.1 可信执行环境, 2.2 可信平台模块, 2.3 威胁模型, 3 设计, 3.1 系统概述, 3.2 内存管理和保护, 3.3 可信启动、证明和封装, 3.4 Enclave SDK, 4 灵活的 Enclave 操作模式, 4.1 客户机用户 Enclaves, 4.2 主机用户 Enclaves, 4.3 特权 Enclaves, 5 实现, 5.1 RustMonitor, 5.2 内核模块, 5.3 Enclave SDK, 6 安全性分析, 7 评估, 7.1 World Switch 性能, 7.2 Enclave 异常处理, 7.3 编组缓冲区开销, 7.4 真实世界工作负载, NBench, SQLite, Lighttpd, Redis, 8 讨论一个开放且跨平台的可信执行环境本文是论文的原文翻译摘要学术界和工业界已经提出了许多可信执行环境然而它们中的大多数都需要特定的硬件或固件更改并且与特定的硬件供应商如英特尔和绑定在本文中我们提出了这是一个开放且跨平台的基于进程的它依赖于广泛可用的虚拟化扩展来创建隔离的执行环境特别是旨在支持灵活的操作模式以满足各种工作负载下的安全和性能需求我们提供了以便在上运行现有的程序只需很少或无需更改源代码我们已在商用服务器上实现了并将该系统部署在一家世界领先的金融科技公司以支持真实的隐私保护计算在微基准测试和应用基准测试上的评估表明的设计只引入了很小的开销引言近年来由于对能够处理海量数据样本的隐私保护数据处理技术的高需求可信执行环境正作为一种新的计算范式机密计算而兴起提供了硬件强制的内存分区敏感数据可以在其中被安全地处理现有的设计支持不同级别的抽象例如基于进程的英特尔的软件防护扩展基于虚拟机的分离的世界以及混合模式目前最突出的例子是英特尔它在商用现成品台式机和服务器处理器中广泛可用动机当今大多数技术都是闭源的并且需要特定的硬件或固件更改这些更改难以审计演进缓慢因此不如基于公开算法和广泛可用硬件的密码学替代方案如同态加密此外大多数现有的设计限制了即受保护的区域只能在固定模式下运行这很难满足需要由保护的各种类型应用的安全和性能要求例如英特尔在用户模式下运行无法访问特权资源如文件系统和页表和处理特权事件中断和异常因此运行密集型和内存要求高的任务会导致显著的性能下降为了填补这一空白我们在本文中提出了的设计以支持机密云计算它可以在云中现成的传统服务器上安全运行也可以在新兴的或未来的服务器上运行而无需特定的硬件功能为此我们的设计使用广泛可用的虚拟化扩展用于隔离和用于信任根和随机性等提供了一个基于进程的抽象为了更好地满足特定工作负载的需求支持灵活的操作模式即可以在不同的特权级别运行并且可以访问某些特权资源详见第节设计细节在我们的设计中系统以三种模式运行一个名为的可信软件层用编写的安全监视器在监视器模式下运行该模式映射到模式负责强制隔离是可信计算基的一部分非可信操作系统称为主操作系统为应用程序的非可信部分提供执行环境非可信操作系统和应用程序部分在正常模式下运行该模式映射到模式应用程序的可信部分即在安全模式下运行可以灵活地映射到模式的或或模式的内存隔离由内存管理单元的基于硬件的内存保护强制执行正如我们观察到现有的基于进程的例如和英特尔容易受到基于页表的攻击我们的内存隔离方案选择完全由可信代码管理的页表和页错误事件从而消除了主操作系统的参与该设计还防止了某些类型的恶意软件攻击第节为了最小化攻击面我们采用了一种称为度量延迟启动的方法首先启动主操作系统内核然后一段作为主操作系统内核模块实现的特殊内核代码运行以在最高特权级别即监视器模式初始化并将主操作系统降级到正常模式启动过程中的所有已启动组件都被度量并扩展到平台配置寄存器由于证明保证了不能回滚该设计确保了的安全启动否则在远程证明期间将检测到的违规我们已在商用服务器上实现了总共包含约行代码我们的的与官方兼容因此为编写的代码可以通过重新编译只需很少或没有源代码更改就可以轻松地移植到上运行我们已经将一些应用程序以及和库操作系统移植到了微基准测试显示和的开销分别小于和个周期在英特尔上分别为和个周期在一系列真实世界应用上的评估表明开销很小例如在上的开销仅为贡献总而言之本文提出了的设计具有以下贡献一个开放的跨平台的基于进程的具有最低的硬件要求虚拟化扩展和可以运行现有的程序只需很少或没有源代码更改从而能够重用英特尔丰富的工具链和生态系统支持灵活的操作模式以满足应用程序多样化的安全和性能需求而无需硬件或固件更改一种内存隔离方案其中的页表和页错误完全由可信代码管理这减轻了基于页表的攻击和恶意软件攻击一种度量延迟启动方法结合基于的证明来减少攻击面在商用服务器上主要使用内存安全语言实现并在真实硬件和应用上进行评估证明了所提出的设计是实用的并且只有很小的开销背景可信执行环境可信执行环境旨在确保敏感数据在一个隔离和可信的环境中被存储处理和保护隔离区域可以是一个独立于正常操作系统的系统如的安全世界也可以是进程地址空间的一部分如英特尔或一个独立的虚拟机如受或英特尔保护的虚拟机为了抵抗特权攻击者不仅需要挫败操作系统级别的对手还需要防御对平台有物理访问权限的恶意方为此它提供了硬件强制的安全功能包括隔离执行的完整性和机密性保护以及通过远程证明来验证在可信平台内运行的代码的能力隔离的核心是内存隔离方案它保证了的代码数据和运行时状态不能被非可信方访问或篡改对于英特尔受保护的内存即被映射到一个称为页缓存的特殊物理内存区域该区域被加密不能被其他软件固件和直接内存访问直接访问证明远程证明的目标是生成一个证明其中包括对软件状态的度量并用嵌入在硬件中的证明密钥签名远程用户通过检查签名反映硬件身份和度量证明软件状态来验证的有效性可信平台模块可信平台模块既是行业标准也是一个用于安全加密处理器的标准几乎所有的个人电脑和服务器制造商都在使用它固件是基于固件例如的实现在撰写本文时英特尔和高通都已实现有一组平台配置寄存器可用于在启动过程中度量已启动的代码在系统重启或开关机时被重置为零在每个启动过程中只能用新的度量值进行扩展称为因此不能被设置为任意值每个都带有一个独特的非对称密钥称为签注密钥由制造商嵌入作为信任根可以生成值的用证明身份密钥签名而在内部生成并使用认证对已启动代码的任何修改都将反映在中收到后远程方可以验证签名密钥来自一个真实的并可以确信摘要报告没有被更改威胁模型与其他提议一样我们信任底层硬件包括建立基于虚拟化的隔离的处理器系统管理模式代码以及我们假设测量核心信任根是可信且不可变的通过硬件对内存加密的支持减轻了某些物理内存攻击例如冷启动攻击和总线嗅探攻击我们不完全信任操作员并假设攻击者在启动过程中无法进行物理攻击即我们假设系统最初是良性的在系统启动期间并且启动阶段的早期操作系统是的一部分这可以通过两种方式实现首先开机事件可以用硬件设备如即硬件安全模块来保护平台只有在拥有的可信方的参与和监督下才能进入启动过程之后负责维护的操作员是不被信任的其次可以增强启动过程以防御具有物理访问权限的对手为了防止攻击我们可以强化操作系统以移除不必要的设备并在启用之前禁用外围设备的功能我们可以在早期阶段例如在中在任何片外内存被使用之前启用内存加密以防止物理内存攻击然而在启动后主操作系统被降级到正常模式并可能受到攻击者的控制攻击者可能会试图破坏或例如试图直接或通过访问受保护的内存我们认为代码可能是恶意的或由于内存错误而被攻击者控制我们的设计需要防止一个受损的污染其他或我们还防止了针对主操作系统或应用程序代码的攻击如中所述与其他类似在本文中我们不关注拒绝服务攻击或侧信道攻击的预防例如缓存时序和推测执行攻击设计旨在支持机密云计算而无需特定的硬件功能因此是建立在广泛可用的虚拟化扩展之上的特别是旨在支持基于进程的模型类似于英特尔原因如下最小化使用基于进程的保护应用程序时仅包括受保护的代码本身而在其他形式的中必须包括更多的代码例如基于的的客户机操作系统已建立的生态系统由于英特尔目前是云中支持最普遍的包括和阿里云在内的主要都提供基于的实例已经开发了丰富的工具链和应用程序支持模型减少了移植工作并使其易于在云中部署机密计算任务云计算趋势我们已经看到了在云中运行基于容器的无服务器应用程序的明显趋势使用保护这些应用程序免受非可信云的攻击非常重要考虑到这类计算任务通常是短暂的并且偏好较短的启动时间维护一个虚拟机似乎过于重量级在本节中我们使用符号介绍因为我们在服务器上对进行了原型设计系统概述支持以下模式监视器模式即操作模式用于主操作系统和应用程序非可信部分的正常模式即分别为操作模式的和以及用于的安全模式根据操作模式它可以是操作模式的和或操作模式的我们将在第节中介绍支持的灵活操作模式如图所示由以下组件组成是一个在监视器模式下运行的轻量级虚拟机管理程序它管理内存强制执行内存隔离并控制状态转换它作为一个资源监视器工作而复杂的任务则被卸载到主操作系统创建一个独特的客户机虚拟机称为正常虚拟机该虚拟机运行主操作系统如并在正常模式下托管应用程序的非可信部分主操作系统仍然负责进程调度和设备管理但它不被和信任应用程序是在主操作系统中运行的应用程序的非可信部分内核模块我们在主操作系统中提供一个内核模块用于加载度量和启动以及调用模拟的特权操作为了方便开发提供了一个其与官方英特尔兼容包括非可信运行时和可信运行时即和因此大多数程序只需很少或没有源代码更改即可在上运行是在安全模式下运行的应用程序的可信部分内存管理和保护挑战对于基于进程的在用户模式下运行无法管理自己的页表现有设计例如英特尔允许非可信操作系统管理的页表为了防止内存映射攻击即通过操纵的地址映射进行的攻击如图附录所示的设计扩展了缺页处理程序并引入了一个名为的新元数据用于对未命中进行额外的安全检查在没有安全硬件支持的情况下一种普遍的软件解决方案是通过设置持有页表的页的页表项来使页表写保护即对页表的任何更新都会陷入虚拟机管理程序然后进行验证然而在平台上的访问位和脏位的更新也会陷入虚拟机管理程序导致不可忽略的开销更糟糕的是由于页错误也由操作系统处理上述设计仍然容易受到基于页表的攻击例如受控信道攻击支持动态内存管理即平台上的时设计变得更具挑战性即在初始化后动态添加或删除页面或更改页面属性或类型没有可能曾经使用的所有物理内存都必须在初始化之前提交因此减少了构建时间并启用了新的功能例如按需堆栈和堆增长以及按需创建代码页以支持即时编译在平台上需要通过将请求发送到驱动程序然后由驱动程序进行请求的更改由于驱动程序不受信任因此更改需要由明确检查和接受才能生效这涉及到繁重的模式切换内存管理我们观察到上述挑战根源于的页表和页错误都由主操作系统管理在中尽管仍然是应用程序地址空间的一部分我们为创建了一个单独的页表并让管理的页表和页错误而无需主操作系统的参与而正常虚拟机中的页表仍由主操作系统管理然而该设计面临新的挑战由于可以访问应用程序的整个地址空间一旦应用程序中页表的映射发生变化例如由于页面交换更新的映射需要同步到由管理的页表中为了消除同步开销我们在应用程序的地址空间中预分配一个编组缓冲区该缓冲区与共享编组缓冲区的映射在整个生命周期内通过预填充物理内存并将其固定在内存中来保持固定和应用程序之间交换的所有数据都必须通过编组缓冲区传递应用程序的内存映射除了编组缓冲区的映射对是不需要的并且不包括在的页表中这样的设计也减轻了已知的恶意软件攻击因为不能访问应用程序的地址空间只能访问编组缓冲区详见第节我们提醒攻击者可能会操纵编组缓冲区但这不会导致额外的安全问题因为该缓冲区在设计上是不受信任的开发者有责任确保通过该缓冲区传输的数据是真实的并受到保护与模型相同当访问一个未提交物理页的虚拟地址时例如由于页面交换或会引发一个页错误会陷入从内存池中挑选一个空闲页在的页表中插入一个新的映射并恢复的执行当请求更改页面权限时会向发出一个以更新页表中的权限并清除相应的条目内存隔离图显示了正常虚拟机内应用程序和的内存映射正常虚拟机内的应用程序内存通过嵌套分页进行管理而的内存可以通过嵌套分页或通过正常的级地址转换进行管理具体取决于相应的操作模式第节因此强制执行以下安全要求主操作系统和应用程序不允许访问属于和的物理内存不允许访问属于和其他的物理内存它被设计为只能访问与非可信应用程序共享的特定内存区域以进行参数传递即编组缓冲区不允许恶意外围设备通过访问属于和的物理内存为了防止此类攻击在现代处理器中利用输入输出内存管理单元的支持来限制外围设备使用的物理内存内存加密为了挫败物理内存攻击例如冷启动和总线嗅探攻击可以利用硬件内存加密例如和来以页面粒度加密部分物理内存如果平台不支持硬件内存加密可以考虑应用软件方法来加密隔离的内存然而与基于硬件的解决方案相比这种方法可能会带来巨大的开销可信启动证明和封装度量延迟启动的启动过程如图所示系统启动时一段称为测量核心信任根的静态且不可变的代码首先执行以引导构建后续固件和软件的测量链包括主操作系统内核和测量值存储在中用于每个启动组件因此任何修改都将反映在证明中为了减少来自主操作系统的攻击面我们将镜像放入内核测量镜像并将值扩展到然后它在早期用户空间中启动即在任何依赖于磁盘文件系统的用户空间程序开始运行之前结合度量启动它确保了加载时的软件状态是可信的加载后执行在预定义的入口点继续设置自己的运行上下文如堆栈页表等并为每个准备虚拟配置然后启动正常虚拟机并将主操作系统降级到正常模式返回内核模块后内核在正常模式下继续启动并且不知道的存在应用上述方法称为度量延迟启动以便作为类型虚拟机管理程序如加载同时作为类型虚拟机管理程序如运行通过这种方式在主操作系统被降级到正常模式后不再需要信任主操作系统远程证明通过度量延迟启动所有启动的组件都被测量并扩展到在启动后它需要将信任扩展到为此派生一个证明密钥对用于签署测量值然后将派生的公钥扩展到私钥永远不会离开受内存隔离和加密保护的在创建期间添加到的所有页面包括相应的页面内容页面类型和权限都由测量以生成测量值中间测量值存储在的内存中对和主操作系统是不可见的与和英特尔类似采用证明协议进行远程证明流程如图所示我们将的证明密钥的公钥表示为虚拟机管理程序证明公钥测量值使用的证明密钥签名形成测量签名使用证明密钥签名包括所有启动代码测量的以及的测量值收到证明报告后远程用户可以通过比较启动代码包括内核和虚拟机管理程序和的测量值以及验证生成签名的证书链来验证报告密钥生成当首次初始化时它从的随机数生成器模块生成一个根密钥使用的封装操作存储在之外在系统重置的启动过程中使用的解封操作解密这保证了只能在完全相同的芯片和匹配的配置下被解封此外在将控制权转移给主操作系统之前用一个常量填充以防止其检索所有其他密钥材料包括的封装密钥和报告密钥都由和的测量值派生而来将现有应用程序移植到中可能很麻烦因为通常暴露有限的硬件和软件接口并提供额外的安全服务例如证明和封装对于基于进程的应用程序需要被划分为可信和非可信部分并且需要仔细设计接口以避免各种安全陷阱由于英特尔在市场上的主导地位已经投入了大量精力并开发了许多工具包括库操作系统容器自动分区和保护工具微运行时和接口保护因此英特尔已经支持安全地运行用等编写的应用程序而无需昂贵的代码重构我们提供的的与官方英特尔兼容以简化在上的应用程序开发是对官方的改造通过用替换用户叶函数例如和程序可以在上运行只需很少或没有源代码更改一旦执行这些用户叶函数它就会陷入会模拟相应指令的功能被编译为应用程序的可信库而应用程序本身在主操作系统中运行的生命周期通过模拟一组特权指令即等来管理为此在主操作系统中运行的内核模块通过调用的来提供类似的功能并通过接口向应用程序公开这些功能通过模拟特权指令负责生命周期管理第节为了与官方英特尔兼容中涉及的大多数数据结构例如结构页面和页面都与相似通过的设计在中支持动态管理非常直接因为内存和页错误都由管理通过为中的每个线程关联一个页面来支持内的多线程通过为每个设置超过个页面来支持内的异常处理由于空间限制细节被省略我们建议读者参考手册以获取更多细节灵活的操作模式现有的大量应用程序可以被卸载到中例如计算密集型任务机器学习输入输出密集型任务如和服务器内存密集型任务和以及偏好在内进行异常处理和特权分离的任务大多数只支持在固定模式下运行特别是英特尔以及和作为应用程序地址空间的一部分在用户模式下运行因此用户模式不允许访问特权资源如和页表和处理特权事件中断和异常它必须切换到非可信代码才能访问特权资源和处理事件密集型和内存密集型任务基本上涉及频繁的这些切换是昂贵的并引入了不可忽略的性能损失尽管已经提出了软件和硬件优化来尝试减少上下文切换延迟在本节中我们介绍支持的三种操作模式如图所示不同操作模式下的如图所示图基于进程的支持的操作模式比较英特尔在主机用户模式或虚拟化环境中的客户机用户模式下运行在客户机用户模式下运行受保护的代码应用程序逻辑片段支持种共存的操作模式在客户机用户模式下运行的在客户机特权模式和可选的客户机用户模式下运行的在主机用户模式下运行的客户机用户客户机用户是基本的操作模式通常运行计算密集型任务在客户机用户模式下运行即操作模式的客户机在创建期间准备一个结构其中包含一个客户机页表和一个用于的嵌套页表在正常虚拟机和虚拟机之间进入和退出时会相应地切换状态例如指令指针线程指针和为了处理运行期间的中断和异常配置以将所有中断和异常陷入监视器模式然后保存的上下文将中断或异常转发到正常虚拟机在主操作系统完成处理中断或异常后应用程序调用该陷入以恢复的上下文并继续执行主机用户主机用户在主机用户模式下运行它通过用环切换在我们的平台上约个周期替代模式切换在我们的平台上约个周期来提供最佳的效率图它进一步消除了中的额外虚拟化开销例如上下文切换和二维页表遍历根据我们在第节的评估可能有利于密集型工作负载相比之下在客户机用户模式下运行提供了更深的防御层次加载时准备一个进程上下文例如创建一个级页表在进入时更新状态并调用系统调用返回指令即平台上的以进入相应地在退出时调用系统调用指令即平台上的并陷入叶指令例如被模拟为系统调用内的中断和异常也会陷入其过程与第节中描述的相似图支持的操作模式的使用进入和退出和使用和返回进入和退出特权受基于的如的启发支持在客户机特权模式下运行的特权被允许访问和级页表这有利于各种应用如所示一个这样的例子是垃圾收集器它是应用程序的一个基本特性现有工作将移植到垃圾收集器频繁更改页面权限以触发页错误以便跟踪页面状态对于用户模式例如和它必须涉及主操作系统来更新页表和处理页错误这由于而遭受巨大的性能损失通过支持内异常处理和级页表管理来消除更具体地说配置自己的异常处理程序来处理某些异常如页错误将白名单中的异常传递给并将其他异常转发给主操作系统此外还可以支持基于页表的内隔离方案例如沙箱化非可信的第三方库由于能够在内接收中断还可以通过计算频率来检测异常中断事件然后请求将它们路由到主操作系统因此可以检测和减轻现有的基于中断的侧信道攻击由于空间限制我们把对这方面的进一步探索留给未来的工作实现我们报告了我们在支持硬件虚拟化技术和内存加密的平台上实现的情况在当前实现中包含约行主要用编写的代码主操作系统的内核模块有约行代码此外我们对官方英特尔版本进行了约行代码的更改运行在最高特权级别并为强制执行隔离为了减少由内存损坏或并发错误引起的风险我们主要用内存安全的语言实现了只有几行汇编代码用于上下文切换与现有的虚拟机管理程序如和相比小得多因此更容易进行形式化验证我们正在进行的形式化验证并计划将结果作为单独的报告发布平台启动时我们在中配置内核命令行参数以保留物理内存区域这些区域专供和使用通过维护一个空闲页面列表来管理保留的物理内存当需要一个页面时例如在创建期间添加一个页面时从池中检索一个空闲页面当页面被释放时该页面再次附加到列表中此外还管理的页表并处理页错误内核模块内核模块在启动过程中由主操作系统加载然后它加载度量和启动并将测量值作为的一部分扩展到内核模块加载后会创建一个设备文件并挂载在应用程序可以打开它并通过调用来调用模拟的特权操作对官方进行了如下改造支持我们用或系统调用替换了中的用户叶函数例如等为了兼容性我们的实现保留了与相同的参数语义和顺序通过编组缓冲区进行参数传递在中只能访问自己的地址空间和与应用程序共享的编组缓冲区编组缓冲区的大小可以在的配置文件中配置有默认大小在调用边缘调用之前数据需要被传输到编组缓冲区我们修改了来处理这些转换因此对开发者是透明的我们修改了中的非可信运行时库即以便在初始化期间使用和标志分配一个编组缓冲区因此编组缓冲区的被预填充然后发出一个请求主操作系统在的生命周期内不要压缩或换出编组缓冲区的物理页面当应用程序调用模拟的指令来标记的初始化时编组缓冲区的基地址和大小被传递给会在的页表中添加编组缓冲区的映射这样编组缓冲区现在在和非可信应用程序之间共享编组缓冲区的基地址和大小也被传递给可信运行时库以便将数据从编组缓冲区传输到当前中的实现是在内部调用在非可信应用程序的堆栈区域分配一个缓冲区然后用于跨数据传输因此我们只需要修改函数在编组缓冲区中分配一个内存区域为了支持通过编组缓冲区为传递参数我们修改了的工具以自动生成将传输数据复制到编组缓冲区的代码编程模型支持使用属性传递参数对于此类参数工具不会生成代码来检查地址范围或执行数据移动由于代码可以访问整个进程的地址空间一些程序可能会使用带有属性的指针直接操纵外部的数据缓冲区而不考虑跨边界复制数据的开销为了处理这个问题我们为开发者增加了一个接口以便在开发者可能使用带有属性的参数时在编组缓冲区内分配缓冲区远程证明流程与类似遵循相同的协议我们扩展了中的结构以包括并且该修改对代码是透明的通过以上设计大多数程序可以在上运行而无需更改源代码此外为了简化应用程序的开发我们还已将和库操作系统移植到安全性分析信任建立依赖度量启动来引导的信任这是设计的常用方法例如和启动过程中的所有组件包括内核和都被测量并扩展到因此对启动代码的任何篡改都将通过远程证明反映和审计我们认为部署在受控环境中即云计算场景中的数据中心因此攻击者对平台的物理访问权限有限为了减少攻击面并最小化我们将镜像放入并在早期用户空间中加载和测量在此阶段主操作系统内核不接受来自用户的外部输入并且网络连接等外围设备被禁用通过度量延迟启动方法在操作系统被降级到正常模式后不再需要信任主操作系统内存隔离如第节所述的内存和页表由维护主操作系统无法访问在时被清除以防止使用过时的条目进行非法内存访问通过从其中移除相应映射来防止主操作系统访问保留的物理内存还配置以防止未经授权的设备访问保留的物理内存我们的设计防止了内存映射攻击因为主操作系统不能干扰的地址映射我们引入编组缓冲区以支持和应用程序之间的内存共享应用程序在正常内存中预分配一个编组缓冲区并在初始化期间将缓冲区的基地址和大小传递给如果应用程序可能传递伪造的地址例如覆盖内存在将编组缓冲区的映射添加到的页表之前会确保编组缓冲区的地址范围在地址范围之外防御受损的先前的工作表明恶意软件可能会窃取秘密数据或劫持外部应用程序的控制流旨在限制潜在的恶意如下所示防止对应用程序的任意内存访问可以访问应用程序的整个地址空间这可能导致诸如泄露密钥或堆栈金丝雀或篡改代码指针以进行控制流攻击等攻击在中只能访问自己的内存和用于参数传递的编组缓冲区防止后的任意控制流设计允许通过在执行指令即退出之前设置来跳转到任意地址这为恶意软件攻击打开了大门在我们的设计中由于指令由模拟因此通过在调用时添加有效性检查很容易防止此类攻击物理攻击诸如之类的硬件内存加密技术可用于保护免受冷启动攻击或总线嗅探攻击等物理攻击通过内存加密数据在内存或内存总线上始终是加密的并且仅在内部解密内存加密密钥在系统启动时随机生成并存储在中软件无法显式访问侧信道攻击与相比可以减轻某些类型的侧信道攻击由于的客户机页表和页错误事件由处理而没有主操作系统的参与因此后者无法发起基于页表的攻击我们将针对微架构攻击如推测执行攻击的防护留作未来工作评估我们在一个配备两颗每核线程共个逻辑核心和的服务器上部署了我们为配置了的保留内存为内存配置了主操作系统是内核版本为为了比较我们在一个启用的上运行了相同的实验该配备运行相同的操作系统和原生硬件的版本均为所有程序都使用和相同的优化级别进行编译我们试图排除硬件之间的差异除非明确说明评估没有超过大小以免引发过多的页面交换所有评估都在单线程模式下进行对于微基准测试表和表我们使用相同的在硬件上将与在硬件上的进行比较我们测量了核心周期以避免频率的影响对于真实世界的工作负载我们分别在和平台上将没有安全保护的对应物设置为基线并比较和引入的相对减速由于我们只比较相对减速我们强调绝对性能结果是在不同的平台上得出的不能直接比较所有评估都是在启用内存加密的情况下进行的我们已谨慎确保正确实现了功能尽管如此和之间的内存加密是不同的即树和对比有关内存加密开销的评估请参见第节中的图这可能解释了内存密集型工作负载的改进此外特别是的更快这解释了密集型工作负载的改进性能我们在在不同的操作模式下和上都测量了边缘调用即和的延迟测试代码运行了次没有显式参数的空边缘调用并取中值我们还测量了上模拟的和指令的指令级延迟我们无法在上测量指令级延迟因为我们的平台上的内不支持指令结果如表所示结果表明具有最佳的边缘调用性能因为它将模式切换约周期减少为环切换约周期而比慢因为它在期间需要切换更多的特权状态所有结果都与相当异常处理我们使用未定义指令异常和页错误异常来评估异常处理性能在基准测试中测试代码在中执行一条未定义指令以触发异常次异常处理程序推进指令指针并返回对于异常完全在内部捕获和处理无需模式切换对于和异常会导致异步退出并将切换到非可信操作系统然后执行一个两阶段异常处理结果表明内的异常处理分别比和快约倍和倍表我们进一步模拟了一个典型的垃圾收集器场景测试代码首先分配一个大的内存缓冲区然后通过更改的页表来撤销对该缓冲区的写权限之后访问该缓冲区以触发页错误在异常处理程序中写权限被恢复结果表显示比快约倍因为自己更新页表并处理页错误而需要陷入来更新页表请注意我们没有在上评估因为我们的平台在初始化后不支持页面权限修改编组缓冲区开销为了测量引入编组缓冲区的开销我们构建了一个不使用编组缓冲区的变体作为基线我们测量了和在不同大小的传输数据和不同数据移动方向即和下的开销我们使用指令确保要传输的数据没有被缓存我们评估了在上传输相同数据的性能以进行比较原文此处有缺失但根据上下文推断开销随着数据大小的增加而增加对于由于额外的内存复制传输数据时和方向的开销分别为和对于开销可以忽略不计因为它在编组缓冲区上分配一个缓冲区而没有额外的内存复制第节我们提醒在许多真实世界的计算工作负载中尤其是在计算或内存密集型任务中中的数据传输只占处理时间的一小部分真实世界工作负载评估在四个真实世界的应用程序上进行一个算法基准套件一个轻量级服务器两个流行的数据库和作为密集型密集型和内存密集型任务的代表我们将库操作系统移植到以减少和的移植工作我们使用在模拟模式下编译的相同代码作为基线不提供安全保证在和上测量了性能测量系统的和内存系统的性能不涉及和系统调用我们使用了的一个改编版即在我们的评估中没有修改源代码如图所示和引入的开销分别约为和我们将与进行了移植并使用工作负载读取更新在和和上对其进行了评估在此评估中我们专注于内存性能因此我们将数据库配置为内存数据库并将客户端嵌入到中以避免操作我们增加了记录数量并测量了次数据库操作的时间如图所示在上对于小内存使用量吞吐量约为基线的当内存使用量超过大小约时由于页面交换性能下降到在上和的性能几乎与基线相同开销我们推测这是因为的内存加密性能没有完整性保护比快我们在和和模式上使用运行了一个服务器我们使用了基准测试工具并通过本地环回运行了个并发客户端来获取各种大小的网页以评估吞吐量在此评估中开销主要来自频繁的模式切换表如图所示提供了预期的最佳性能基线的达到了基线的而达到了基线的我们使用来评估在内存和都很密集的综合场景下的性能我们在和和模式上使用运行了一个数据库服务器与类似我们将数据库配置为内存数据库并使用了工作负载对于评估我们首先加载了条记录总共数据然后通过本地环回从个客户端执行了次操作我们增加了请求频率并测量了不同吞吐量下的延迟如图所示达到了基线最大吞吐量的而和分别约为基线的和讨论在其他平台上的应用需要虚拟化扩展特别是两级地址转换进行隔离以及用于信任根和随机性等许多服务器如平台都支持虚拟化扩展规范已于年演进到和虚拟化都支持两级地址转换某些产品已经支持服务器已经有研究在上支持固件因此有迹象表明可以被适配到和平台上运行然而将移植到和平台需要大量的工程工作考虑到指令集架构完全不同以架构为例软件模块可以映射到不同的异常级别的监视器模式可以映射到主操作系统和应用程序的非可信部分可以分别映射到和的安全模式可以灵活地映射到或内存隔离可以通过地址转换的支持类似地实现此外官方的只支持平台特别是跨边界的转换是用平台相关的汇编代码处理的需要根据目标平台的应用程序二进制接口重写我们将把适配到其他平台的进一步探索留作未来工作不同操作模式下的攻击面非可信的主操作系统仍然在虚拟机内运行从主操作系统到的攻击面没有改变然而在特权模式或主机中运行可能会向恶意暴露更多的攻击面例如如果已经在主机中运行它可能会使恶意软件更容易升级到主机',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-07-19 00:00:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" itemprop="url">隐私计算</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/HyperEnclave/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>HyperEnclave</span></a><a class="article-meta__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>机密计算</span></a><a class="article-meta__tags" href="/tags/TEE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TEE</span></a><a class="article-meta__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>虚拟化</span></a><a class="article-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>论文翻译</span></a></span></div></div><h1 class="post-title" itemprop="name headline">HyperEnclave：一个开放且跨平台的可信执行环境</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-07-18T16:00:00.000Z" title="发表于 2025-07-19 00:00:00">2025-07-19</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-07-18T16:00:00.000Z" title="更新于 2025-07-19 00:00:00">2025-07-19</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="HyperEnclave：一个开放且跨平台的可信执行环境"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/"><header><a class="post-meta-categories" href="/categories/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" itemprop="url">隐私计算</a><a href="/tags/HyperEnclave/" tabindex="-1" itemprop="url">HyperEnclave</a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" tabindex="-1" itemprop="url">机密计算</a><a href="/tags/TEE/" tabindex="-1" itemprop="url">TEE</a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" tabindex="-1" itemprop="url">虚拟化</a><a href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" tabindex="-1" itemprop="url">论文翻译</a><h1 id="CrawlerTitle" itemprop="name headline">HyperEnclave：一个开放且跨平台的可信执行环境</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-07-18T16:00:00.000Z" title="发表于 2025-07-19 00:00:00">2025-07-19</time><time itemprop="dateCreated datePublished" datetime="2025-07-18T16:00:00.000Z" title="更新于 2025-07-19 00:00:00">2025-07-19</time></header><h1 id="HyperEnclave：一个开放且跨平台的可信执行环境"><a href="#HyperEnclave：一个开放且跨平台的可信执行环境" class="headerlink" title="HyperEnclave：一个开放且跨平台的可信执行环境"></a>HyperEnclave：一个开放且跨平台的可信执行环境</h1><blockquote>
+<p>本文是论文《HyperEnclave: An Open and Cross-platform Trusted Execution Environment》的原文翻译</p>
+</blockquote>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>学术界和工业界已经提出了许多可信执行环境（TEE）。然而，它们中的大多数都需要特定的硬件或固件更改，并且与特定的硬件供应商（如英特尔、AMD、ARM 和 IBM）绑定。在本文中，我们提出了 HyperEnclave，这是一个开放且跨平台的、基于进程的 TEE，它依赖于广泛可用的虚拟化扩展来创建隔离的执行环境。特别是，HyperEnclave 旨在支持灵活的 enclave 操作模式，以满足各种 enclave 工作负载下的安全和性能需求。我们提供了 enclave SDK，以便在 HyperEnclave 上运行现有的 SGX 程序，只需很少或无需更改源代码。我们已在商用 AMD 服务器上实现了 HyperEnclave，并将该系统部署在一家世界领先的金融科技公司，以支持真实的隐私保护计算。在微基准测试和应用基准测试上的评估表明，HyperEnclave 的设计只引入了很小的开销。</p>
+<h2 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h2><p>近年来，由于对能够处理海量数据样本的隐私保护数据处理技术的高需求，可信执行环境（TEE）正作为一种新的计算范式——机密计算——而兴起。TEE 提供了硬件强制的内存分区，敏感数据可以在其中被安全地处理。现有的 TEE 设计支持不同级别的 TEE 抽象，例如基于进程的（英特尔的软件防护扩展（SGX）[55]）、基于虚拟机的（AMD SEV [45]）、分离的世界（ARM TrustZone [16]）以及混合模式（Keystone [49]）。目前，TEE 最突出的例子是英特尔 SGX，它在商用现成品（COTS）台式机和服务器处理器中广泛可用。</p>
+<p><strong>动机。</strong> 当今大多数 TEE 技术都是闭源的，并且需要特定的硬件或固件更改，这些更改难以审计、演进缓慢，因此不如基于公开算法和广泛可用硬件的密码学替代方案（如同态加密）。此外，大多数现有的 TEE 设计限制了 enclave（即受保护的 TEE 区域）只能在固定模式下运行。这很难满足需要由 TEE 保护的各种类型应用的安全和性能要求。例如，英特尔 SGX enclave 在用户模式下运行，无法访问特权资源（如文件系统、IDT 和页表）和处理特权事件（中断和异常）。因此，运行 I&#x2F;O 密集型和内存要求高的任务会导致显著的性能下降。</p>
+<p>为了填补这一空白，我们在本文中提出了 HyperEnclave 的设计，以支持机密云计算，它可以在云中现成的传统服务器上安全运行，也可以在新兴的 ARM（或未来的 RISC-V）服务器上运行，而无需特定的硬件功能。为此，我们的设计使用广泛可用的虚拟化扩展（用于隔离）和 TPM（用于信任根和随机性等）提供了一个基于进程的 TEE 抽象。为了更好地满足特定 enclave 工作负载的需求，HyperEnclave 支持灵活的 enclave 操作模式，即 enclave 可以在不同的特权级别运行，并且可以访问某些特权资源（详见第 4 节）。</p>
+<p><strong>设计细节。</strong> 在我们的设计中，系统以三种模式运行。一个名为 RustMonitor 的可信软件层（用 Rust 编写的安全监视器）在监视器模式下运行，该模式映射到 VMX root 模式。RustMonitor 负责强制隔离，是可信计算基（TCB）的一部分。非可信操作系统（称为主操作系统）为应用程序的非可信部分提供执行环境；非可信操作系统和应用程序部分在正常模式下运行，该模式映射到 VMX non-root 模式。应用程序的可信部分（即 enclave）在安全模式下运行，可以灵活地映射到 VMX non-root 模式的 ring-3 或 ring-0，或 VMX root 模式的 ring-3。</p>
+<p>内存隔离由内存管理单元（MMU）的基于硬件的内存保护强制执行。正如我们观察到现有的基于进程的 TEE（例如，Inktag [38] 和英特尔 SGX [55]）容易受到基于页表的攻击 [74]，我们的内存隔离方案选择完全由可信代码管理 enclave 的页表和页错误事件，从而消除了主操作系统的参与。该设计还防止了某些类型的 enclave 恶意软件攻击（第 3.2 节）。</p>
+<p>为了最小化攻击面，我们采用了一种称为”度量延迟启动”的方法：首先启动主操作系统内核；然后，一段作为主操作系统内核模块实现的特殊内核代码运行，以在最高特权级别（即监视器模式）初始化 RustMonitor，并将主操作系统降级到正常模式。启动过程中的所有已启动组件都被度量并扩展到 TPM 平台配置寄存器（PCRs）。由于 TPM 证明保证了 PCRs 不能回滚，该设计确保了 RustMonitor 的安全启动；否则，在远程证明期间将检测到 TPM quote 的违规。</p>
+<p>我们已在商用 AMD 服务器上实现了 HyperEnclave。RustMonitor 总共包含约 7,500 行 Rust 代码。我们的 enclave SDK 的 API 与官方 SGX SDK 兼容。因此，为 SGX 编写的代码可以通过重新编译，只需很少（或没有）源代码更改，就可以轻松地移植到 HyperEnclave 上运行。我们已经将一些 SGX 应用程序以及 Rust SGX SDK [71] 和 Occlum 库操作系统 [64] 移植到了 HyperEnclave。微基准测试显示，ECALL 和 OCALL 的开销分别小于 9,700 和 5,260 个周期（在英特尔 SGX 上分别为 14,432 和 12,432 个周期）。在一系列真实世界应用上的评估表明，开销很小（例如，在 SQLite 上的开销仅为 5%）。</p>
+<p><strong>贡献。</strong> 总而言之，本文提出了 HyperEnclave 的设计，具有以下贡献：</p>
+<ul>
+<li>一个开放的、跨平台的、基于进程的 TEE，具有最低的硬件要求（虚拟化扩展和 TPM），可以运行现有的 SGX 程序，只需很少或没有源代码更改，从而能够重用英特尔 SGX 丰富的工具链和生态系统。</li>
+<li>支持灵活的 enclave 操作模式，以满足 enclave 应用程序多样化的安全和性能需求，而无需硬件或固件更改。</li>
+<li>一种内存隔离方案，其中 enclave 的页表和页错误完全由可信代码管理，这减轻了基于页表的攻击和 enclave 恶意软件攻击。</li>
+<li>一种度量延迟启动方法，结合基于 TPM 的证明来减少攻击面。</li>
+<li>在商用服务器上（主要）使用内存安全语言 Rust 实现，并在真实硬件和应用上进行评估，证明了所提出的设计是实用的，并且只有很小的开销。</li>
+</ul>
+<h2 id="2-背景"><a href="#2-背景" class="headerlink" title="2 背景"></a>2 背景</h2><h3 id="2-1-可信执行环境"><a href="#2-1-可信执行环境" class="headerlink" title="2.1 可信执行环境"></a>2.1 可信执行环境</h3><p>可信执行环境（TEE）旨在确保敏感数据在一个隔离和可信的环境中被存储、处理和保护。隔离区域可以是一个独立于正常操作系统的系统（如 TrustZone [16] 的安全世界），也可以是进程地址空间的一部分（如英特尔 SGX [55] enclave），或一个独立的虚拟机（如受 AMD SEV [45] 或英特尔 TDX [41] 保护的虚拟机）。为了抵抗特权攻击者，TEE 不仅需要挫败操作系统级别的对手，还需要防御对平台有物理访问权限的恶意方。为此，它提供了硬件强制的安全功能，包括隔离执行、enclave 的完整性和机密性保护，以及通过远程证明来验证在可信平台内运行的代码的能力。</p>
+<p><strong>隔离。</strong> TEE 的核心是内存隔离方案，它保证了 enclave 的代码、数据和运行时状态不能被非可信方访问或篡改。对于英特尔 SGX，受保护的内存（即 enclave）被映射到一个称为 Enclave 页缓存（EPC）的特殊物理内存区域，该区域被加密，不能被其他软件、固件、BIOS 和直接内存访问（DMA）直接访问。</p>
+<p><strong>证明。</strong> 远程证明的目标是生成一个证明 quote，其中包括对软件状态的度量，并用嵌入在硬件中的证明密钥签名。远程用户通过检查签名（反映硬件身份）和度量（证明软件状态）来验证 quote 的有效性。</p>
+<h3 id="2-2-可信平台模块"><a href="#2-2-可信平台模块" class="headerlink" title="2.2 可信平台模块"></a>2.2 可信平台模块</h3><p>可信平台模块（TPM）既是行业标准 [36]，也是一个用于安全加密处理器的 ISO&#x2F;IEC 标准 [4]。几乎所有的个人电脑和服务器制造商都在使用它。固件 TPM（fTPMs）是基于固件（例如 UEFI）的 TPM 实现。在撰写本文时，英特尔、AMD 和高通都已实现 fTPM。</p>
+<p>TPM 有一组平台配置寄存器（PCRs），可用于在启动过程中度量已启动的代码。PCRs 在系统重启或开关机时被重置为零。在每个启动过程中，PCRs 只能用新的度量值进行扩展（称为 PCR extend），因此不能被设置为任意值。</p>
+<p>每个 TPM 都带有一个独特的非对称密钥，称为签注密钥（EK），由制造商嵌入作为信任根。TPM 可以生成 PCR 值的 quote，用 TPM 证明身份密钥（AIK）签名，而 AIK 在 TPM 内部生成并使用 EK 认证。对已启动代码的任何修改都将反映在 quote 中。收到 quote 后，远程方可以验证签名密钥来自一个真实的 TPM，并可以确信 PCR 摘要报告没有被更改。</p>
+<h3 id="2-3-威胁模型"><a href="#2-3-威胁模型" class="headerlink" title="2.3 威胁模型"></a>2.3 威胁模型</h3><p>与其他 TEE 提议 [23, 49] 一样，我们信任底层硬件，包括建立基于虚拟化的隔离的处理器、系统管理模式（SMM）代码以及 TPM。我们假设测量核心信任根（CRTM）是可信且不可变的。HyperEnclave 通过硬件对内存加密的支持，减轻了某些物理内存攻击，例如冷启动攻击和总线嗅探攻击。我们不完全信任操作员，并假设攻击者在启动过程中无法进行物理攻击，即我们假设系统最初是良性的（在系统启动期间），并且启动阶段的早期操作系统是 TCB 的一部分。这可以通过两种方式实现。</p>
+<ul>
+<li>首先，开机事件可以用硬件设备（如 HSM，即硬件安全模块）来保护。平台只有在拥有 HSM 的可信方的参与和监督下才能进入启动过程。之后，负责维护的操作员是不被信任的。</li>
+<li>其次，可以增强启动过程以防御具有物理访问权限的对手。为了防止 I&#x2F;O 攻击，我们可以强化操作系统以移除不必要的设备，并在启用 IOMMU 之前禁用外围设备的 DMA 功能。我们可以在早期阶段（例如，在 BIOS 中，在任何片外内存被使用之前）启用内存加密以防止物理内存攻击。</li>
+</ul>
+<p>然而，在 RustMonitor 启动后，主操作系统被降级到正常模式，并可能受到攻击者的控制，攻击者可能会试图破坏 RustMonitor 或 enclave，例如，试图直接或通过 DMA 访问受保护的内存。我们认为 enclave 代码可能是恶意的或由于内存错误而被攻击者控制。我们的设计需要防止一个受损的 enclave 污染其他 enclave 或 RustMonitor。我们还防止了针对主操作系统或应用程序代码的攻击，如 [63] 中所述。与其他 TEE 类似，在本文中，我们不关注拒绝服务（DoS）攻击或侧信道攻击的预防，例如缓存时序和推测执行攻击 [48]。</p>
+<h2 id="3-设计"><a href="#3-设计" class="headerlink" title="3 设计"></a>3 设计</h2><p>HyperEnclave 旨在支持机密云计算，而无需特定的硬件功能。因此，HyperEnclave 是建立在广泛可用的虚拟化扩展之上的。特别是，HyperEnclave 旨在支持基于进程的 TEE 模型（类似于英特尔 SGX），原因如下。</p>
+<ul>
+<li><strong>最小化 TCB。</strong> 使用基于进程的 TEE 保护应用程序时，TCB 仅包括受保护的代码本身，而在其他形式的 TEE 中，必须包括更多的代码，例如基于 VM 的 TEE 的客户机操作系统。</li>
+<li><strong>已建立的生态系统。</strong> 由于英特尔 SGX 目前是云中支持最普遍的 TEE（包括 GCP、Azure 和阿里云在内的主要 CSP 都提供基于 SGX 的实例 [9, 62]），已经开发了丰富的工具链和应用程序。支持 SGX 模型减少了移植工作，并使其易于在云中部署机密计算任务。</li>
+<li><strong>云计算趋势。</strong> 我们已经看到了在云中运行基于容器的无服务器应用程序的明显趋势。使用 TEE 保护这些应用程序免受非可信云的攻击非常重要。考虑到这类计算任务通常是短暂的，并且偏好较短的启动时间，维护一个虚拟机似乎过于重量级。</li>
+</ul>
+<p>在本节中，我们使用 x86 符号介绍 HyperEnclave，因为我们在 AMD 服务器上对 HyperEnclave 进行了原型设计。</p>
+<h3 id="3-1-系统概述"><a href="#3-1-系统概述" class="headerlink" title="3.1 系统概述"></a>3.1 系统概述</h3><p>HyperEnclave 支持以下模式：监视器模式，即 VMX root 操作模式；用于主操作系统和应用程序非可信部分的正常模式，即分别为 VMX non-root 操作模式的 ring-0 和 ring-3；以及用于 enclave 的安全模式，根据 enclave 操作模式，它可以是 VMX non-root 操作模式的 ring-3 和 ring-0，或 VMX root 操作模式的 ring-3。我们将在第 4 节中介绍 HyperEnclave 支持的灵活操作模式。如图 1 所示，HyperEnclave 由以下组件组成：</p>
+<ul>
+<li><strong>RustMonitor</strong> 是一个在监视器模式下运行的轻量级虚拟机管理程序，它管理 enclave 内存，强制执行内存隔离，并控制 enclave 状态转换。它作为一个资源监视器工作，而复杂的任务则被卸载到主操作系统。</li>
+<li>RustMonitor 创建一个独特的客户机虚拟机（称为<strong>正常虚拟机</strong>），该虚拟机运行主操作系统（如 Linux）并在正常模式下托管应用程序的非可信部分。主操作系统仍然负责进程调度和 I&#x2F;O 设备管理，但它不被 RustMonitor 和 enclave 信任。</li>
+<li><strong>应用程序</strong>是在主操作系统中运行的应用程序的非可信部分。</li>
+<li><strong>内核模块</strong>。我们在主操作系统中提供一个内核模块，用于加载、度量和启动 RustMonitor，以及调用模拟的特权操作。</li>
+<li>为了方便开发，HyperEnclave 提供了一个 <strong>enclave SDK</strong>，其 API 与官方英特尔 SGX SDK [12] 兼容，包括非可信运行时和可信运行时（即 SDK uRTS 和 SDK tRTS）。因此，大多数 SGX 程序只需很少或没有源代码更改即可在 HyperEnclave 上运行。</li>
+<li><strong>Enclave</strong> 是在安全模式下运行的应用程序的可信部分。</li>
+</ul>
+<h3 id="3-2-内存管理和保护"><a href="#3-2-内存管理和保护" class="headerlink" title="3.2 内存管理和保护"></a>3.2 内存管理和保护</h3><p><strong>挑战。</strong> 对于基于进程的 TEE，enclave 在用户模式下运行，无法管理自己的页表。现有设计（例如，英特尔 SGX、TrustVisor [54]）允许非可信操作系统管理 enclave 的页表。为了防止内存映射攻击（即通过操纵 enclave 的地址映射进行的攻击，如图 9，附录 A.1 所示），SGX 的设计扩展了缺页处理程序（PMH）并引入了一个名为 EPCM 的新元数据，用于对 TLB 未命中进行额外的安全检查 [32]。在没有安全硬件支持的情况下，一种普遍的软件解决方案 [19, 54, 75] 是通过设置持有页表的页的页表项（PTEs）来使页表写保护，即对页表的任何更新都会陷入虚拟机管理程序然后进行验证。然而，在 x86 平台上，PTE 的访问位和脏位的更新也会陷入虚拟机管理程序，导致不可忽略的开销。更糟糕的是，由于 enclave 页错误也由操作系统处理，上述设计仍然容易受到基于页表的攻击，例如受控信道攻击 [74]。</p>
+<p>支持 enclave 动态内存管理（即 SGX2 平台上的 EDMM [34]）时，设计变得更具挑战性，即在 enclave 初始化后动态添加或删除 enclave 页面，或更改 enclave 页面属性或类型。没有 EDMM，enclave 可能曾经使用的所有物理内存都必须在 enclave 初始化之前提交。因此，EDMM 减少了 enclave 构建时间并启用了新的 enclave 功能，例如按需堆栈和堆增长，以及按需创建代码页以支持即时（JIT）编译。在 SGX2 平台上，enclave 需要通过 OCALL 将 EDMM 请求发送到 SGX 驱动程序，然后由驱动程序进行请求的更改。由于驱动程序不受 enclave 信任，因此更改需要由 enclave 明确检查和接受才能生效，这涉及到繁重的 enclave 模式切换。</p>
+<p><strong>HyperEnclave 内存管理。</strong> 我们观察到，上述挑战根源于 enclave 的页表和页错误都由主操作系统管理。在 HyperEnclave 中，尽管 enclave 仍然是应用程序地址空间的一部分，我们为 enclave 创建了一个单独的页表，并让 RustMonitor 管理 enclave 的页表和页错误，而无需主操作系统的参与³，而正常虚拟机中的页表仍由主操作系统管理。然而，该设计面临新的挑战：由于 enclave 可以访问应用程序的整个地址空间，一旦应用程序中页表的映射发生变化，例如由于页面交换，更新的映射需要同步到由 RustMonitor 管理的 enclave 页表中。</p>
+<p>为了消除同步开销，我们在应用程序的地址空间中预分配一个编组缓冲区，该缓冲区与 enclave 共享。编组缓冲区的映射在整个 enclave 生命周期内通过预填充物理内存并将其固定在内存中来保持固定。enclave 和应用程序之间交换的所有数据都必须通过编组缓冲区传递。应用程序的内存映射（除了编组缓冲区的映射）对 enclave 是不需要的，并且不包括在 enclave 的页表中。这样的设计也减轻了已知的 enclave 恶意软件攻击 [63]，因为 enclave 不能访问应用程序的地址空间，只能访问编组缓冲区（详见第 6 节）。我们提醒攻击者可能会操纵编组缓冲区，但这不会导致额外的安全问题，因为该缓冲区在设计上是不受信任的，开发者有责任确保通过该缓冲区传输的数据是真实的并受到保护（与 SGX 模型相同）。</p>
+<p>当 enclave 访问一个未提交物理页的虚拟地址时（例如，由于页面交换或 EDMM），会引发一个页错误，enclave 会陷入 RustMonitor。RustMonitor 从 enclave 内存池中挑选一个空闲页，在 enclave 的页表中插入一个新的映射，并恢复 enclave 的执行。当 enclave 请求更改页面权限时，enclave 会向 RustMonitor 发出一个 hypercall，以更新 enclave 页表中的权限并清除相应的 TLB 条目。⁴</p>
+<p><strong>HyperEnclave 内存隔离。</strong> 图 2 显示了正常虚拟机内应用程序和 enclave 的内存映射。正常虚拟机内的应用程序内存通过嵌套分页进行管理，而 enclave 的内存可以通过嵌套分页或通过正常的 1 级地址转换进行管理，具体取决于相应的操作模式（第 4 节）。因此，HyperEnclave 强制执行以下安全要求。</p>
+<ul>
+<li><strong>R-1:</strong> 主操作系统和应用程序不允许访问属于 RustMonitor 和 enclave 的物理内存。</li>
+<li><strong>R-2:</strong> enclave 不允许访问属于 RustMonitor 和其他 enclave 的物理内存。它被设计为只能访问与非可信应用程序共享的特定内存区域以进行参数传递（即编组缓冲区）。</li>
+<li><strong>R-3:</strong> 不允许恶意外围设备通过 DMA 访问属于 RustMonitor 和 enclave 的物理内存。为了防止此类攻击，HyperEnclave 在现代处理器中利用输入输出内存管理单元（IOMMU）的支持来限制外围设备使用的物理内存。</li>
+</ul>
+<p><strong>内存加密。</strong> 为了挫败物理内存攻击，例如冷启动和总线嗅探攻击，HyperEnclave 可以利用硬件内存加密（例如 AMD SME [44] 和 Intel MKTME [42]）来以页面粒度加密部分物理内存。如果平台不支持硬件内存加密，HyperEnclave 可以考虑应用软件方法 [76] 来加密隔离的内存。然而，与基于硬件的解决方案相比，这种方法可能会带来巨大的开销。</p>
+<h3 id="3-3-可信启动、证明和封装"><a href="#3-3-可信启动、证明和封装" class="headerlink" title="3.3 可信启动、证明和封装"></a>3.3 可信启动、证明和封装</h3><p><strong>度量延迟启动。</strong> HyperEnclave 的启动过程如图 3 所示。系统启动时，一段称为测量核心信任根（CRTM）的静态且不可变的代码首先执行，以引导构建后续固件和软件的测量链，包括 BIOS、grub、主操作系统内核和 initramfs。测量值存储在 TPM PCR 中，用于每个启动组件，因此任何修改都将反映在证明 quote 中。</p>
+<p>为了减少来自主操作系统的攻击面，我们将 RustMonitor 镜像放入 initramfs。内核测量 RustMonitor 镜像并将值扩展到 TPM PCR，然后它在早期用户空间中启动 RustMonitor，即在任何依赖于磁盘文件系统的用户空间程序开始运行之前。结合度量启动，它确保了 RustMonitor 加载时的软件状态是可信的。RustMonitor 加载后，执行在预定义的入口点继续。RustMonitor 设置自己的运行上下文（如堆栈、页表、IDT 等）并为每个 CPU 准备虚拟 CPU（vCPU）配置。然后 RustMonitor 启动正常虚拟机并将主操作系统降级到正常模式。返回内核模块后，内核在正常模式下继续启动，并且不知道 RustMonitor 的存在。</p>
+<p>HyperEnclave 应用上述方法（称为<strong>度量延迟启动</strong>），以便 RustMonitor 作为类型-2 虚拟机管理程序（如 KVM）加载，同时作为类型-1 虚拟机管理程序（如 Xen）运行。通过这种方式，在主操作系统被降级到正常模式后，RustMonitor 不再需要信任主操作系统。</p>
+<p><strong>远程证明。</strong> 通过度量延迟启动，所有启动的组件都被测量并扩展到 TPM。在 RustMonitor 启动后，它需要将信任扩展到 enclave。为此，RustMonitor 派生一个证明密钥对，用于签署 enclave 测量值。然后 RustMonitor 将派生的公钥扩展到 TPM PCR，私钥永远不会离开受内存隔离和加密保护的 RustMonitor。</p>
+<p>在 enclave 创建期间，添加到 enclave 的所有页面（包括相应的页面内容、页面类型和 RWX 权限）都由 RustMonitor 测量，以生成 enclave 测量值。（中间）测量值存储在 RustMonitor 的内存中，对 enclave 和主操作系统是不可见的。</p>
+<p>与 TPM 和英特尔 SGX 类似，HyperEnclave 采用 SIGn-and-MAc (SIGMA) 证明协议进行远程证明流程。如图 4 所示，我们将 RustMonitor 的证明密钥的公钥表示为虚拟机管理程序证明公钥（hapk）。enclave 测量值使用 RustMonitor 的证明密钥签名，形成 enclave 测量签名（ems）。TPM quote <code>TMP_Quote</code>，使用 TPM 证明密钥签名，包括所有启动代码测量的 PCRs，以及 hapk 的测量值。收到证明报告后，远程用户可以通过比较启动代码（包括 CRTM、BIOS、grub、内核、initramfs 和虚拟机管理程序）和 enclave 的测量值，以及验证生成签名的证书链来验证报告。</p>
+<p><strong>密钥生成。</strong> 当 RustMonitor 首次初始化时，它从 TPM 的随机数生成器（RNG）模块生成一个根密钥 <code>Kroot</code>。<code>Kroot</code> 使用 TPM 的封装操作存储在 TPM 之外。在系统重置的启动过程中，RustMonitor 使用 TPM 的解封操作解密 <code>Kroot</code>，这保证了 <code>Kroot</code> 只能在完全相同的 TPM 芯片和匹配的 PCR 配置下被解封。此外，在将控制权转移给主操作系统之前，RustMonitor 用一个常量填充 PCRs，以防止其检索 <code>Kroot</code>。所有其他密钥材料，包括 enclave 的封装密钥和报告密钥，都由 <code>Kroot</code> 和 enclave 的测量值派生而来。</p>
+<h3 id="3-4-Enclave-SDK"><a href="#3-4-Enclave-SDK" class="headerlink" title="3.4 Enclave SDK"></a>3.4 Enclave SDK</h3><p>将现有应用程序移植到 enclave 中可能很麻烦，因为 TEE 通常暴露有限的硬件和软件接口，并提供额外的安全服务（例如，证明和封装）。对于基于进程的 TEE，应用程序需要被划分为可信和非可信部分，并且需要仔细设计接口以避免各种安全陷阱 [27, 46, 69]。由于英特尔 SGX 在市场上的主导地位，已经投入了大量精力并开发了许多工具，包括库操作系统 [64, 67]、容器 [18]、自动分区和保护工具 [50, 68]、WebAssembly 微运行时 [57] 和接口保护 [65]。因此，英特尔 SGX 已经支持安全地运行用 C&#x2F;C++、Rust、Java、Python 等编写的应用程序，而无需昂贵的代码重构。</p>
+<p>我们提供的 enclave SDK 的 API 与官方英特尔 SGX SDK 兼容，以简化在 HyperEnclave 上的应用程序开发。enclave SDK 是对官方 SGX SDK 的改造。通过用 hypercall 替换 SGX 用户叶函数（例如，EENTER、EEXIT 和 ERESUME），SGX 程序可以在 HyperEnclave 上运行，只需很少或没有源代码更改。一旦 enclave 执行这些用户叶函数，它就会陷入 RustMonitor，RustMonitor 会模拟相应 SGX 指令的功能。</p>
+<p>enclave 被编译为应用程序的可信库，而应用程序本身在主操作系统中运行。enclave 的生命周期通过模拟一组特权 SGX 指令（即 ECREATE、EADD、EINIT 等）来管理。为此，在主操作系统中运行的内核模块通过调用 RustMonitor 的 hypercall 来提供类似的功能，并通过 <code>ioctl()</code> 接口向应用程序公开这些功能。通过模拟特权 SGX 指令，RustMonitor 负责 enclave 生命周期管理（第 4 节）。</p>
+<p>为了与官方英特尔 SGX SDK 兼容，HyperEnclave 中涉及的大多数数据结构（例如 SIGSTRUCT 结构、SECS 页面和 TCS 页面）都与 SGX 相似。通过 HyperEnclave 的设计，在 enclave 中支持动态 enclave 管理非常直接，因为 enclave 内存和页错误都由 RustMonitor 管理。通过为 enclave 中的每个线程关联一个 TCS 页面来支持 enclave 内的多线程。通过为每个 TCS 设置超过 1 个 SSA 页面来支持 enclave 内的异常处理。由于空间限制，细节被省略，我们建议读者参考 SGX 手册 [11] 以获取更多细节。</p>
+<h2 id="4-灵活的-Enclave-操作模式"><a href="#4-灵活的-Enclave-操作模式" class="headerlink" title="4 灵活的 Enclave 操作模式"></a>4 灵活的 Enclave 操作模式</h2><p>现有的大量应用程序可以被卸载到 TEE 中，例如计算密集型任务（机器学习 [60]）、输入输出（IO）密集型任务（如 Apache 和 Nginx Web 服务器 [18]）、内存密集型任务（Redis 和 Memcached [18]），以及偏好在 enclave 内进行异常处理和特权分离的任务 [21]。大多数 TEE 只支持在固定模式下运行 enclave，特别是英特尔 SGX（以及 TrustVisor [54] 和 Secage [51]）enclave，作为应用程序地址空间的一部分，在用户模式下运行。因此，用户模式 enclave 不允许访问特权资源（如 IDT 和页表）和处理特权事件（中断和异常）。它必须切换到非可信代码才能访问特权资源和处理事件。IO 密集型和内存密集型任务基本上涉及频繁的 world switch，这些切换是昂贵的，并引入了不可忽略的性能损失，尽管已经提出了软件和硬件优化来尝试减少上下文切换延迟 [61, 66, 73]。在本节中，我们介绍 HyperEnclave 支持的三种 enclave 操作模式，如图 5 所示。不同 enclave 操作模式下的 world switch 如图 6 所示。</p>
+<p><strong>图 5：基于进程的 TEE 支持的 enclave 操作模式比较。</strong> (a) 英特尔 SGX 在主机用户模式（或虚拟化环境中的客户机用户模式）下运行 enclave。(b) TrustVisor 在客户机用户模式下运行受保护的代码（应用程序逻辑片段，PALs）。(c) HyperEnclave 支持 3 种共存的 enclave 操作模式：① 在客户机用户模式下运行的 GU-Enclaves；② 在客户机特权模式和可选的客户机用户模式下运行的 P-Enclaves；③ 在主机用户模式下运行的 HU-Enclaves。</p>
+<h3 id="4-1-客户机用户-Enclaves"><a href="#4-1-客户机用户-Enclaves" class="headerlink" title="4.1 客户机用户 Enclaves"></a>4.1 客户机用户 Enclaves</h3><p>客户机用户 enclave (GU-Enclave) 是基本的 enclave 操作模式，通常运行计算密集型任务。enclave 在客户机用户模式下运行（即 VMX non-root 操作模式的客户机 ring-3）。</p>
+<p>在 enclave 创建期间，RustMonitor 准备一个 vCPU 结构，其中包含一个客户机页表（GPT）和一个用于 GU-Enclave 的嵌套页表（NPT）。在正常虚拟机和 enclave 虚拟机之间进入和退出时，RustMonitor 会相应地切换 vCPU 状态（例如指令指针、线程指针、NPT 和 GPT）。</p>
+<p>为了处理 enclave 运行期间的中断和异常，RustMonitor 配置 vCPU 以将所有中断和异常陷入监视器模式。然后 RustMonitor 保存 enclave 的上下文，将中断或异常转发到正常虚拟机。在主操作系统完成处理中断或异常后，应用程序调用 ERESUME hypercall，该 hypercall 陷入 RustMonitor 以恢复 enclave 的上下文并继续执行 enclave。</p>
+<h3 id="4-2-主机用户-Enclaves"><a href="#4-2-主机用户-Enclaves" class="headerlink" title="4.2 主机用户 Enclaves"></a>4.2 主机用户 Enclaves</h3><p>主机用户 enclave (HU-Enclave) 在主机用户模式下运行。它通过用环切换（syscalls：在我们的平台上约 120 个 CPU 周期）替代模式切换（hypercalls：在我们的平台上约 880 个 CPU 周期）来提供最佳的 world switch 效率（图 6）。它进一步消除了 GU-Enclave 中的额外虚拟化开销（例如 vCPU 上下文切换和二维页表遍历）。根据我们在第 7 节的评估，HU-Enclave 可能有利于 I&#x2F;O 密集型工作负载。相比之下，在客户机用户模式下运行 enclave 提供了更深的防御层次。</p>
+<p>加载 HU-Enclave 时，RustMonitor 准备一个进程上下文，例如创建一个 1 级页表。在 enclave 进入时，RustMonitor 更新 CPU 状态并调用系统调用返回指令（即 x86 平台上的 SYSRET）以进入 HU-Enclave。相应地，在 enclave 退出时，HU-Enclave 调用系统调用指令（即 x86 平台上的 SYSCALL）并陷入 RustMonitor。ENCLU 叶指令（例如，EGETKEY、EREPORT）被模拟为系统调用。HU-Enclaves 内的中断和异常也会陷入 RustMonitor。其过程与第 4.1 节中描述的 GU-Enclaves 相似。</p>
+<p><strong>图 6：支持的 enclave 操作模式的 world switch。</strong> (a) 使用 hypercall 进入和退出 GU-Enclave 和 P-Enclave。(b) 使用 syscall 和 syscall 返回进入和退出 HU-Enclave。</p>
+<h3 id="4-3-特权-Enclaves"><a href="#4-3-特权-Enclaves" class="headerlink" title="4.3 特权 Enclaves"></a>4.3 特权 Enclaves</h3><p>受基于 VM 的 TEE（如 AMD SEV [45]）的启发，HyperEnclave 支持在客户机特权模式下运行的特权 enclave (P-Enclaves)。P-Enclave 被允许访问 GDT、IDT 和 1 级页表，这有利于各种应用，如 Dune [21] 所示。一个这样的例子是垃圾收集器，它是 Java 应用程序的一个基本特性（现有工作将 JVM 移植到 enclave [26, 43]）。垃圾收集器频繁更改页面权限以触发页错误，以便跟踪页面状态。对于用户模式 enclave（例如，GU-Enclaves 和 HU-Enclaves），它必须涉及主操作系统来更新页表和处理页错误，这由于 world switch 而遭受巨大的性能损失。P-Enclaves 通过支持 enclave 内异常处理和 1 级页表管理来消除 world switch。更具体地说，P-Enclaves 配置自己的异常处理程序来处理某些异常（如页错误）。RustMonitor 将白名单中的异常传递给 P-Enclave，并将其他异常转发给主操作系统。此外，P-Enclaves 还可以支持基于页表的 enclave 内隔离方案，例如，沙箱化非可信的第三方库。</p>
+<p>由于能够在 enclave 内接收中断，P-Enclaves 还可以通过计算频率来检测异常中断事件，然后请求 RustMonitor 将它们路由到主操作系统。因此，可以检测和减轻现有的基于中断的侧信道攻击 [24, 37, 40, 58, 59, 70]。由于空间限制，我们把对这方面的进一步探索留给未来的工作。</p>
+<h2 id="5-实现"><a href="#5-实现" class="headerlink" title="5 实现"></a>5 实现</h2><p>我们报告了我们在支持硬件虚拟化技术和内存加密的 AMD 平台上实现 HyperEnclave 的情况。在当前实现中，RustMonitor 包含约 7,500 行主要用 Rust 编写的代码，主操作系统的内核模块有约 3,500 行 C 代码。此外，我们对官方英特尔 SGX SDK（版本 2.13）进行了约 2,000 行代码的更改。</p>
+<h3 id="5-1-RustMonitor"><a href="#5-1-RustMonitor" class="headerlink" title="5.1 RustMonitor"></a>5.1 RustMonitor</h3><p>RustMonitor 运行在最高特权级别，并为 enclave 强制执行隔离。为了减少由内存损坏或并发错误引起的风险，我们主要用内存安全的语言 Rust 实现了 RustMonitor，只有几行汇编代码用于上下文切换。与现有的虚拟机管理程序如 KVM [47] 和 Xen [29] 相比，RustMonitor 小得多，因此更容易进行形式化验证。我们正在进行 RustMonitor 的形式化验证，并计划将结果作为单独的报告发布。</p>
+<p>平台启动时，我们在 grub 中配置内核命令行参数以保留物理内存区域，这些区域专供 RustMonitor 和 enclave 使用。RustMonitor 通过维护一个空闲页面列表来管理保留的物理内存。当需要一个 enclave 页面时，例如，在 enclave 创建期间添加一个 enclave 页面时，从池中检索一个空闲页面；当 enclave 页面被释放时，该页面再次附加到列表中。此外，RustMonitor 还管理 enclave 的页表并处理页错误。</p>
+<h3 id="5-2-内核模块"><a href="#5-2-内核模块" class="headerlink" title="5.2 内核模块"></a>5.2 内核模块</h3><p>内核模块在启动过程中由主操作系统加载。然后它加载、度量和启动 RustMonitor，并将测量值作为 TPM quote 的一部分扩展到 TPM PCR。内核模块加载后，会创建一个设备文件并挂载在 <code>/dev/hyper_enclave</code>。应用程序可以打开它并通过 <code>ioctl()</code> 调用来调用模拟的特权操作。</p>
+<h3 id="5-3-Enclave-SDK"><a href="#5-3-Enclave-SDK" class="headerlink" title="5.3 Enclave SDK"></a>5.3 Enclave SDK</h3><p>HyperEnclave 对官方 SGX SDK 进行了如下改造。</p>
+<p><strong>支持 SGX SDK API。</strong> 我们用 hypercall 或系统调用替换了 SGX SDK 中的 SGX 用户叶函数（例如 EENTER、EEXIT、ERESUME 等）。为了兼容性，我们的实现保留了与 SGX 相同的参数语义和顺序。</p>
+<p><strong>通过编组缓冲区进行参数传递。</strong> 在 HyperEnclave 中，enclave 只能访问自己的地址空间和与应用程序共享的编组缓冲区。编组缓冲区的大小可以在 enclave 的配置文件中配置，有默认大小。在调用边缘调用之前，数据需要被传输到编组缓冲区。我们修改了 SGX SDK 来处理这些转换，因此对开发者是透明的。</p>
+<p>我们修改了 SDK 中的非可信运行时库（即 <code>libsgx_urts.so</code>），以便在 enclave 初始化期间使用 <code>mmap()</code> 和 <code>MAP_POPULATE</code> 标志分配一个编组缓冲区。因此，编组缓冲区的 GPA 被预填充。然后发出一个 <code>ioctl()</code> 请求主操作系统在 enclave 的生命周期内不要压缩或换出编组缓冲区的物理页面。当应用程序调用模拟的 EINIT 指令来标记 enclave 的初始化时，编组缓冲区的基地址和大小被传递给 RustMonitor，RustMonitor 会在 enclave 的页表中添加编组缓冲区的映射。这样，编组缓冲区现在在 enclave 和非可信应用程序之间共享。编组缓冲区的基地址和大小也被传递给可信运行时库，以便将数据从编组缓冲区传输到 enclave。</p>
+<p>当前 SGX SDK 中的 OCALL 实现是在 enclave 内部调用 <code>sgx_ocalloc()</code>，在非可信应用程序的堆栈区域分配一个缓冲区，然后用于跨 enclave 数据传输。因此，我们只需要修改 <code>sgx_ocalloc()</code> 函数，在编组缓冲区中分配一个内存区域。为了支持通过编组缓冲区为 ECALL 传递参数，我们修改了 SGX 的 Edger8r 工具，以自动生成将传输数据复制到编组缓冲区的代码。</p>
+<p>SGX 编程模型支持使用 <code>user_check</code> 属性传递参数。对于此类参数，SDK 工具不会生成代码来检查地址范围或执行数据移动。由于 enclave 代码可以访问整个进程的地址空间，一些 enclave 程序可能会使用带有 <code>user_check</code> 属性的指针直接操纵 enclave 外部的数据缓冲区，而不考虑跨 enclave 边界复制数据的开销。为了处理这个问题，我们为开发者增加了一个接口，以便在开发者可能使用带有 <code>user_check</code> 属性的参数时，在编组缓冲区内分配缓冲区。</p>
+<p>远程证明流程与 SGX 类似，遵循相同的 SIGn-and-MAc (SIGMA) 协议。我们扩展了 SDK 中的 <code>sgx_quote_t</code> 结构以包括 HyperEnclave quote，并且该修改对 enclave 代码是透明的。</p>
+<p>通过以上设计，大多数 SGX 程序可以在 HyperEnclave 上运行而无需更改源代码。此外，为了简化 HyperEnclave 应用程序的开发，我们还已将 Rust SGX SDK [71] 和 Occlum 库操作系统 [64] 移植到 HyperEnclave。</p>
+<h2 id="6-安全性分析"><a href="#6-安全性分析" class="headerlink" title="6 安全性分析"></a>6 安全性分析</h2><p><strong>信任建立。</strong> HyperEnclave 依赖度量启动来引导 RustMonitor 的信任，这是 TEE 设计的常用方法（例如，TrustZone [16] 和 Keystone [49]）。启动过程中的所有组件（包括 CRTM、BIOS、grub、内核和 initramfs）都被测量并扩展到 TPM PCR。因此，对启动代码的任何篡改都将通过远程证明反映和审计。我们认为 HyperEnclave 部署在受控环境中（即云计算场景中的数据中心），因此攻击者对平台的物理访问权限有限。为了减少攻击面并最小化 TCB，我们将 RustMonitor 镜像放入 initramfs，并在早期用户空间中加载和测量 RustMonitor。在此阶段，主操作系统内核不接受来自用户的外部输入，并且网络连接等外围设备被禁用。通过度量延迟启动方法，在操作系统被降级到正常模式后，RustMonitor 不再需要信任主操作系统。</p>
+<p><strong>Enclave 内存隔离。</strong> 如第 3.2 节所述，enclave 的内存和页表由 RustMonitor 维护，主操作系统无法访问。TLB 在 world switch 时被清除，以防止使用过时的 TLB 条目进行非法内存访问。RustMonitor 通过从其 NPT 中移除相应映射来防止主操作系统访问保留的物理内存。RustMonitor 还配置 IOMMU 以防止未经授权的设备访问保留的物理内存。</p>
+<p>我们的设计防止了内存映射攻击，因为主操作系统不能干扰 enclave 的地址映射。我们引入编组缓冲区以支持 enclave 和应用程序之间的内存共享。应用程序在正常内存中预分配一个编组缓冲区，并在 enclave 初始化期间将缓冲区的基地址和大小传递给 RustMonitor。如果应用程序可能传递伪造的地址（例如，覆盖 enclave 内存），在将编组缓冲区的映射添加到 enclave 的页表之前，RustMonitor 会确保编组缓冲区的地址范围在 enclave 地址范围之外。</p>
+<p><strong>防御受损的 Enclave。</strong> 先前的工作表明，enclave 恶意软件可能会窃取秘密数据或劫持 enclave 外部应用程序的控制流 [63]。HyperEnclave 旨在限制潜在的恶意 enclave，如下所示。</p>
+<ul>
+<li><strong>防止对应用程序的任意内存访问。</strong> SGX enclave 可以访问应用程序的整个地址空间，这可能导致诸如泄露密钥或堆栈金丝雀，或篡改代码指针以进行控制流攻击等攻击。在 HyperEnclave 中，enclave 只能访问自己的内存和用于参数传递的编组缓冲区。</li>
+<li><strong>防止 EEXIT 后的任意控制流。</strong> SGX 设计允许 enclave 通过在执行 EEXIT 指令（即退出 enclave）之前设置 rbx 来跳转到任意地址，这为 enclave 恶意软件攻击打开了大门 [63]。在我们的设计中，由于 EEXIT 指令由 RustMonitor 模拟，因此通过在调用 EEXIT 时添加有效性检查，很容易防止此类攻击。</li>
+</ul>
+<p><strong>物理攻击。</strong> 诸如 AMD SME 之类的硬件内存加密技术可用于保护 enclave 免受冷启动攻击或总线嗅探攻击等物理攻击。通过内存加密，数据在内存或内存总线上始终是加密的，并且仅在 CPU 内部解密。内存加密密钥在系统启动时随机生成并存储在 CPU 中，软件无法显式访问。</p>
+<p><strong>侧信道攻击。</strong> 与 SGX 相比，HyperEnclave 可以减轻某些类型的侧信道攻击。由于 enclave 的客户机页表和页错误事件由 RustMonitor 处理，而没有主操作系统的参与，因此后者无法发起基于页表的攻击 [25, 72, 74]。我们将针对微架构攻击（如推测执行攻击）的防护留作未来工作。</p>
+<h2 id="7-评估"><a href="#7-评估" class="headerlink" title="7 评估"></a>7 评估</h2><p>我们在一个配备两颗 AMD EPYC 7601 CPU（每核 2 线程，共 128 个逻辑核心）和 512 GB DDR4 RAM 的服务器上部署了 HyperEnclave。我们为 RustMonitor 配置了 2 GB 的保留内存，为 EPC 内存配置了 24 GB。主操作系统是 Ubuntu 18.04 LTS，Linux 内核版本为 4.19.91。为了比较，我们在一个启用 SGX 的 Intel Xeon E3-1270 v6 CPU 上运行了相同的实验，该 CPU 配备 64 GB DDR4 RAM，运行相同的操作系统。HyperEnclave 和原生 SGX 硬件的 SGX SDK 版本均为 2.13。所有程序都使用 GCC 7.5.0 和相同的优化级别进行编译。</p>
+<p>我们试图排除硬件之间的差异。除非明确说明，评估没有超过 EPC 大小，以免引发过多的页面交换。所有评估都在单线程模式下进行。对于微基准测试（表 1 和表 2），我们使用相同的 SGX SDK 在 AMD 硬件上将 HyperEnclave 与在 Intel 硬件上的 SGX 进行比较。我们测量了核心周期以避免 CPU 频率的影响。对于真实世界的工作负载，我们分别在 Intel 和 AMD 平台上将没有安全保护的对应物设置为基线，并比较 SGX 和 HyperEnclave 引入的相对减速。由于我们只比较相对减速，我们强调绝对性能结果是在不同的平台上得出的，不能直接比较。所有 HyperEnclave 评估都是在启用内存加密的情况下进行的。</p>
+<p>我们已谨慎确保 HyperEnclave 正确实现了 TEE 功能。尽管如此，SGX1 和 HyperEnclave 之间的内存加密是不同的，即 Merkel 树和 AES-CTR 对比 AES-XTS（有关内存加密开销的评估，请参见第 A.3 节中的图 11），这可能解释了内存密集型工作负载的改进。此外，HyperEnclave（特别是 HU-enclave）的 world switch 更快，这解释了 I&#x2F;O 密集型工作负载的改进。</p>
+<h3 id="7-1-World-Switch-性能"><a href="#7-1-World-Switch-性能" class="headerlink" title="7.1 World Switch 性能"></a>7.1 World Switch 性能</h3><p>我们在 HyperEnclave（在不同的 enclave 操作模式下）和 Intel SGX 上都测量了边缘调用（即 ECALL 和 OCALL）的延迟。测试代码运行了 1,000,000 次没有显式参数的空边缘调用，并取中值。我们还测量了 HyperEnclave 上模拟的 EENTER 和 EEXIT 指令的指令级延迟。我们无法在 SGX 上测量指令级延迟，因为我们的 SGX 平台上的 enclave 内不支持 RDTSCP 指令。</p>
+<p>结果如表 1 所示。结果表明，HU-Enclave 具有最佳的边缘调用性能，因为它将模式切换（约 880 周期）减少为环切换（约 120 周期），而 P-Enclave 比 GU-Enclave 慢，因为它在 world switch 期间需要切换更多的特权状态。所有结果都与 Intel SGX 相当。</p>
+<h3 id="7-2-Enclave-异常处理"><a href="#7-2-Enclave-异常处理" class="headerlink" title="7.2 Enclave 异常处理"></a>7.2 Enclave 异常处理</h3><p>我们使用未定义指令异常（#UD）和页错误异常（#PF）来评估 enclave 异常处理性能。在 #UD 基准测试中，测试代码在 enclave 中执行一条未定义指令以触发异常 1,000,000 次。异常处理程序推进指令指针并返回。对于 P-Enclave，异常完全在 enclave 内部捕获和处理，无需 enclave 模式切换。对于 GU-Enclave 和 SGX，异常会导致异步 enclave 退出（AEX）并将 CPU 切换到非可信操作系统，然后执行一个两阶段异常处理 [7]。结果表明，P-Enclave 内的异常处理分别比 GU-Enclave 和 Intel SGX 快约 68 倍和 110 倍（表 2）。</p>
+<p>我们进一步模拟了一个典型的垃圾收集器（GC）场景，测试代码首先分配一个大的内存缓冲区，然后通过更改 enclave 的页表来撤销对该缓冲区的写权限。之后，enclave 访问该缓冲区以触发页错误。在异常处理程序中，写权限被恢复。结果（表 2）显示，P-Enclave 比 GU-Enclave 快约 2.3 倍，因为 P-Enclave 自己更新页表并处理页错误，而 GU-Enclave 需要陷入 RustMonitor 来更新页表。请注意，我们没有在 Intel SGX 上评估 GC，因为我们的 SGX1 平台在 enclave 初始化后不支持页面权限修改。</p>
+<h3 id="7-3-编组缓冲区开销"><a href="#7-3-编组缓冲区开销" class="headerlink" title="7.3 编组缓冲区开销"></a>7.3 编组缓冲区开销</h3><p>为了测量引入编组缓冲区的开销，我们构建了一个不使用编组缓冲区的 GU-Enclave 变体作为基线。我们测量了 ECALL 和 OCALL 在不同大小的传输数据和不同数据移动方向（即”in”、”out”和”in&amp;out”）下的开销。我们使用 CLFLUSH 指令确保要传输的数据没有被缓存。我们评估了在 SGX 上传输相同数据的性能以进行比较。</p>
+<p>（原文此处有缺失，但根据上下文推断）开销随着数据大小的增加而增加。对于 ECALL，由于额外的内存复制，传输 16 KB 数据时，”in”、”out” 和 “in&amp;out” 方向的开销分别为 8%、11% 和 21%。对于 OCALL，开销可以忽略不计，因为它在编组缓冲区上分配一个缓冲区而没有额外的内存复制（第 5.3 节）。我们提醒，在许多真实世界的计算工作负载中，尤其是在计算或内存密集型任务中，ECALL 中的数据传输只占处理时间的一小部分。</p>
+<h3 id="7-4-真实世界工作负载"><a href="#7-4-真实世界工作负载" class="headerlink" title="7.4 真实世界工作负载"></a>7.4 真实世界工作负载</h3><p>评估在四个真实世界的应用程序上进行：一个算法基准套件 NBench [53]，一个轻量级 Web 服务器 Lighttpd [13]，两个流行的数据库 SQLite [14] 和 Redis [15]，作为 CPU 密集型、I&#x2F;O 密集型和内存密集型任务的代表。我们将库操作系统 Occlum [64] (v0.21) 移植到 enclave SDK，以减少 Lighttpd 和 Redis 的移植工作。我们使用在 SDK 模拟模式下编译的相同代码作为基线（不提供安全保证），在 HyperEnclave 和 Intel SGX 上测量了性能。</p>
+<h4 id="NBench"><a href="#NBench" class="headerlink" title="NBench"></a>NBench</h4><p>NBench 测量系统的 CPU、FPU 和内存系统的性能，不涉及 I&#x2F;O 和系统调用。我们使用了 NBench 的一个 SGX 改编版，即 SGX-NBench [8]，在我们的评估中没有修改源代码。如图 8a 所示，HyperEnclave 和 SGX 引入的开销分别约为 1% 和 3%。</p>
+<h4 id="SQLite"><a href="#SQLite" class="headerlink" title="SQLite"></a>SQLite</h4><p>我们将 SQLite (v3.19.3) 与 enclave SDK 进行了移植，并使用 YCSB [30] 工作负载 A（50% 读取，50% 更新）在 Intel SGX 和 HyperEnclave（GU-Enclave 和 HU-Enclave）上对其进行了评估。在此评估中，我们专注于内存性能，因此我们将数据库配置为内存数据库，并将客户端嵌入到 enclave 中以避免 I&#x2F;O 操作。我们增加了记录数量，并测量了 100,000 次数据库操作的时间。如图 8b 所示，在 SGX 上，对于小内存使用量，吞吐量约为基线的 75%。当内存使用量超过 EPC 大小（约 90 MB）时，由于页面交换，性能下降到 50%。在 HyperEnclave 上，GU-Enclave 和 HU-Enclave 的性能几乎与基线相同（开销 &lt; 5%）。我们推测这是因为 AMD SME 的内存加密性能（没有完整性保护）比 SGX 快。</p>
+<h4 id="Lighttpd"><a href="#Lighttpd" class="headerlink" title="Lighttpd"></a>Lighttpd</h4><p>我们在 SGX 和 HyperEnclave（GU-Enclave 和 HU-Enclave 模式）上使用 Occlum 运行了一个 Lighttpd (v1.4.40) 服务器。我们使用了 Apache HTTP 基准测试工具 [10]，并通过本地环回运行了 100 个并发客户端来获取各种大小的网页以评估吞吐量。在此评估中，开销主要来自频繁的 enclave 模式切换（表 1）。如图 8c 所示，HU-Enclave 提供了预期的最佳性能（基线的 81% ~ 88%）。GU-Enclave 达到了基线的 69% ~ 78%，而 SGX 达到了基线的 51% ~ 63%。</p>
+<h4 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h4><p>我们使用 Redis 来评估在内存和 I&#x2F;O 都很密集的综合场景下的性能。我们在 SGX 和 HyperEnclave（GU-Enclave 和 HU-Enclave 模式）上使用 Occlum 运行了一个 Redis (v6.0.9) 数据库服务器。与 SQLite 类似，我们将数据库配置为内存数据库，并使用了 YCSB 工作负载 A。对于评估，我们首先加载了 50,000 条记录（总共 50 MB 数据），然后通过本地环回从 20 个客户端执行了 100,000 次操作。我们增加了请求频率，并测量了不同吞吐量下的延迟。如图 8d 所示，HU-Enclave 达到了基线最大吞吐量的 89%，而 GU-Enclave 和 SGX 分别约为基线的 72% 和 48%。</p>
+<h2 id="8-讨论"><a href="#8-讨论" class="headerlink" title="8 讨论"></a>8 讨论</h2><p><strong>HyperEnclave 在其他平台上的应用。</strong> HyperEnclave 需要虚拟化扩展（特别是两级地址转换）进行隔离，以及 TPM 用于信任根和随机性等。许多 ARM 服务器（如 ARMv8 平台 [2]）都支持虚拟化。RISC-V H-扩展规范已于 2021 年演进到 v0.6.1。ARM 和 RISC-V 虚拟化都支持两级地址转换。某些 TPM 产品已经支持 ARM 服务器。已经有研究在 RISC-V 上支持固件 TPM [22]。因此，有迹象表明 HyperEnclave 可以被适配到 ARM 和 RISC-V 平台上运行。</p>
+<p>然而，将 HyperEnclave 移植到 ARM 和 RISC-V 平台需要大量的工程工作，考虑到指令集架构（ISA）完全不同。以 ARMv8 架构为例。软件模块可以映射到不同的异常级别（EL）：RustMonitor 的监视器模式可以映射到 EL2；主操作系统和应用程序的非可信部分可以分别映射到 EL1 和 EL0；enclave 的安全模式可以灵活地映射到 EL1 或 EL0。内存隔离可以通过 stage 2 地址转换的支持类似地实现。此外，官方的 Intel SGX SDK 只支持 x86 平台。特别是，跨 enclave 边界的转换是用平台相关的汇编代码处理的，需要根据目标平台的应用程序二进制接口（ABI）重写。我们将把 HyperEnclave 适配到其他平台的进一步探索留作未来工作。</p>
+<p><strong>不同 enclave 操作模式下的攻击面。</strong> 非可信的主操作系统仍然在虚拟机内运行，从主操作系统到 enclave 的攻击面没有改变。然而，在特权模式或主机中运行 enclave，可能会向恶意 enclave 暴露更多的攻击面。例如，如果 enclave 已经在主机中运行，它可能会使 enclave 恶意软件更容易升级到主机 ring-0。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/')">HyperEnclave：一个开放且跨平台的可信执行环境</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=HyperEnclave：一个开放且跨平台的可信执行环境&amp;url=http://example.com/2025/07/19/HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250624000019253.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/HyperEnclave/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>HyperEnclave<span class="tagsPageCount">5</span></a><a class="post-meta__box__tags" href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>机密计算<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/TEE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TEE<span class="tagsPageCount">10</span></a><a class="post-meta__box__tags" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>虚拟化<span class="tagsPageCount">5</span></a><a class="post-meta__box__tags" href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>论文翻译<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/07/18/HyperEnclave%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%9B%BE/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115418384.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">HyperEnclave源码学习路线图</div></div></a></div><div class="next-post pull-right"><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/07/21/HyperEnclave%E5%90%AF%E5%8A%A8%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/" title="HyperEnclave启动和初始化流程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721161224869.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-21</div><div class="title">HyperEnclave启动和初始化流程</div></div></a></div><div><a href="/2025/07/20/HyperEnclave%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97%E8%A7%A3%E6%9E%90%EF%BC%9A%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/" title="HyperEnclave机密计算解析：架构原理、安全机制与技术对比"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-20</div><div class="title">HyperEnclave机密计算解析：架构原理、安全机制与技术对比</div></div></a></div><div><a href="/2025/07/18/HyperEnclave%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E5%9B%BE/" title="HyperEnclave源码学习路线图"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115418384.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-18</div><div class="title">HyperEnclave源码学习路线图</div></div></a></div><div><a href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-23</div><div class="title">HyperEnclave内存管理模块源码与原理分析</div></div></a></div><div><a href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-26</div><div class="title">Intel SGX 设计与安全原理全解析</div></div></a></div><div><a href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-27</div><div class="title">一起来学Intel SGX</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#HyperEnclave%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%BC%80%E6%94%BE%E4%B8%94%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">HyperEnclave：一个开放且跨平台的可信执行环境</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%BC%95%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">1 引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%83%8C%E6%99%AF"><span class="toc-number">1.3.</span> <span class="toc-text">2 背景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">1.3.1.</span> <span class="toc-text">2.1 可信执行环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%8F%AF%E4%BF%A1%E5%B9%B3%E5%8F%B0%E6%A8%A1%E5%9D%97"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.2 可信平台模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%A8%81%E8%83%81%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">2.3 威胁模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.4.</span> <span class="toc-text">3 设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="toc-number">1.4.1.</span> <span class="toc-text">3.1 系统概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%92%8C%E4%BF%9D%E6%8A%A4"><span class="toc-number">1.4.2.</span> <span class="toc-text">3.2 内存管理和保护</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%8F%AF%E4%BF%A1%E5%90%AF%E5%8A%A8%E3%80%81%E8%AF%81%E6%98%8E%E5%92%8C%E5%B0%81%E8%A3%85"><span class="toc-number">1.4.3.</span> <span class="toc-text">3.3 可信启动、证明和封装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Enclave-SDK"><span class="toc-number">1.4.4.</span> <span class="toc-text">3.4 Enclave SDK</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%81%B5%E6%B4%BB%E7%9A%84-Enclave-%E6%93%8D%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.5.</span> <span class="toc-text">4 灵活的 Enclave 操作模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%AE%A2%E6%88%B7%E6%9C%BA%E7%94%A8%E6%88%B7-Enclaves"><span class="toc-number">1.5.1.</span> <span class="toc-text">4.1 客户机用户 Enclaves</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E4%B8%BB%E6%9C%BA%E7%94%A8%E6%88%B7-Enclaves"><span class="toc-number">1.5.2.</span> <span class="toc-text">4.2 主机用户 Enclaves</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E7%89%B9%E6%9D%83-Enclaves"><span class="toc-number">1.5.3.</span> <span class="toc-text">4.3 特权 Enclaves</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.6.</span> <span class="toc-text">5 实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-RustMonitor"><span class="toc-number">1.6.1.</span> <span class="toc-text">5.1 RustMonitor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97"><span class="toc-number">1.6.2.</span> <span class="toc-text">5.2 内核模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-Enclave-SDK"><span class="toc-number">1.6.3.</span> <span class="toc-text">5.3 Enclave SDK</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%AE%89%E5%85%A8%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">1.7.</span> <span class="toc-text">6 安全性分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E8%AF%84%E4%BC%B0"><span class="toc-number">1.8.</span> <span class="toc-text">7 评估</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-World-Switch-%E6%80%A7%E8%83%BD"><span class="toc-number">1.8.1.</span> <span class="toc-text">7.1 World Switch 性能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-Enclave-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.8.2.</span> <span class="toc-text">7.2 Enclave 异常处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E7%BC%96%E7%BB%84%E7%BC%93%E5%86%B2%E5%8C%BA%E5%BC%80%E9%94%80"><span class="toc-number">1.8.3.</span> <span class="toc-text">7.3 编组缓冲区开销</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E7%9C%9F%E5%AE%9E%E4%B8%96%E7%95%8C%E5%B7%A5%E4%BD%9C%E8%B4%9F%E8%BD%BD"><span class="toc-number">1.8.4.</span> <span class="toc-text">7.4 真实世界工作负载</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#NBench"><span class="toc-number">1.8.4.1.</span> <span class="toc-text">NBench</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SQLite"><span class="toc-number">1.8.4.2.</span> <span class="toc-text">SQLite</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Lighttpd"><span class="toc-number">1.8.4.3.</span> <span class="toc-text">Lighttpd</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Redis"><span class="toc-number">1.8.4.4.</span> <span class="toc-text">Redis</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E8%AE%A8%E8%AE%BA"><span class="toc-number">1.9.</span> <span class="toc-text">8 讨论</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/eb3ff373916e1b7f04659bee6c94eb23.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一起来学Intel SGX"/></a><div class="content"><a class="title" href="/2025/07/27/%E4%B8%80%E8%B5%B7%E5%AD%A6%20Intel%20SGX/" title="一起来学Intel SGX">一起来学Intel SGX</a><time datetime="2025-07-27T12:00:00.000Z" title="发表于 2025-07-27 20:00:00">2025-07-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3aa144bd3c7f6bcc77c15cb6f271975c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Intel SGX 设计与安全原理全解析"/></a><div class="content"><a class="title" href="/2025/07/26/Intel%20SGX%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Intel SGX 设计与安全原理全解析">Intel SGX 设计与安全原理全解析</a><time datetime="2025-07-26T14:00:00.000Z" title="发表于 2025-07-26 22:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3564d61e60e59786c3e06fbcb40d0aad.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave"/></a><div class="content"><a class="title" href="/2025/07/26/Hypervisor%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3/" title="Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave">Hypervisor主要原理解析：传统虚拟化技术与HyperEnclave</a><time datetime="2025-07-26T11:00:00.000Z" title="发表于 2025-07-26 19:00:00">2025-07-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/0657f362c75db694f40e01dcca53753b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解RSA：加密与签名的艺术"/></a><div class="content"><a class="title" href="/2025/07/24/RSA_Explained/" title="深入理解RSA：加密与签名的艺术">深入理解RSA：加密与签名的艺术</a><time datetime="2025-07-24T14:00:00.000Z" title="发表于 2025-07-24 22:00:00">2025-07-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HyperEnclave内存管理模块源码与原理分析"/></a><div class="content"><a class="title" href="/2025/07/23/HyperEnclave%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%A8%A1%E5%9D%97%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" title="HyperEnclave内存管理模块源码与原理分析">HyperEnclave内存管理模块源码与原理分析</a><time datetime="2025-07-23T11:00:00.000Z" title="发表于 2025-07-23 19:00:00">2025-07-23</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">71</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>3</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>1</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>4</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>6</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>10</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>4</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>2</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>3</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
