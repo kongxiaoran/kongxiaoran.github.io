@@ -1,0 +1,843 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>Zeppelin 源码编译构建与打包部署 | 凌霄的博客</title><meta name="keywords" content="Spark,大数据,Zeppelin"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="Zeppelin 源码编译构建与打包部署"><meta name="application-name" content="Zeppelin 源码编译构建与打包部署"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="Zeppelin 源码编译构建与打包部署"><meta property="og:url" content="http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="记录学习 Zeppelin 源码的编译构建以及debug的过程"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png"><meta name="description" content="记录学习 Zeppelin 源码的编译构建以及debug的过程"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'Zeppelin 源码编译构建与打包部署',
+  postAI: '',
+  pageFillDescription: 'Zeppelin 源码编译构建与打包部署, 一、背景：, 二、编译构建, 2.1 步骤, 2.2 遇到的问题, 三、IDEA运行与Debug, 3.1 IDEA运行, 3.2 网络问题, 1）问题现象与解决, 2）扩展知识, 3）刨根问底, 3.3 debug zeppelin 解释器进程, 1）背景知识, 2）怎么debug, 四、打包部署, 4.1 标准部署方式, 4.2 Docker部署源码编译构建与打包部署官方网站仓库官方构建说明文档一背景本文是为了记录学习的编译构建以及的过程的过程中遇到了不少问题虽然最终都解决了但是我建议在真正开始构建与了解源码之前一定先读读的提供的这两个文档而不仅是构建文档里面有介绍了运行机制等等二编译构建步骤准备要求我使用的是版本最好不要太高了我一开始用的就编译出问题了下拉源码编译源码启动以上是什么都不出问题的步骤实际上可能会出现问题遇到的问题损坏报错原因的下载插件下载下来的是损坏的应该是下载中途停止了导致其实下载下来的不完整完整的应该是左右下载插件的缓存目录位于将原先缓存的损坏的给删除掉然后我用浏览器单独下载了然后将复制并重命名为就这样来了一个偷梁换柱哈哈然后就可以单独构建一下出问题的模块试下发现没问题了然后继续从模块开始继续完成全部构建版本导致的编译报错然后然后又出现新的报错了进一步获取细节报错发现错误的根本原因是版本不兼容错误信息表明编译器无法找到对象这通常是由于版本不兼容导致的通过查看项目的文件我发现项目的根文件中指定了版本为模块使用的版本为使用的版本为额是我忘记调了发现编译没问题继续编译报错这个报错我当时也没注意具体排查就是执行了下安装父级好像就修复好了类找不到找不到符号符号类位置程序包依赖存在问题我尝试的解决方法是找到属于哪个模块然后重新编译下那个模块确实解决问题以上就是我遇到过的编译问题这里只是记录下不一定会遇到我后面几次编译都是一次正常完成三运行与问题不仅仅在编译哦咱们继续下面也有坑运行启动类环境变量参数这个可以不填这个是我排查问题测试用的编辑好启动配置就可以开始运行系统启动起来之后访问页面上新建一个文件夹和笔记查看集群信息应输出远程主节点地址执行简单计算验证是否能正常使用集群资源分区数计算结果可以设置断点然后页面点击运行图标你就可以到了备注这里提醒一下页面需要配置下解释器的即需要提前下载一个适配到但是如果成功编译其实项目也会自己下载一个存放的路径可以配置这个也行如果有自己之后想要对接的集群可以单独下载对应的版本比如我用的是网络问题问题现象与解决在上面我到断点之后放行但是页面一直卡在状态然后等待一段时间之后本地目录下可以发现这样的报错这个问题原因是网络配置问题使用了这个特殊的地址表现解释器进程启动但无法注册到服务器修复这个问题我问了经过几次拷打它们加了很多的配置也修复了问题然后我就想知道是哪个配置真正解决了问题加了参数环境变量配置文件等但是实质上真正解决问题的是这个参数给的环境变量在启动配置上新增环境变量问题就修复好了扩展知识与的作用与区别控制服务器绑定的地址决定用户通过哪个访问主要影响的是外部访问服务器的地址控制服务器和解释器之间通信使用的本地地址这个地址会被传递给解释器进程用于解释器进程回连到服务器主要影响的是解释器进程和服务器之间的内部通信在调试解释器进程时很重要因为它决定了解释器进程如何连接回服务器如果设置不正确解释器进程可能无法连接到服务器导致代码执行失败实际上日志中的这个地址就是由配置的或者在没有明确配置时由系统自动选择的本地地址刨根问底下一个问题来了为什么用了这么个特殊由来使用看到了真的有个网络接口有个是真的是冤有头债有主软件导致的那么怎么就用了这个以及为什么配置就好了源码解释器进程背景知识在熟悉源码的过程中我发现一个问题我不到解释器真正执行作业的代码这个就是我说要先看看的文档的原因如果你看过了解释器相关内容就会发现其实解释器运行在单独的进程里的而且你多执行几次页面作业就发现类似日志通过这个日志其实可以学到很多东西本地的可执行文件路径指定启动的主类这是远程解释器的服务类用于与之间的通信后面的一串路径指定需要加载的类路径包含解释器相关的包配置文件路径等确保解释器能正确找到依赖的类后的参数给的传递的参数设置文件编码为指定日志配置文件路径控制日志输出格式和级别指定解释器的日志文件路径记录解释器运行日志启用调试功能表示启动时暂停等待调试器连接是调试端口核心配置参数这些是作业的资源和运行参数每个分配内存运行模式为本地模式表示使用所有可用核心进程分配内存作业名称为的共享进程启动个实例解释器的包路径解释器服务绑定的本地地址端口及进程名称这条日志本质上是启动解释器的详细命令记录包含了的运行模式资源配置类路径日志设置等信息通过这些参数成功启动了一个本地模式的进程并建立了与的通信通道以便用户在中编写和执行代码解释器的进程是独立于服务的所以不到怎么如果想要到得用上远程调试修改这个脚本是用来控制启动解释器的修改调整增加将空格分隔的提交选项拆分为数组将分隔的配置拆分为数组判断是否为集群模式集群模式的启动命令非模式如本地模式的启动命令额外添加指定驱动类路径调试参数允许远程调试将分隔的配置拆分为数组组装应用模式启动命令拆分选项和内存配置为数组组装默认解释器启动命令直接用运行调试参数类路径配置远程调试选择端口即可因为在解释器启动脚本那配置的就是然后得在页面执行作业之后才启动解释器进程哈所以我们也不用提前我们调试参数中有启动时会暂停程序执行直到远程调试器连接成功后才继续运行所以不用担心四打包部署标准部署方式为了体现打包的是我们自己编译的源码可以留个痕迹我在方法第一行加了一个日志打印如果打包之后的在运行作业时日志出现这条日志那么证明就成功了编译打包使用来进行打包打包完成之后在项目根目录下会生成一个打包好的分发版本位于项目的部署执行可以将这个文件夹上传到服务器然后执行运行笔记观察日志成功啦部署官方文档提供了多种镜像构建和部署方式这是因为从版本开始支持在或中运行并且采用了服务器和解释器分离的架构设计服务器和解释器分离部署方式这种方式下有三种镜像基础分发镜像作用这是一个中间镜像主要用于构建和打包的所有组件内容包含完整的源代码构建工具和构建过程中生成的所有包特点体积较大包含编译环境和构建工具用途不直接用于部署而是作为其他镜像的基础服务器镜像作用这是实际运行服务器的镜像内容只包含运行服务器所需的组件不包含构建工具特点体积相对较小优化用于生产环境用途直接用于部署服务器解释器基础镜像构建流程关系首先构建基础分发镜像在这个过程中完成的编译和打包然后基于这个分发镜像提取出服务器部分创建服务器镜像同样基于分发镜像提取出解释器部分创建解释器镜像这种多阶段构建方式的好处是分离构建环境和运行环境减小最终镜像大小允许服务器和解释器分别部署实现微服务架构便于单独更新或扩展某个组件实操镜像构建首先构建基础分发镜像然后构建服务器镜像构建解释器基础镜像部署编写直接部署要让使用单独的容器运行解释器需要在启动容器时设置环境变量指定解释器容器镜像确保挂载套接字服务器和解释器一体化部署如果你是快速搭建开发与测试环境可以接受服务端与解释器运行在一个容器内则有一种更加简单的镜像构建方式这种方式适合以下场景快速开始使用进行开发或测试不需要服务器和解释器分离部署想要一个更轻量级的镜像需要对镜像进行简单定制',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-09-20 22:31:59',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>4</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>5</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 1.05rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>11</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>7</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>5</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">九月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">4</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">八月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Spark/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Spark</span></a><a class="article-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>大数据</span></a><a class="article-meta__tags" href="/tags/Zeppelin/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Zeppelin</span></a></span></div></div><h1 class="post-title" itemprop="name headline">Zeppelin 源码编译构建与打包部署</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-09-17T02:00:00.000Z" title="发表于 2025-09-17 10:00:00">2025-09-17</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-09-20T14:31:59.544Z" title="更新于 2025-09-20 22:31:59">2025-09-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="Zeppelin 源码编译构建与打包部署"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/"><header><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a><a href="/tags/Spark/" tabindex="-1" itemprop="url">Spark</a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" tabindex="-1" itemprop="url">大数据</a><a href="/tags/Zeppelin/" tabindex="-1" itemprop="url">Zeppelin</a><h1 id="CrawlerTitle" itemprop="name headline">Zeppelin 源码编译构建与打包部署</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-09-17T02:00:00.000Z" title="发表于 2025-09-17 10:00:00">2025-09-17</time><time itemprop="dateCreated datePublished" datetime="2025-09-20T14:31:59.544Z" title="更新于 2025-09-20 22:31:59">2025-09-20</time></header><h1 id="Zeppelin-源码编译构建与打包部署"><a href="#Zeppelin-源码编译构建与打包部署" class="headerlink" title="Zeppelin 源码编译构建与打包部署"></a>Zeppelin 源码编译构建与打包部署</h1><blockquote>
+<p>官方网站：<a target="_blank" rel="noopener" href="https://zeppelin.apache.org/">https://zeppelin.apache.org/</a></p>
+<p>github仓库：<a target="_blank" rel="noopener" href="https://github.com/apache/zeppelin">https://github.com/apache/zeppelin</a></p>
+<p>官方构建说明文档：<a target="_blank" rel="noopener" href="https://zeppelin.apache.org/docs/0.12.0/setup/basics/how_to_build.html">https://zeppelin.apache.org/docs/0.12.0/setup/basics/how_to_build.html</a></p>
+</blockquote>
+<h2 id="一、背景："><a href="#一、背景：" class="headerlink" title="一、背景："></a>一、背景：</h2><p>本文是为了记录学习 Zeppelin 的编译构建以及debug的过程的。过程中遇到了不少问题，虽然最终都解决了，但是我建议在真正开始构建与了解源码之前，一定先读读 Zeppelin的提供的这两个文档，而不仅是构建文档。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zeppelin.apache.org/docs/0.12.0/usage/interpreter/interpreter_binding_mode.html">https://zeppelin.apache.org/docs/0.12.0/usage/interpreter/interpreter_binding_mode.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://zeppelin.apache.org/docs/0.12.0/interpreter/spark.html#zeppelincontext">https://zeppelin.apache.org/docs/0.12.0/interpreter/spark.html#zeppelincontext</a></li>
+</ul>
+<p>里面有介绍了 interpreter运行机制、Zeppelin Configuration等等。</p>
+<h2 id="二、编译构建"><a href="#二、编译构建" class="headerlink" title="二、编译构建"></a>二、编译构建</h2><h3 id="2-1-步骤"><a href="#2-1-步骤" class="headerlink" title="2.1 步骤"></a>2.1 步骤</h3><p>1）准备要求：</p>
+<table>
+<thead>
+<tr>
+<th align="center">Name</th>
+<th align="center">Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Git</td>
+<td align="center">(Any Version)</td>
+</tr>
+<tr>
+<td align="center">Maven</td>
+<td align="center">3.6.3 or higher</td>
+</tr>
+<tr>
+<td align="center">OpenJDK or Oracle JDK</td>
+<td align="center">1.8 (151+) (set JAVA_HOME)</td>
+</tr>
+</tbody></table>
+<p>我使用的是 <code>jdk11</code>。jdk版本最好不要太高了，我一开始用的jdk21就编译出问题了。</p>
+<p>2）下拉源码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/apache/zeppelin.git</span><br></pre></td></tr></table></figure>
+
+<p>3）编译源码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean package -DskipTests </span><br></pre></td></tr></table></figure>
+
+<p>4）启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/zeppelin-daemon.sh start</span><br></pre></td></tr></table></figure>
+
+<p>以上是什么都不出问题的步骤 😂，实际上可能会出现问题</p>
+<h3 id="2-2-遇到的问题"><a href="#2-2-遇到的问题" class="headerlink" title="2.2 遇到的问题"></a>2.2 遇到的问题</h3><p>1）spark-3.5.3-bin-without-hadoop.tgz 损坏</p>
+<p>报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[ERROR] Failed to execute goal com.googlecode.maven-download-plugin:download-maven-plugin:1.6.0:wget (download-sparkr-files) on project r: IO Error: Error while expanding /Users/kxr/learning/zeppelin/rlang/target/spark-3.5.3-bin-without-hadoop.tgz: Unexpected end of ZLIB input stream -&gt; [Help 1]</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.</span><br><span class="line">[ERROR] Re-run Maven using the -X switch to enable full debug logging.</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] For more information about the errors and possible solutions, please read the following articles:</span><br><span class="line">[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] After correcting the problems, you can resume the build with the command</span><br><span class="line">[ERROR]   mvn &lt;args&gt; -rf :r</span><br></pre></td></tr></table></figure>
+
+<p>原因：maven的下载插件下载下来的 spark-3.5.3-bin-without-hadoop.tgz 是损坏的。应该是maven下载中途停止了，导致其实下载下来的不完整（233MB），完整的应该是300MB左右。</p>
+<p>Maven下载插件的缓存目录位于 <code>/Users/kxr/.m2/repository/.cache/download-maven-plugin/</code></p>
+<p>将原先maven缓存的损坏的spark-3.5.3-bin-without-hadoop.tgz给删除掉。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -f /Users/kxr/.m2/repository/.cache/download-maven-plugin/spark-3.5.3-bin-without-hadoop.tgz_cab0a2ce6ec48d96124c50359f3fb6a1</span><br></pre></td></tr></table></figure>
+
+<p>然后我用浏览器单独下载了spark-3.5.3-bin-without-hadoop.tgz，然后将复制并重命名为 <code>/Users/kxr/.m2/repository/.cache/download-maven-plugin/spark-3.5.3-bin-without-hadoop.tgz_cab0a2ce6ec48d96124c50359f3fb6a1</code></p>
+<p>就这样来了一个偷梁换柱哈哈。然后就可以单独构建一下出问题的 rlang模块试下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -pl rlang -DskipTests</span><br></pre></td></tr></table></figure>
+
+<p>发现没问题了！</p>
+<p>然后继续从rlang模块开始继续完成全部构建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -rf rlang</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2）jdk版本导致的编译报错</p>
+<p>然后然后又出现新的报错了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">INFO] ------------------------------------------------------------------------</span><br><span class="line">[ERROR] Failed to execute goal net.alchim31.maven:scala-maven-plugin:4.9.2:compile (scala-compile-first) on project flink1.15-shims: scala compilation failed -&gt; [Help 1]</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.</span><br><span class="line">[ERROR] Re-run Maven using the -X switch to enable full debug logging.</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] For more information about the errors and possible solutions, please read the following articles:</span><br><span class="line">[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] After correcting the problems, you can resume the build with the command</span><br><span class="line">[ERROR]   mvn &lt;args&gt; -rf :flink1.15-shims</span><br></pre></td></tr></table></figure>
+
+<p>进一步获取细节报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -pl flink/flink1.15-shims -e</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">[ERROR] Failed to execute goal net.alchim31.maven:scala-maven-plugin:4.9.2:compile (scala-compile-first) on project flink1.15-shims: scala compilation failed -&gt; [Help 1]</span><br><span class="line">org.apache.maven.lifecycle.LifecycleExecutionException: Failed to execute goal net.alchim31.maven:scala-maven-plugin:4.9.2:compile (scala-compile-first) on project flink1.15-shims: scala compilation failed</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:333)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)</span><br><span class="line">    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)</span><br><span class="line">    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)</span><br><span class="line">    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)</span><br><span class="line">    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)</span><br><span class="line">    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:103)</span><br><span class="line">    at java.lang.reflect.Method.invoke (Method.java:580)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)</span><br><span class="line">    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:103)</span><br><span class="line">    at java.lang.reflect.Method.invoke (Method.java:580)</span><br><span class="line">    at org.apache.maven.wrapper.BootstrapMainStarter.start (BootstrapMainStarter.java:52)</span><br><span class="line">    at org.apache.maven.wrapper.WrapperExecutor.execute (WrapperExecutor.java:161)</span><br><span class="line">    at org.apache.maven.wrapper.MavenWrapperMain.main (MavenWrapperMain.java:73)</span><br><span class="line">Caused by: org.apache.maven.plugin.MojoFailureException: scala compilation failed</span><br><span class="line">    at scala_maven.ScalaCompilerSupport.doExecute (ScalaCompilerSupport.java:89)</span><br><span class="line">    at scala_maven.ScalaMojoSupport.execute (ScalaMojoSupport.java:310)</span><br><span class="line">    at scala_maven.ScalaCompileMojo.execute (ScalaCompileMojo.java:108)</span><br><span class="line">    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)</span><br><span class="line">    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)</span><br><span class="line">    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)</span><br><span class="line">    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)</span><br><span class="line">    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)</span><br><span class="line">    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)</span><br><span class="line">    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)</span><br><span class="line">    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:103)</span><br><span class="line">    at java.lang.reflect.Method.invoke (Method.java:580)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)</span><br><span class="line">    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)</span><br><span class="line">    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:103)</span><br><span class="line">    at java.lang.reflect.Method.invoke (Method.java:580)</span><br><span class="line">    at org.apache.maven.wrapper.BootstrapMainStarter.start (BootstrapMainStarter.java:52)</span><br><span class="line">    at org.apache.maven.wrapper.WrapperExecutor.execute (WrapperExecutor.java:161)</span><br><span class="line">    at org.apache.maven.wrapper.MavenWrapperMain.main (MavenWrapperMain.java:73)</span><br></pre></td></tr></table></figure>
+
+<p>发现错误的根本原因是 Java 版本不兼容 。</p>
+<ul>
+<li><p>1.错误信息 scala.reflect.internal.MissingRequirementError: object java.lang.Object in compiler mirror not found 表明 Scala 编译器无法找到 Java 对象，这通常是由于 Java 版本不兼容导致的。</p>
+</li>
+<li><p>2.通过查看项目的 POM 文件，我发现：</p>
+<p>项目的根 POM 文件中指定了 Java 版本为 11 ( &lt;java.version&gt;11&lt;&#x2F;java.version&gt; )</p>
+<p>Flink 模块使用的 Scala 版本为 2.12.7</p>
+<p>使用的 scala-maven-plugin 版本为 4.9.2</p>
+</li>
+</ul>
+<p>额，是我忘记调 Java SDK了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=$(/usr/libexec/java_home -v 11)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -pl flink/flink1.15-shims -DskipTests</span><br></pre></td></tr></table></figure>
+
+<p>发现编译没问题，继续：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -rf flink/flink1.15-shims</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3）flink&#x2F;flink-scala-2.12 编译报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[ERROR] Failed to execute goal net.alchim31.maven:scala-maven-plugin:4.9.2:compile (scala-compile-first) on project flink-scala-2.12: scala compilation failed -&gt; [Help 1]</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.</span><br><span class="line">[ERROR] Re-run Maven using the -X switch to enable full debug logging.</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] For more information about the errors and possible solutions, please read the following articles:</span><br><span class="line">[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException</span><br><span class="line">[ERROR] </span><br><span class="line">[ERROR] After correcting the problems, you can resume the build with the command</span><br><span class="line">[ERROR]   mvn &lt;args&gt; -rf :flink-scala-2.12</span><br></pre></td></tr></table></figure>
+
+<p>这个报错，我当时也没注意具体排查，就是执行了下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 安装 Flink 父级 POM</span><br><span class="line">cd flink &amp;&amp; ../mvnw install -N</span><br></pre></td></tr></table></figure>
+
+<p>好像就修复好了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -DskipTests -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -rf flink/flink-scala-2.12</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean install -DskipTests</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4）类找不到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">WARN [2025-09-16 22:04:50,334] (&#123;FIFO-RemoteInterpreter-spark-shared_process-shared_session-1&#125; NotebookServer.java[onStatusChange]:1963) - Job paragraph_1758022969766_1777889232 is finished, status: ERROR, exception: null, result: %text org.apache.zeppelin.interpreter.InterpreterException: org.apache.zeppelin.interpreter.InterpreterException: Fail to open SparkInterpreter</span><br><span class="line">	at org.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:77)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:808)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:716)</span><br><span class="line">	at org.apache.zeppelin.scheduler.Job.run(Job.java:187)</span><br><span class="line">	at org.apache.zeppelin.scheduler.AbstractScheduler.runJob(AbstractScheduler.java:136)</span><br><span class="line">	at org.apache.zeppelin.scheduler.FIFOScheduler.lambda$runJobInScheduler$0(FIFOScheduler.java:42)</span><br><span class="line">	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)</span><br><span class="line">	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)</span><br><span class="line">	at java.base/java.lang.Thread.run(Thread.java:834)</span><br><span class="line">Caused by: org.apache.zeppelin.interpreter.InterpreterException: Fail to open SparkInterpreter</span><br><span class="line">	at org.apache.zeppelin.spark.SparkInterpreter.open(SparkInterpreter.java:140)</span><br><span class="line">	at org.apache.zeppelin.interpreter.LazyOpenInterpreter.open(LazyOpenInterpreter.java:71)</span><br><span class="line">	... 8 more</span><br><span class="line">Caused by: java.lang.NullPointerException</span><br><span class="line">	at org.apache.zeppelin.spark.SparkInterpreter.loadSparkScalaInterpreter(SparkInterpreter.java:171)</span><br><span class="line">	at org.apache.zeppelin.spark.SparkInterpreter.open(SparkInterpreter.java:123)</span><br><span class="line">	... 9 more</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mvnw clean package -pl spark/scala-2.12 -DskipTests</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Users/kxr/learning/zeppelin/zeppelin-server/src/main/java/org/apache/zeppelin/rest/CredentialRestApi.java:36:32</span><br><span class="line">找不到符号</span><br><span class="line">符号:   类 Credentials</span><br><span class="line">位置: 程序包 org.apache.zeppelin.user</span><br><span class="line">org.apache.zeppelin.user.Credentials</span><br></pre></td></tr></table></figure>
+
+<p>依赖存在问题，我尝试的解决方法是：找到Credentials属于哪个模块，然后重新编译下那个模块。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd zeppelin-zengine</span><br><span class="line">mvn clean install -DskipTests</span><br></pre></td></tr></table></figure>
+
+<p>确实解决问题。</p>
+<p>以上就是我遇到过的编译问题。这里只是记录下，不一定会遇到——我后面几次编译都是一次正常完成。</p>
+<h2 id="三、IDEA运行与Debug"><a href="#三、IDEA运行与Debug" class="headerlink" title="三、IDEA运行与Debug"></a>三、IDEA运行与Debug</h2><p>问题不仅仅在编译哦😂 咱们继续下面也有坑</p>
+<h3 id="3-1-IDEA运行"><a href="#3-1-IDEA运行" class="headerlink" title="3.1 IDEA运行"></a>3.1 IDEA运行</h3><p>启动类：<code>org.apache.zeppelin.server.ZeppelinServer</code></p>
+<p>环境变量：<code>ZEPPELIN_LOCAL_IP=127.0.0.1</code></p>
+<p>VM参数：<code>-Dzeppelin.server.rpc.port=12345</code>（这个可以不填，这个是我排查问题测试用的）</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/image-20250918163659733.png" alt="image-20250918163659733"></p>
+<p>编辑好启动配置，就可以开始运行，系统启动起来之后访问：<a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080/</a></p>
+<p>web页面上新建一个文件夹和笔记：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">%spark</span><br><span class="line">// 查看 Spark 集群信息</span><br><span class="line">println(sc.master)  // 应输出远程 Spark 主节点地址</span><br><span class="line"></span><br><span class="line">// 执行简单计算，验证是否能正常使用集群资源</span><br><span class="line">val rdd = sc.parallelize(1 to 111)</span><br><span class="line">println(s&quot;RDD 分区数：$&#123;rdd.getNumPartitions&#125;&quot;)</span><br><span class="line">println(s&quot;计算结果：$&#123;rdd.sum()&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>可以设置断点：</p>
+<ul>
+<li>org.apache.zeppelin.scheduler.RemoteScheduler#runJobInScheduler</li>
+<li>org.apache.zeppelin.notebook.Paragraph#jobRun</li>
+</ul>
+<p>然后页面点击运行图标，你就可以debug到了。</p>
+<blockquote>
+<p>备注：这里提醒一下 web页面需要配置下spark解释器的 SPARK_HOME，即需要提前下载一个spark（zeppelin0.12.0 适配spark3.3到spark3.5）。但是如果成功编译，其实zeppelin项目也会自己下载一个spark，存放的路径： spark&#x2F;interpreter&#x2F;target&#x2F;spark-3.4.3-bin-without-hadoop。可以配置这个也行。</p>
+<p>如果有自己之后想要对接的spark集群，可以单独下载对应的spark版本，比如我用的是spark3.5.6</p>
+</blockquote>
+<h3 id="3-2-网络问题"><a href="#3-2-网络问题" class="headerlink" title="3.2 网络问题"></a>3.2 网络问题</h3><h4 id="1）问题现象与解决"><a href="#1）问题现象与解决" class="headerlink" title="1）问题现象与解决"></a>1）问题现象与解决</h4><p>在上面我debug到断点之后，放行。但是页面一直卡在pending状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">INFO [2025-09-17 10:14:13,663] (&#123;FIFO-RemoteInterpreter-spark-shared_process-shared_session-1&#125; ProcessLauncher.java[launch]:96) - Process is launched: [.//bin/interpreter.sh, -d, .//interpreter/spark, -c, 0.0.1.1, -p, 58194, -r, :, -i, spark-shared_process, -l, .//local-repo/spark, -g, spark]</span><br><span class="line"> INFO [2025-09-17 10:14:13,905] (&#123;Exec Stream Pumper&#125; ProcessLauncher.java[processLine]:193) - [INFO] Interpreter launch command: /Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3/bin/spark-submit --class org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer --driver-class-path :.//local-repo/spark/*:.//interpreter/spark/*:/Users/kxr/learning/zeppelin/zeppelin-interpreter-shaded/target/*:/Users/kxr/learning/zeppelin/zeppelin-zengine/target/test-classes/*:::/Users/kxr/learning/zeppelin/interpreter/zeppelin-interpreter-shaded-0.12.0.jar:/Users/kxr/learning/zeppelin/zeppelin-interpreter/target/classes:/Users/kxr/learning/zeppelin/zeppelin-zengine/target/test-classes:/Users/kxr/learning/zeppelin/interpreter/spark/spark-interpreter-0.12.0.jar:/Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3/conf --driver-java-options   -Dfile.encoding=UTF-8 -Dlog4j.configuration=file:///Users/kxr/learning/zeppelin/conf/log4j.properties -Dlog4j.configurationFile=file:///Users/kxr/learning/zeppelin/conf/log4j2.properties -Dzeppelin.log.file=/Users/kxr/learning/zeppelin/logs/zeppelin-interpreter-spark-shared_process-kxr-kxrdeMacBook-Pro.local.log --conf spark.executor.memory=1g --conf spark.master=local[*] --conf spark.driver.memory=1g --conf spark.driver.cores=1 --conf spark.executor.cores=1 --conf spark.app.name=spark-shared_process --conf spark.executor.instances=2 --conf spark.webui.yarn.useProxy=false /Users/kxr/learning/zeppelin/interpreter/spark/spark-interpreter-0.12.0.jar 0.0.1.1 58194 spark-shared_process :</span><br><span class="line"> WARN [2025-09-17 10:14:15,677] (&#123;Exec Default Executor&#125; ExecRemoteInterpreterProcess.java[onProcessComplete]:231) - Process is exited with exit value 0</span><br><span class="line"> INFO [2025-09-17 10:14:15,677] (&#123;Exec Default Executor&#125; ProcessLauncher.java[transition]:109) - Process state is transitioned to COMPLETED</span><br></pre></td></tr></table></figure>
+
+<p>然后等待一段时间之后，本地logs目录下，可以发现这样的报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">WARN [2025-09-17 16:09:13,170] (&#123;main&#125; Logging.scala[logWarning]:72) - Your hostname, kxrdeMacBook-Pro.local resolves to a loopback address: 127.0.0.1; using 192.168.231.196 instead (on interface en0)</span><br><span class="line"> WARN [2025-09-17 16:09:13,170] (&#123;main&#125; Logging.scala[logWarning]:72) - Set SPARK_LOCAL_IP if you need to bind to another address</span><br><span class="line"> INFO [2025-09-17 16:09:13,392] (&#123;RegisterThread&#125; RemoteInterpreterServer.java[run]:583) - Start registration</span><br><span class="line"> INFO [2025-09-17 16:09:13,393] (&#123;RemoteInterpreterServer-Thread&#125; RemoteInterpreterServer.java[run]:193) - Launching ThriftServer at 0.0.1.1:56799</span><br><span class="line"> INFO [2025-09-17 16:09:14,449] (&#123;RegisterThread&#125; RemoteInterpreterServer.java[run]:597) - Registering interpreter process</span><br><span class="line">ERROR [2025-09-17 16:09:14,451] (&#123;RegisterThread&#125; RemoteInterpreterServer.java[run]:601) - Error while registering interpreter: RegisterInfo(host:0.0.1.1, port:56799, interpreterGroupId:spark-shared_process), cause: &#123;&#125;</span><br><span class="line">java.lang.RuntimeException</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.PooledRemoteClient.callRemoteFunction(PooledRemoteClient.java:123)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient.callRemoteFunction(RemoteInterpreterEventClient.java:80)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient.registerInterpreterProcess(RemoteInterpreterEventClient.java:88)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$RegisterRunnable.run(RemoteInterpreterServer.java:598)</span><br><span class="line">	at java.base/java.lang.Thread.run(Thread.java:834)</span><br><span class="line"> INFO [2025-09-17 16:09:14,452] (&#123;RegisterThread&#125; RemoteInterpreterServer.java[shutdown]:233) - Unregister interpreter process</span><br><span class="line">ERROR [2025-09-17 16:09:14,452] (&#123;RegisterThread&#125; RemoteInterpreterServer.java[shutdown]:236) - Fail to unregister remote interpreter process</span><br><span class="line">java.lang.RuntimeException</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.PooledRemoteClient.callRemoteFunction(PooledRemoteClient.java:123)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient.callRemoteFunction(RemoteInterpreterEventClient.java:80)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient.unRegisterInterpreterProcess(RemoteInterpreterEventClient.java:95)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer.shutdown(RemoteInterpreterServer.java:234)</span><br><span class="line">	at org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$RegisterRunnable.run(RemoteInterpreterServer.java:603)</span><br><span class="line">	at java.base/java.lang.Thread.run(Thread.java:834)</span><br></pre></td></tr></table></figure>
+
+<p>这个问题原因是：网络配置问题，使用了 0.0.1.1 这个特殊的 IP 地址</p>
+<p>表现：解释器进程启动但无法注册到 Zeppelin 服务器</p>
+<p>修复：这个问题我问了claude4、claude3.7 。经过几次拷打，它们加了很多的配置，也修复了问题。然后我就想知道是哪个配置真正解决了问题。</p>
+<p>ai加了 VM参数、环境变量、spark-env.sh、zeppelin-env.sh、zeppelin-site.xml配置文件等。但是实质上真正解决问题的是这个参数：<code>ZEPPELIN_LOCAL_IP</code></p>
+<blockquote>
+<p>AI给的环境变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home;</span><br><span class="line">SPARK_HOME=/Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3;</span><br><span class="line">HADOOP_CONF_DIR=$SPARK_HOME/conf;</span><br><span class="line">USE_HADOOP=false;</span><br><span class="line">ZEPPELIN_ADDR=&quot;127.0.0.1&quot;;</span><br><span class="line">ZEPPELIN_PORT=8080;</span><br><span class="line">ZEPPELIN_LOCAL_IP=&quot;127.0.0.1&quot;;</span><br><span class="line">SPARK_LOCAL_IP=&quot;127.0.0.1&quot;;</span><br><span class="line">SPARK_PUBLIC_DNS=&quot;127.0.0.1&quot;;</span><br><span class="line">ZEPPELIN_JAVA_OPTS=&quot;-Dfile.encoding=UTF-8 -XX:+UseG1GC&quot;;</span><br><span class="line">ZEPPELIN_MEM=&quot;-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m&quot;;</span><br><span class="line">PYSPARK_PYTHON=python3;</span><br><span class="line">PYSPARK_DRIVER_PYTHON=python3;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>在IDEA启动配置上 新增环境变量：<code>ZEPPELIN_LOCAL_IP=127.0.0.1</code>，问题就修复好了。</p>
+<h4 id="2）扩展知识"><a href="#2）扩展知识" class="headerlink" title="2）扩展知识"></a>2）扩展知识</h4><p>ZEPPELIN_LOCAL_IP与ZEPPELIN_ADDR的作用与区别：</p>
+<ol>
+<li>zeppelin.server.addr (ZEPPELIN_ADDR):</li>
+</ol>
+<ul>
+<li><p>控制Zeppelin Web服务器绑定的地址</p>
+</li>
+<li><p>决定用户通过哪个IP访问Zeppelin Web UI</p>
+</li>
+<li><p>主要影响的是外部访问Zeppelin服务器的地址</p>
+</li>
+</ul>
+<ol start="2">
+<li>zeppelin.local.ip (ZEPPELIN_LOCAL_IP):</li>
+</ol>
+<ul>
+<li><p>控制Zeppelin服务器和解释器之间通信使用的本地IP地址</p>
+</li>
+<li><p>这个IP地址会被传递给解释器进程，用于解释器进程回连到Zeppelin服务器</p>
+</li>
+<li><p>主要影响的是解释器进程和Zeppelin服务器之间的内部通信</p>
+</li>
+</ul>
+<p>在调试解释器进程时，ZEPPELIN_LOCAL_IP很重要，因为它决定了解释器进程如何连接回Zeppelin服务器。如果设置不正确，解释器进程可能无法连接到Zeppelin服务器，导致代码执行失败。</p>
+<p>实际上，日志中的InterpreterEventServer is starting at 0.0.1.1:52889，这个IP地址就是由zeppelin.local.ip配置的，或者在没有明确配置时由系统自动选择的本地IP地址。</p>
+<h4 id="3）刨根问底"><a href="#3）刨根问底" class="headerlink" title="3）刨根问底"></a>3）刨根问底</h4><p>下一个问题来了？为什么用了 0.0.1.1 这么个特殊ip</p>
+<p>ip由来：</p>
+<p>使用 <code>ifconfig</code> 看到了真的有个网络接口有个ip是 0.0.1.1</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">utun7: flags=8051&lt;UP,POINTOPOINT,RUNNING,MULTICAST&gt; mtu 1500</span><br><span class="line">	inet 0.0.1.1 --&gt; 28.30.0.0 netmask 0xff000000</span><br><span class="line">	inet6 fe80::ac67:e0e4:5044:be4e%utun7 prefixlen 64 scopeid 0x16 </span><br><span class="line">	inet6 fd0a:b001:c002:d003:c9ca:2bf3:c3e6:d3a9 prefixlen 64 </span><br><span class="line">	nd6 options=201&lt;PERFORMNUD,DAD&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kxr@kxrdeMacBook-Pro ~ % lsof -i | grep <span class="string">&quot;0.0.1.1&quot;</span></span><br><span class="line">aTrustAge   721            kxr   74u  IPv4 0x3c4e05689bf20a17      0t0    TCP 0.0.1.1:55224-&gt;198.18.0.2:https (ESTABLISHED)</span><br></pre></td></tr></table></figure>
+
+<p>真的是冤有头债有主——VPN软件导致的。那么怎么就用了这个ip，以及为什么配置 ZEPPELIN_LOCAL_IP 就好了。</p>
+<p>Zeppelin源码：</p>
+<p><code>org.apache.zeppelin.interpreter.remote.RemoteInterpreterUtils#findAvailableHostAddress</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">findAvailableHostAddress</span><span class="params">()</span> <span class="keyword">throws</span> UnknownHostException, SocketException &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">zeppelinServerIP</span> <span class="operator">=</span> System.getenv(<span class="string">&quot;ZEPPELIN_LOCAL_IP&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (zeppelinServerIP != <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> zeppelinServerIP;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">InetAddress</span> <span class="variable">address</span> <span class="operator">=</span> InetAddress.getLocalHost();</span><br><span class="line">    <span class="keyword">if</span> (address.isLoopbackAddress()) &#123;</span><br><span class="line">      <span class="keyword">for</span> (NetworkInterface networkInterface : Collections</span><br><span class="line">          .list(NetworkInterface.getNetworkInterfaces())) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!networkInterface.isLoopback()) &#123;</span><br><span class="line">          <span class="keyword">for</span> (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) &#123;</span><br><span class="line">            <span class="type">InetAddress</span> <span class="variable">a</span> <span class="operator">=</span> interfaceAddress.getAddress();</span><br><span class="line">            <span class="keyword">if</span> (a <span class="keyword">instanceof</span> Inet4Address) &#123;</span><br><span class="line">              <span class="keyword">return</span> a.getHostAddress();</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> address.getHostAddress();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-3-debug-zeppelin-解释器进程"><a href="#3-3-debug-zeppelin-解释器进程" class="headerlink" title="3.3 debug zeppelin 解释器进程"></a>3.3 debug zeppelin 解释器进程</h3><h4 id="1）背景知识"><a href="#1）背景知识" class="headerlink" title="1）背景知识"></a>1）背景知识</h4><p>在 debug 熟悉 zeppelin源码的过程中，我发现一个问题，我debug不到 zeppelin 解释器 真正执行作业的代码。</p>
+<p>这个就是我说要先看看 zeppelin的文档的原因。如果你看过了zeppelin解释器相关内容，就会发现其实zeppelin解释器运行在单独的JVM进程里的。而且你多执行几次页面作业，就发现类似日志：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INFO [2025-09-18 17:19:28,473] (&#123;Exec Stream Pumper&#125; ProcessLauncher.java[processLine]:193) - [INFO] Interpreter launch command: /Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3/bin/spark-submit --class org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer --driver-class-path :.//local-repo/spark/*:.//interpreter/spark/*:/Users/kxr/learning/zeppelin/zeppelin-interpreter-shaded/target/*:/Users/kxr/learning/zeppelin/zeppelin-zengine/target/test-classes/*:::/Users/kxr/learning/zeppelin/interpreter/zeppelin-interpreter-shaded-0.12.0.jar:/Users/kxr/learning/zeppelin/zeppelin-interpreter/target/classes:/Users/kxr/learning/zeppelin/zeppelin-zengine/target/test-classes:/Users/kxr/learning/zeppelin/interpreter/spark/spark-interpreter-0.12.0.jar:/Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3/conf --driver-java-options   -Dfile.encoding=UTF-8 -Dlog4j.configuration=file:///Users/kxr/learning/zeppelin/conf/log4j.properties -Dlog4j.configurationFile=file:///Users/kxr/learning/zeppelin/conf/log4j2.properties -Dzeppelin.log.file=/Users/kxr/learning/zeppelin/logs/zeppelin-interpreter-spark-shared_process-kxr-kxrdeMacBook-Pro.local.log -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 --conf spark.executor.memory=1g --conf spark.master=local[*] --conf spark.driver.memory=1g --conf spark.driver.cores=1 --conf spark.executor.cores=1 --conf spark.app.name=spark-shared_process --conf spark.executor.instances=2 --conf spark.webui.yarn.useProxy=false /Users/kxr/learning/zeppelin/interpreter/spark/spark-interpreter-0.12.0.jar 127.0.0.1 12345 spark-shared_process :</span><br></pre></td></tr></table></figure>
+
+<p>通过这个日志其实可以学到很多东西。</p>
+<ol>
+<li><p><code>/Users/kxr/learning/spark/spark-3.5.6-bin-hadoop3/bin/spark-submit</code>：本地 Spark 的 <code>spark-submit</code> 可执行文件路径。<br><code>--class org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer</code>：指定启动的主类，这是 Zeppelin 远程解释器的服务类，用于 Zeppelin 与 Spark 之间的通信。</p>
+</li>
+<li><p><code>--driver-class-path</code> 后面的一串路径：指定 Spark Driver 需要加载的 Java 类路径，包含 Zeppelin 解释器相关的 JAR 包、Spark 配置文件路径等，确保解释器能正确找到依赖的类。</p>
+</li>
+<li><p><code>--driver-java-options</code> 后的参数：给 Spark Driver 的 JVM 传递的参数：</p>
+<ul>
+<li><code>-Dfile.encoding=UTF-8</code>：设置文件编码为 UTF-8。</li>
+<li><code>-Dlog4j.configuration=...</code>：指定 log4j 日志配置文件路径，控制日志输出格式和级别。</li>
+<li><code>-Dzeppelin.log.file=...</code>：指定 Zeppelin 解释器的日志文件路径（记录解释器运行日志）。</li>
+<li><code>-agentlib:jdwp=...</code>：启用 JVM 调试功能（<code>suspend=y</code> 表示启动时暂停等待调试器连接，<code>address=8000</code> 是调试端口）。</li>
+</ul>
+</li>
+<li><p><strong>Spark 核心配置（–conf 参数）</strong><br>这些是 Spark 作业的资源和运行参数：</p>
+</li>
+</ol>
+<ul>
+<li><code>spark.executor.memory=1g</code>：每个 Executor 分配 1GB 内存。</li>
+<li><code>spark.master=local[*]</code>：Spark 运行模式为本地模式，<code>[*]</code> 表示使用所有可用 CPU 核心。</li>
+<li><code>spark.driver.memory=1g</code>：Driver 进程分配 1GB 内存。</li>
+<li><code>spark.app.name=spark-shared_process</code>：作业名称为 <code>spark-shared_process</code>（Zeppelin 的共享 Spark 进程）。</li>
+<li><code>spark.executor.instances=2</code>：启动 2 个 Executor 实例。</li>
+</ul>
+<ol start="5">
+<li><code>/Users/kxr/learning/zeppelin/interpreter/spark/spark-interpreter-0.12.0.jar</code>：Zeppelin Spark 解释器的 JAR 包路径。<br><code>127.0.0.1 12345 spark-shared_process</code>：解释器服务绑定的本地地址（127.0.0.1）、端口（12345）及进程名称。</li>
+</ol>
+<p>这条日志本质上是 Zeppelin 启动 Spark 解释器的详细命令记录，包含了 Spark 的运行模式、资源配置、类路径、日志设置等信息。通过这些参数，Zeppelin 成功启动了一个本地模式的 Spark 进程，并建立了与 Spark 的通信通道，以便用户在 Zeppelin 中编写和执行 Spark 代码。</p>
+<p>解释器的进程是独立于 zeppelin服务的，所以debug不到。</p>
+<h4 id="2）怎么debug"><a href="#2）怎么debug" class="headerlink" title="2）怎么debug"></a>2）怎么debug</h4><p>如果想要debug到，得用上 远程JVM调试。</p>
+<ol>
+<li><p>修改 <code>bin/interpreter.sh</code> ，这个脚本是用来控制启动 解释器的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">if [[ -n &quot;$&#123;SPARK_SUBMIT&#125;&quot; ]]; then</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a SPARK_SUBMIT_OPTIONS_ARRAY &lt;&lt;&lt; &quot;$&#123;SPARK_SUBMIT_OPTIONS&#125;&quot;</span><br><span class="line">  IFS=&#x27;|&#x27; read -r -a ZEPPELIN_SPARK_CONF_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_SPARK_CONF&#125;&quot;</span><br><span class="line">  if [[ &quot;$&#123;ZEPPELIN_SPARK_YARN_CLUSTER&#125;&quot; == &quot;true&quot;  ]]; then</span><br><span class="line">    INTERPRETER_RUN_COMMAND+=(&quot;$&#123;SPARK_SUBMIT&#125;&quot; &quot;--class&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;--driver-java-options&quot; &quot;$&#123;SPARK_DRIVER_EXTRAJAVAOPTIONS_CONF&#125; $&#123;JAVA_INTP_OPTS&#125;&quot; &quot;$&#123;SPARK_SUBMIT_OPTIONS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_SPARK_CONF_ARRAY[@]&#125;&quot; &quot;$&#123;SPARK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">  else</span><br><span class="line">    INTERPRETER_RUN_COMMAND+=(&quot;$&#123;SPARK_SUBMIT&#125;&quot; &quot;--class&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;--driver-class-path&quot; &quot;$&#123;ZEPPELIN_INTP_CLASSPATH_OVERRIDES&#125;:$&#123;ZEPPELIN_INTP_CLASSPATH&#125;&quot; &quot;--driver-java-options&quot; &quot;$&#123;SPARK_DRIVER_EXTRAJAVAOPTIONS_CONF&#125; $&#123;JAVA_INTP_OPTS&#125;&quot; &quot;$&#123;SPARK_SUBMIT_OPTIONS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_SPARK_CONF_ARRAY[@]&#125;&quot; &quot;$&#123;SPARK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">  fi</span><br><span class="line">elif [[ -n &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE&#125;&quot; ]]; then</span><br><span class="line">  IFS=&#x27;|&#x27; read -r -a ZEPPELIN_FLINK_APPLICATION_MODE_CONF_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE_CONF&#125;&quot;</span><br><span class="line">  INTERPRETER_RUN_COMMAND+=(&quot;$&#123;FLINK_HOME&#125;/bin/flink&quot; &quot;run-application&quot; &quot;-c&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;-t&quot; &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE&#125;&quot; &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE_CONF_ARRAY[@]&#125;&quot; &quot;$&#123;FLINK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">else</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a JAVA_INTP_OPTS_ARRAY &lt;&lt;&lt; &quot;$&#123;JAVA_INTP_OPTS&#125;&quot;</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a ZEPPELIN_INTP_MEM_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_INTP_MEM&#125;&quot;</span><br><span class="line">  INTERPRETER_RUN_COMMAND+=(&quot;$&#123;ZEPPELIN_RUNNER&#125;&quot; &quot;$&#123;JAVA_INTP_OPTS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_INTP_MEM_ARRAY[@]&#125;&quot; &quot;-cp&quot; &quot;$&#123;ZEPPELIN_INTP_CLASSPATH_OVERRIDES&#125;:$&#123;ZEPPELIN_INTP_CLASSPATH&#125;&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p>修改调整，增加：-agentlib:jdwp&#x3D;transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;y,address&#x3D;8000</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">if [[ -n &quot;$&#123;SPARK_SUBMIT&#125;&quot; ]]; then</span><br><span class="line">  # 将空格分隔的 Spark 提交选项拆分为数组</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a SPARK_SUBMIT_OPTIONS_ARRAY &lt;&lt;&lt; &quot;$&#123;SPARK_SUBMIT_OPTIONS&#125;&quot;</span><br><span class="line">  # 将 | 分隔的 Zeppelin Spark 配置拆分为数组</span><br><span class="line">  IFS=&#x27;|&#x27; read -r -a ZEPPELIN_SPARK_CONF_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_SPARK_CONF&#125;&quot;</span><br><span class="line">  </span><br><span class="line">  # 判断是否为 YARN 集群模式</span><br><span class="line">  if [[ &quot;$&#123;ZEPPELIN_SPARK_YARN_CLUSTER&#125;&quot; == &quot;true&quot;  ]]; then</span><br><span class="line">    # YARN 集群模式的启动命令</span><br><span class="line">    INTERPRETER_RUN_COMMAND+=(&quot;$&#123;SPARK_SUBMIT&#125;&quot; &quot;--class&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; </span><br><span class="line">      &quot;--driver-java-options&quot; &quot;$&#123;SPARK_DRIVER_EXTRAJAVAOPTIONS_CONF&#125; $&#123;JAVA_INTP_OPTS&#125;&quot; </span><br><span class="line">      &quot;$&#123;SPARK_SUBMIT_OPTIONS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_SPARK_CONF_ARRAY[@]&#125;&quot; </span><br><span class="line">      &quot;$&#123;SPARK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">  else</span><br><span class="line">    # 非 YARN 模式（如本地模式）的启动命令，额外添加：</span><br><span class="line">    # - driver-class-path：指定驱动类路径</span><br><span class="line">    # - 调试参数：-agentlib:jdwp=...（允许远程调试）</span><br><span class="line">    INTERPRETER_RUN_COMMAND+=(&quot;$&#123;SPARK_SUBMIT&#125;&quot; &quot;--class&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; </span><br><span class="line">      &quot;--driver-class-path&quot; &quot;$&#123;ZEPPELIN_INTP_CLASSPATH_OVERRIDES&#125;:$&#123;ZEPPELIN_INTP_CLASSPATH&#125;&quot; </span><br><span class="line">      &quot;--driver-java-options&quot; &quot;$&#123;SPARK_DRIVER_EXTRAJAVAOPTIONS_CONF&#125; $&#123;JAVA_INTP_OPTS&#125; -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000&quot; </span><br><span class="line">      &quot;$&#123;SPARK_SUBMIT_OPTIONS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_SPARK_CONF_ARRAY[@]&#125;&quot; </span><br><span class="line">      &quot;$&#123;SPARK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">  fi</span><br><span class="line">elif [[ -n &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE&#125;&quot; ]]; then</span><br><span class="line">  # 将 | 分隔的 Flink 配置拆分为数组</span><br><span class="line">  IFS=&#x27;|&#x27; read -r -a ZEPPELIN_FLINK_APPLICATION_MODE_CONF_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE_CONF&#125;&quot;</span><br><span class="line">  # 组装 Flink 应用模式启动命令</span><br><span class="line">  INTERPRETER_RUN_COMMAND+=(&quot;$&#123;FLINK_HOME&#125;/bin/flink&quot; &quot;run-application&quot; </span><br><span class="line">    &quot;-c&quot; &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;-t&quot; &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE&#125;&quot; </span><br><span class="line">    &quot;$&#123;ZEPPELIN_FLINK_APPLICATION_MODE_CONF_ARRAY[@]&#125;&quot; </span><br><span class="line">    &quot;$&#123;FLINK_APP_JAR&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">else</span><br><span class="line">  # 拆分 Java 选项和内存配置为数组</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a JAVA_INTP_OPTS_ARRAY &lt;&lt;&lt; &quot;$&#123;JAVA_INTP_OPTS&#125;&quot;</span><br><span class="line">  IFS=&#x27; &#x27; read -r -a ZEPPELIN_INTP_MEM_ARRAY &lt;&lt;&lt; &quot;$&#123;ZEPPELIN_INTP_MEM&#125;&quot;</span><br><span class="line">  # 组装默认解释器启动命令（直接用 Java 运行）</span><br><span class="line">  INTERPRETER_RUN_COMMAND+=(&quot;$&#123;ZEPPELIN_RUNNER&#125;&quot; </span><br><span class="line">    &quot;$&#123;JAVA_INTP_OPTS_ARRAY[@]&#125;&quot; &quot;$&#123;ZEPPELIN_INTP_MEM_ARRAY[@]&#125;&quot; </span><br><span class="line">    &quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000&quot;  # 调试参数</span><br><span class="line">    &quot;-cp&quot; &quot;$&#123;ZEPPELIN_INTP_CLASSPATH_OVERRIDES&#125;:$&#123;ZEPPELIN_INTP_CLASSPATH&#125;&quot;  # 类路径</span><br><span class="line">    &quot;$&#123;ZEPPELIN_SERVER&#125;&quot; &quot;$&#123;CALLBACK_HOST&#125;&quot; &quot;$&#123;PORT&#125;&quot; &quot;$&#123;INTP_GROUP_ID&#125;&quot; &quot;$&#123;INTP_PORT&#125;&quot;)</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>配置idea 远程JVM调试</p>
+<p>选择8000端口即可，因为在解释器启动脚本那配置的就是8000。然后得在页面执行作业之后，才启动解释器进程哈，所以我们也不用提前debug。我们调试参数中有 <code>suspend=y</code>,<strong>启动 JVM 时会暂停程序执行，直到远程调试器连接成功后才继续运行</strong>，所以不用担心。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/image-20250918173209955.png" alt="image-20250918173209955"></p>
+</li>
+</ol>
+<h2 id="四、打包部署"><a href="#四、打包部署" class="headerlink" title="四、打包部署"></a>四、打包部署</h2><h3 id="4-1-标准部署方式"><a href="#4-1-标准部署方式" class="headerlink" title="4.1 标准部署方式"></a>4.1 标准部署方式</h3><p>为了体现打包的是我们自己编译的源码，可以留个痕迹：</p>
+<p>我在方法<code>org.apache.zeppelin.notebook.Paragraph#jobRun</code> 第一行加了一个日志打印：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LOGGER.info(<span class="string">&quot;KXR just passing through&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>如果打包之后的 zeppelin 在运行作业时，日志出现这条日志，那么证明就成功了。</p>
+<p>1）编译打包</p>
+<p>使用 <code>./mvnw clean package -Pbuild-distr</code> 来进行打包。</p>
+<p>打包完成之后，在项目根目录下会生成一个打包好的分发版本，位于项目的：</p>
+<p><code>zeppelin-distribution/target/zeppelin-0.12.0-bin/zeppelin-0.12.0-bin</code></p>
+<p>2）部署执行</p>
+<p>可以将这个文件夹上传到服务器，然后执行 <code>./bin/zeppelin-daemon.sh start</code></p>
+<p>3）运行笔记，观察日志：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INFO [2025-09-18 21:02:02,360] (&#123;FIFO-RemoteInterpreter-spark-shared_process-shared_session-1&#125; AbstractScheduler.java[runJob]:131) - Job paragraph_1758022969766_1777889232 started by scheduler RemoteInterpreter-spark-shared_process-shared_session</span><br><span class="line">INFO [2025-09-18 21:02:02,360] (&#123;FIFO-RemoteInterpreter-spark-shared_process-shared_session-1&#125; Paragraph.java[jobRun]:396) - KXR just passing through</span><br><span class="line">INFO [2025-09-18 21:02:02,361] (&#123;FIFO-RemoteInterpreter-spark-shared_process-shared_session-1&#125; Paragraph.java[jobRun]:405) - Run paragraph [paragraph_id: paragraph_1758022969766_1777889232, interpreter: org.apache.zeppelin.spark.SparkInterpreter, note_id: 2M5RT8PVM, user: anonymous]</span><br></pre></td></tr></table></figure>
+
+<p>成功啦</p>
+<h3 id="4-2-Docker部署"><a href="#4-2-Docker部署" class="headerlink" title="4.2 Docker部署"></a>4.2 Docker部署</h3><blockquote>
+<p>官方文档：<a target="_blank" rel="noopener" href="https://zeppelin.apache.org/docs/0.12.0/setup/deployment/docker">https://zeppelin.apache.org/docs/0.12.0/setup/deployment/docker</a></p>
+</blockquote>
+<p>Zeppelin提供了多种Docker镜像构建和部署方式，这是因为从0.9版本开始，Zeppelin支持在Kubernetes或Docker中运行，并且采用了服务器和解释器分离的架构设计。</p>
+<p>1）服务器和解释器分离部署方式</p>
+<p>这种方式下有三种镜像：</p>
+<ul>
+<li><p>基础分发镜像（zeppelin-distribution）</p>
+<ul>
+<li><p>作用 ：这是一个中间镜像，主要用于构建和打包Zeppelin的所有组件</p>
+</li>
+<li><p>内容 ：包含完整的Zeppelin源代码、构建工具和构建过程中生成的所有JAR包</p>
+</li>
+<li><p>特点 ：体积较大，包含编译环境和构建工具</p>
+</li>
+<li><p>用途 ：不直接用于部署，而是作为其他镜像的基础</p>
+</li>
+</ul>
+</li>
+<li><p>Zeppelin服务器镜像</p>
+<ul>
+<li>作用 ：这是实际运行Zeppelin服务器的镜像</li>
+<li>内容 ：只包含运行Zeppelin服务器所需的组件，不包含构建工具</li>
+<li>特点 ：体积相对较小，优化用于生产环境</li>
+<li>用途 ：直接用于部署Zeppelin服务器</li>
+</ul>
+</li>
+<li><p>解释器基础镜像</p>
+</li>
+</ul>
+<p>构建流程关系</p>
+<ol>
+<li><p>首先构建基础分发镜像，在这个过程中完成Zeppelin的编译和打包</p>
+</li>
+<li><p>然后基于这个分发镜像，提取出服务器部分创建服务器镜像</p>
+</li>
+<li><p>同样基于分发镜像，提取出解释器部分创建解释器镜像。</p>
+</li>
+</ol>
+<p>这种多阶段构建方式的好处是：</p>
+<ol>
+<li><p>分离构建环境和运行环境，减小最终镜像大小</p>
+</li>
+<li><p>允许服务器和解释器分别部署，实现微服务架构</p>
+</li>
+<li><p>便于单独更新或扩展某个组件</p>
+</li>
+</ol>
+<p>实操镜像构建：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#首先构建基础分发镜像</span><br><span class="line">cd $ZEPPELIN_HOME</span><br><span class="line">docker build -t zeppelin-distribution .</span><br><span class="line"></span><br><span class="line">#然后构建服务器镜像</span><br><span class="line">cd $ZEPPELIN_HOME/scripts/docker/zeppelin-server</span><br><span class="line">docker build -t zeppelin-server:0.12.0 .</span><br><span class="line"></span><br><span class="line">#构建解释器基础镜像</span><br><span class="line">cd $ZEPPELIN_HOME/scripts/docker/zeppelin-interpreter</span><br><span class="line">docker build -t zeppelin-interpreter-base:0.12.0 .</span><br></pre></td></tr></table></figure>
+
+
+
+<p>docker compose 部署</p>
+<p>编写 <code>docker-compose.yml</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">version: &#x27;3&#x27;</span><br><span class="line">services:</span><br><span class="line">  zeppelin-server:</span><br><span class="line">    image: zeppelin-server:0.12.0</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;8080:8080&quot;</span><br><span class="line">    environment:</span><br><span class="line">      - ZEPPELIN_RUN_MODE=docker</span><br><span class="line">      - ZEPPELIN_IN_DOCKER=true</span><br><span class="line">      - ZEPPELIN_DOCKER_CONTAINER_IMAGE=zeppelin-interpreter-base:latest</span><br><span class="line">    volumes:</span><br><span class="line">      - ./logs:/logs</span><br><span class="line">      - ./notebook:/notebook</span><br><span class="line">      - /var/run/docker.sock:/var/run/docker.sock</span><br><span class="line">    networks:</span><br><span class="line">      - zeppelin-net</span><br><span class="line"></span><br><span class="line">networks:</span><br><span class="line">  zeppelin-net:</span><br><span class="line">    driver: bridge</span><br></pre></td></tr></table></figure>
+
+
+
+<p>直接docker部署：</p>
+<p>要让zeppelin-server使用单独的容器运行解释器，需要：</p>
+<ol>
+<li>在启动容器时设置环境变量： ZEPPELIN_RUN_MODE&#x3D;docker</li>
+<li>指定解释器容器镜像： ZEPPELIN_DOCKER_CONTAINER_IMAGE&#x3D;zeppelin-interpreter-base:latest</li>
+<li>确保挂载Docker套接字： -v &#x2F;var&#x2F;run&#x2F;docker.sock:&#x2F;var&#x2F;run&#x2F;docker.sock</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -p 8080:8080 \</span><br><span class="line">  -e ZEPPELIN_RUN_MODE=docker \</span><br><span class="line">  -e ZEPPELIN_IN_DOCKER=true \</span><br><span class="line">  -e ZEPPELIN_DOCKER_CONTAINER_IMAGE=zeppelin-interpreter-base:latest \</span><br><span class="line">  -v /var/run/docker.sock:/var/run/docker.sock \</span><br><span class="line">  zeppelin-server:0.12.0</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>2）服务器和解释器一体化部署</p>
+<p>如果你是快速搭建开发与测试环境，可以接受zeppelin服务端与解释器运行在一个容器内。则有一种更加简单的镜像构建方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd $ZEPPELIN_HOME</span><br><span class="line">cd scripts/docker/zeppelin/bin</span><br><span class="line">docker build -t my-zeppelin:my-tag ./</span><br></pre></td></tr></table></figure>
+
+<p>这种方式适合以下场景：</p>
+<ul>
+<li>快速开始使用Zeppelin进行开发或测试</li>
+<li>不需要服务器和解释器分离部署</li>
+<li>想要一个更轻量级的镜像</li>
+<li>需要对镜像进行简单定制</li>
+</ul>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/')">Zeppelin 源码编译构建与打包部署</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=Zeppelin 源码编译构建与打包部署&amp;url=http://example.com/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Spark/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Spark<span class="tagsPageCount">11</span></a><a class="post-meta__box__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>大数据<span class="tagsPageCount">7</span></a><a class="post-meta__box__tags" href="/tags/Zeppelin/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Zeppelin<span class="tagsPageCount">4</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092159955.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">一站式搭建Spark-Hadoop集群及Zeppelin</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/09/07/Zeppelin%20%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/" title="Zeppelin 使用体验"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092337513.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-09-07</div><div class="title">Zeppelin 使用体验</div></div></a></div><div><a href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804100847374.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-09-11</div><div class="title">Spark、Hadoop集群及Zeppelin的镜像具体构建过程</div></div></a></div><div><a href="/2025/07/08/Spark%E4%B8%93%E6%A0%8F%E6%95%B4%E4%BD%93%E6%96%87%E7%AB%A0%E5%A4%A7%E7%BA%B2/" title="Spark专栏整体文章大纲"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-08</div><div class="title">Spark专栏整体文章大纲</div></div></a></div><div><a href="/2025/01/15/Spark%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B8%8E%E7%BB%84%E4%BB%B6%E8%AF%A6%E8%A7%A3/" title="Spark集群架构与组件详解：从Driver到Executor的深度解析"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-01-15</div><div class="title">Spark集群架构与组件详解：从Driver到Executor的深度解析</div></div></a></div><div><a href="/2025/06/18/hadoop-ecosystem-explained/" title="Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250619194740317.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-18</div><div class="title">Hadoop生态：YARN、HDFS、Hive、Spark、HBase是如何协同工作的？</div></div></a></div><div><a href="/2025/07/15/%E4%BB%8E%20CSV%E6%96%87%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E3%80%81%E5%88%86%E5%8C%BA%E5%92%8C%E5%A4%84%E7%90%86%20%E6%9D%A5%E7%90%86%E8%A7%A3%20RDD/" title="从 CSV文件的加载、分区和处理 来理解 RDD"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-07-15</div><div class="title">从 CSV文件的加载、分区和处理 来理解 RDD</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Zeppelin-%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2"><span class="toc-number">1.</span> <span class="toc-text">Zeppelin 源码编译构建与打包部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">一、背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA"><span class="toc-number">1.2.</span> <span class="toc-text">二、编译构建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 遇到的问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81IDEA%E8%BF%90%E8%A1%8C%E4%B8%8EDebug"><span class="toc-number">1.3.</span> <span class="toc-text">三、IDEA运行与Debug</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-IDEA%E8%BF%90%E8%A1%8C"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 IDEA运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%BD%91%E7%BB%9C%E9%97%AE%E9%A2%98"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 网络问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%EF%BC%89%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1%E4%B8%8E%E8%A7%A3%E5%86%B3"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">1）问题现象与解决</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%EF%BC%89%E6%89%A9%E5%B1%95%E7%9F%A5%E8%AF%86"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">2）扩展知识</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3%EF%BC%89%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">3）刨根问底</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-debug-zeppelin-%E8%A7%A3%E9%87%8A%E5%99%A8%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 debug zeppelin 解释器进程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%EF%BC%89%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">1）背景知识</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%EF%BC%89%E6%80%8E%E4%B9%88debug"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">2）怎么debug</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2"><span class="toc-number">1.4.</span> <span class="toc-text">四、打包部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%A0%87%E5%87%86%E9%83%A8%E7%BD%B2%E6%96%B9%E5%BC%8F"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 标准部署方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Docker%E9%83%A8%E7%BD%B2"><span class="toc-number">1.4.2.</span> <span class="toc-text">4.2 Docker部署</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/" title="Zeppelin 源码编译构建与打包部署"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Zeppelin 源码编译构建与打包部署"/></a><div class="content"><a class="title" href="/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/" title="Zeppelin 源码编译构建与打包部署">Zeppelin 源码编译构建与打包部署</a><time datetime="2025-09-17T02:00:00.000Z" title="发表于 2025-09-17 10:00:00">2025-09-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/" title="一站式搭建Spark-Hadoop集群及Zeppelin"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092159955.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一站式搭建Spark-Hadoop集群及Zeppelin"/></a><div class="content"><a class="title" href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/" title="一站式搭建Spark-Hadoop集群及Zeppelin">一站式搭建Spark-Hadoop集群及Zeppelin</a><time datetime="2025-09-13T09:00:00.000Z" title="发表于 2025-09-13 17:00:00">2025-09-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804100847374.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"/></a><div class="content"><a class="title" href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程">Spark、Hadoop集群及Zeppelin的镜像具体构建过程</a><time datetime="2025-09-11T06:52:01.000Z" title="发表于 2025-09-11 14:52:01">2025-09-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/07/Zeppelin%20%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/" title="Zeppelin 使用体验"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092337513.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Zeppelin 使用体验"/></a><div class="content"><a class="title" href="/2025/09/07/Zeppelin%20%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/" title="Zeppelin 使用体验">Zeppelin 使用体验</a><time datetime="2025-09-07T14:00:00.000Z" title="发表于 2025-09-07 22:00:00">2025-09-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/30/%E5%AD%A6%E4%B9%A0Spark4.0%E6%BA%90%E7%A0%81%E3%80%901%E3%80%91%E2%80%94%E2%80%94%E4%B8%8B%E8%BD%BD%E5%B9%B6%E8%BF%90%E8%A1%8C%20spark,%E5%B9%B6%E8%BF%9B%E8%A1%8Cdebug%20/" title="学习Spark4.0源码【1】——下载并运行spark并进行debug"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250818155818848.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="学习Spark4.0源码【1】——下载并运行spark并进行debug"/></a><div class="content"><a class="title" href="/2025/08/30/%E5%AD%A6%E4%B9%A0Spark4.0%E6%BA%90%E7%A0%81%E3%80%901%E3%80%91%E2%80%94%E2%80%94%E4%B8%8B%E8%BD%BD%E5%B9%B6%E8%BF%90%E8%A1%8C%20spark,%E5%B9%B6%E8%BF%9B%E8%A1%8Cdebug%20/" title="学习Spark4.0源码【1】——下载并运行spark并进行debug">学习Spark4.0源码【1】——下载并运行spark并进行debug</a><time datetime="2025-08-30T06:00:00.000Z" title="发表于 2025-08-30 14:00:00">2025-08-30</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">87</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">7</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>2</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>4</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>5</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Shuffle%E6%9C%BA%E5%88%B6/" style="font-size: 0.88rem;">Shuffle机制<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>11</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>7</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>5</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>3</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
