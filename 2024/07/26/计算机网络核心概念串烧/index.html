@@ -1,0 +1,710 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>计算机网络核心概念串烧 | 凌霄的博客</title><meta name="keywords" content="DNS,NAT,DHCP,ARP,计算机网络"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="计算机网络核心概念串烧"><meta name="application-name" content="计算机网络核心概念串烧"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="计算机网络核心概念串烧"><meta property="og:url" content="http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="本文以“设备访问某个域名”的完整过程为例，串联DHCP、DNS、IP、MAC、ARP、路由器转发等核心概念，帮助读者深入理解计算机网络。"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="本文以“设备访问某个域名”的完整过程为例，串联DHCP、DNS、IP、MAC、ARP、路由器转发等核心概念，帮助读者深入理解计算机网络。"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '计算机网络核心概念串烧',
+  postAI: '',
+  pageFillDescription: '计算机网络核心概念串烧, 1.主要示例, 前置：电脑通过 DHCP 获取局域网身份（上网基础）, 步骤 1：电脑发起 DNS 请求（域名→IP 的 翻译）, 步骤 2：通过 ARP 获取网关 MAC（局域网内 找下一跳）, 步骤 3：局域网转发 DNS 请求到家庭路由器（网关）, 步骤 4：家庭路由器通过 NAT 转换将请求发往公网接入路由器, 步骤 5：公网接入层路由器转发 DNS 请求到汇聚层路由器, 步骤 6：公网汇聚层路由器转发 DNS 请求到核心层路由器, 步骤 7：公网核心层路由器转发 DNS 请求到 DNS 服务器所在网络, 步骤 8：DNS 服务器返回解析结果（域名→IP）, 步骤 9：电脑发起 HTTPS 请求（访问百度服务器）, 步骤 10：公网路由器逐跳转发 HTTPS 请求到百度服务器, 步骤 11：百度服务器处理请求并返回响应, 步骤 12：电脑接收响应浏览器渲染页面, 2. 疑问与解答, 2.1 若家庭路由器有公网IP为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）, 2.1.1 核心前提：家庭路由器的双接口与双局域网属性, 2.1.2 关键问题：为何有公网IP仍需依赖运营商接入局域网？, 1. 接入认证：确保仅合法付费用户可使用公网, 2. 流量汇聚：降低公网骨干网连接成本, 3. 安全管控：拦截恶意流量保护公网与家庭网络, 4. 网络优化：提升访问速度与稳定性, 2.1.3 延伸疑问：拥有公网IP的实际意义是什么？, 场景设定, 公网访问NAS的完整流程（6步）, 步骤1：朋友侧局域网内发起请求（终端→家庭路由器）, 步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）, 步骤3：跨区域公网骨干网转发（上海→北京）, 步骤4：你侧运营商转发（北京骨干网→你家路由器）, 步骤5：你侧局域网内转发（你家路由器→NAS）, 步骤6：NAS响应并按原路径返回, 3.核心概念串联总结计算机网络核心概念串烧在学习软考的时候发现对于计算机网络有些概念都有点遗忘了所以这里特意将一些核心概念通过一个示例串联起来方便理解和记忆我以设备访问某个域名如的全过程为例子沿着终端身份配置解析域名转局域网内转发跨网到公网公网路由传输目标服务器响应的完整链路拆解同时串联路由器转发等核心概念主要示例下面以家用电脑通过访问为例前置电脑通过获取局域网身份上网基础电脑刚连接家庭时无地址需通过动态主机配置协议从路由器获取局域网通信资格电脑向局域网广播发现报文目标目标询问谁能分配家庭路由器默认开启服务收到请求后单播回复提供报文包含核心配置局域网电脑的局域网身份证子网掩码判断目标是否在同一局域网网关家庭路由器口局域网通往公网的大门服务器运营商提供的用于解析域名电脑确认配置后路由器发送确认报文电脑网络配置生效此时具备发起网络请求的基础步骤电脑发起请求域名的翻译在浏览器输入后电脑需先通过协议将域名转为公网电脑判断服务器位置服务器与自身局域网不在同一网段子网掩码前者属于段后者属于段因此需通过网关转发请求到公网封装请求包电脑构造协议的查询包端口内容为查询的记录地址包的两层地址结构如下层源电脑目标服务器以太网帧层源电脑网卡目标需通过获取网关步骤通过获取网关局域网内找下一跳局域网内数据传输依赖地址以太网帧必须指定目标才能转发电脑需通过协议获取网关的电脑查询本地缓存表发现无对应的于是向局域网广播请求帧目标内容为谁是请回复你的地址家庭路由器网关收到广播后识别到请求是自身口于是单播回复响应帧内容为我是我的是路由器口电脑将存入缓存表有效期分钟后续给网关发数据无需重复请求步骤局域网转发请求到家庭路由器网关电脑补全以太网帧的目标后将请求包通过发送给家庭路由器电脑无线网卡发送帧源电脑目标网关口帧内封装查询的数据包家庭路由器接收并解包路由器口收到帧后检查目标是自身口于是解包取出数据包目标网关判断转发方向路由器查看数据包的目标确认不在局域网段因此需通过口转发到公网并触发转换步骤家庭路由器通过转换将请求发往公网接入路由器家用网络通常只有个公网由运营商分配如需通过网络地址转换将局域网转为公网才能在公网传输地址转换路由器修改数据包的源从局域网公网不可见改为路由器口公网同时在映射表中记录电脑随机端口路由器口端口用于后续接收应答时找到对应的电脑获取公网下一跳路由器口需将数据包发给运营商的公网接入路由器如小区宽带的接入路由器因此通过口的请求仅在路由器口与运营商接入路由器构成的小局域网内广播获取其如发送到公网路由器口封装以太网帧源路由器口目标运营商接入路由器将请求包通过光纤网线发送到公网接入层路由器运营商小区接入路由器步骤公网接入层路由器转发请求到汇聚层路由器公网第一层转发接入层路由器覆盖小区企业功能是汇总用户终端流量转发到汇聚层接入层路由器收到请求包后解包查看目标服务器查询自身路由表路由表中记录网段服务器所在网段的下一跳是市汇聚层路由器转发到汇聚层接入层路由器通过广域网链路如城域网光纤将数据包发给市汇聚层路由器注意公网路由器间通信用广域网技术如无地址直接通过下一跳转发无需步骤公网汇聚层路由器转发请求到核心层路由器公网第二层转发汇聚层路由器覆盖城市某区域区县功能是汇总接入层流量转发到核心层市汇聚层路由器收到数据包后查看目标查询路由表记录网段的下一跳是省核心层路由器转发到核心层通过省级骨干光纤链路将数据包发给省核心层路由器核心层路由器是跨区域转发的关键承担大量数据流量步骤公网核心层路由器转发请求到服务器所在网络公网第三层转发核心层路由器覆盖全省跨市功能是跨区域骨干流量转发省核心层路由器收到数据包后查看目标运营商服务器位于本省核心机房查询路由表记录网段的下一跳是服务器的接入路由器转发到接入路由器通过机房内部链路将数据包发给服务器的接入路由器步骤服务器返回解析结果域名服务器处理请求并返回结果按原路径反向转发服务器接收请求端口收到查询包解析出查询的在本地缓存中找到对应的记录封装应答包层源目标家庭路由器公网反向转发到家庭路由器应答包按接入路由器省核心层路由器市汇聚层路由器接入层路由器的路径反向传输最终到达家庭路由器口反向映射家庭路由器查询映射表发现目标对应的局域网是于是将层目标改为转发到电脑路由器口通过缓存获取电脑发送应答包电脑最终拿到的是步骤电脑发起请求访问百度服务器电脑拿到目标后通过协议端口向百度服务器发送访问请求流程与请求类似但目标是公网服务器封装请求包层源目标以太网帧目标网关口缓存已存在家庭路由器转换将源改为记录映射通过口发送到公网接入层路由器步骤公网路由器逐跳转发请求到百度服务器请求在公网中通过接入层汇聚层核心层百度接入层的路径转发接入层路由器汇聚层路由器核心层路由器与请求转发逻辑一致通过路由表找到下一跳逐跳转发省核心层路由器百度接入路由器核心层路由器查询路由表发现网段百度服务器所在网段的下一跳是百度的接入路由器百度接入路由器转发百度互联网数据中心的接入路由器收到请求后根据负载均衡策略将请求转发到具体的百度服务器节点如步骤百度服务器处理请求并返回响应百度服务器收到请求后处理并返回首页数据接收请求百度服务器的端口收到请求包解析出客户端要访问首页处理请求服务器调用后端服务生成首页的图片等资源封装成响应包层源目标返回响应响应包按百度接入路由器省核心层路由器市汇聚层路由器接入层路由器家庭路由器的路径反向转发步骤电脑接收响应浏览器渲染页面家庭路由器转发响应路由器口收到响应包后通过映射表找到对应的电脑修改层目标通过口发送到电脑电脑解包处理电脑网卡接收帧解包取出响应数据交给浏览器浏览器渲染浏览器解析加载图片等资源最终在屏幕上显示百度首页整个访问流程完成疑问与解答若家庭路由器有公网为何仍需通过获取小区接入路由器仅用于局域网内的矛盾点解析要解答此问题需先明确两个核心概念家庭路由器的双重角色与局域网边界的实际定义家庭路由器既是家庭局域网的网关也是运营商小局域网的终端而请求的局域网内特指家庭路由器口与小区接入路由器共同所在的运营商小局域网并非用户通常理解的家庭局域网核心前提家庭路由器的双接口与双局域网属性家用路由器并非单一功能设备而是连接两个独立局域网的桥梁其两个关键接口对应不同网络属性具体差异如下表所示接口类型连接的网络网络属性地址来源作用口有线家庭局域网私网如路由器自身分配服务器连接家中电脑手机电视等终端作为家庭局域网的网关口网线光纤运营商小局域网私网或公网取决于运营商运营商通过分配连接小区接入路由器作为运营商小局域网的终端设备类似家庭电脑在家庭局域网中的角色简言之家庭路由器的双重身份表现为对家庭终端电脑手机等是家庭局域网的网关对小区接入路由器是运营商小局域网内的普通终端关键问题为何有公网仍需依赖运营商接入局域网即使家庭路由器获取了公网也无法跳过运营商接入局域网直接连接公网核心原因是运营商接入局域网解决了个家庭路由器自身无法实现的核心需求接入认证确保仅合法付费用户可使用公网运营商需通过认证验证用户合法性该过程必须在运营商接入局域网内完成具体流程如下家庭路由器启动时向小区接入路由器发送拨号请求或认证请求携带用户宽带账号与密码小区接入路由器将认证信息转发至运营商认证服务器服务器验证通过后为家庭路由器分配公网或确认已分配公网有效若无此认证任何人可随意连接公网运营商无法实现收费与管理流量汇聚降低公网骨干网连接成本公网骨干网端口资源昂贵如端口成本达几十万元若每个家庭路由器直接对接骨干网会导致两大问题资源浪费家庭宽带通常为直接连接骨干端口相当于大水管接小水龙头带宽被闲置管理混乱全国数亿家庭若均直接连骨干网需数亿个骨干端口公网无法承载运营商接入局域网通过分层汇聚解决该问题小区接入路由器汇聚本小区所有家庭流量如户通过端口连接市汇聚层路由器市汇聚层路由器汇聚多个小区流量如个小区通过端口连接省核心骨干网安全管控拦截恶意流量保护公网与家庭网络公网存在大量恶意流量如攻击病毒包若家庭路由器直接连公网会面临双重风险家庭网络被攻击恶意流量直接冲击家庭路由器可能突破防火墙入侵内网家庭网络成为攻击源若家庭设备被黑客控制如沦为肉鸡会向外发送攻击流量影响公网稳定运营商接入局域网的安全防护作用体现在家庭路由器与公网骨干网之间的防火墙小区接入路由器与运营商边界防火墙过滤流量拦截已知恶意数据包限制单家庭最大连接数检测异常流量如突发包若发现家庭路由器发送恶意流量运营商可通过接入局域网临时封禁该公网避免影响其他用户网络优化提升访问速度与稳定性家庭路由器能力有限无法实时感知公网链路状态运营商接入局域网通过两大方式优化网络缓存加速小区接入路由器缓存热门域名如百度微信的解析结果家庭路由器查询时无需绕到省核心服务器速度更快就近资源分配访问视频网站时接入路由器将流量转发至就近的视频节点而非直接连接网站总部服务器降低延迟提升画质延伸疑问拥有公网的实际意义是什么公网的核心意义在于设备是否可被公网主动定位并访问以下通过具体场景说明其作用以北京用户公网访问为例场景设定朋友上海家庭局域网段电脑路由器口公网你北京家庭公网内网已配置端口映射公网访问的完整流程步步骤朋友侧局域网内发起请求终端家庭路由器判断转发方向朋友电脑检查目标发现不在自身局域网需通过网关朋友家路由器转发至公网获取网关朋友电脑查询本地缓存找到朋友家路由器口如封装以太网帧源朋友电脑目标路由器口帧内包含数据包源目标端口发送至路由器通过网线将帧发送到朋友家路由器路由器口解包后提取数据包步骤朋友侧运营商转发家庭路由器上海骨干网地址转换朋友家路由器将数据包的源从改为自身口公网同时在映射表记录随机端口随机端口用于接收后续响应转发至上海小区接入层路由器朋友家路由器通过口向上海小区接入层路由器发送请求包先通过获取接入层路由器二者同属上海运营商接入局域网封装帧后发送接入层汇聚层转发上海小区接入层路由器汇总小区流量查询路由表发现目标属北京运营商网段转发至上海市区汇聚层路由器汇聚层核心层转发上海汇聚层路由器汇总多个小区流量转发至上海核心层路由器完成朋友侧到公网骨干网的接入步骤跨区域公网骨干网转发上海北京上海核心层国家级骨干路由器上海核心层路由器将请求包转发至国家级骨干网路由器如天津节点骨干网路由器仅记录段聚合路由不记录单个骨干网北京核心层路由器国家级骨干路由器查询路由表发现段归属北京运营商通过跨区域光纤链路转发至北京核心层路由器步骤你侧运营商转发北京骨干网你家路由器北京核心层汇聚层转发北京核心层路由器将请求包转发至你所在区域的北京汇聚层路由器核心层负责跨区域流量本地流量由汇聚层分发汇聚层小区接入层转发北京汇聚层路由器查询路由表发现段对应你家小区接入层路由器转发至你家小区接入层路由器小区接入层你家路由器你家小区接入层路由器查询缓存维护的关联表发现对应你家路由器口如将请求包转发至你家路由器口步骤你侧局域网内转发你家路由器映射匹配你家路由器接收请求包后提取目标端口查询映射表匹配到提前配置的转发至修改数据包的目标为内网通过获取的如封装以太网帧后通过口发送到步骤响应并按原路径返回生成响应包处理请求后返回首页数据封装响应包源目标端口你侧局域网北京运营商响应包经你家路由器转换源改为小区接入层北京汇聚层北京核心层进入公网骨干网骨干网上海运营商响应包经国家级骨干网上海核心层上海汇聚层上海小区接入层到达朋友家路由器朋友侧运营商局域网朋友家路由器通过映射表找到随机端口对应随机端口修改目标后转发到朋友电脑朋友电脑渲染页面朋友电脑接收响应包浏览器解析数据并显示首页整个访问流程完成核心概念串联总结给电脑分配局域网身份网关是上网的基础将域名转为公网解决公网定位目标的问题仅在局域网内生效获取网关设备的地址解决局域网内转发目标的问题将局域网转为公网解决家用网络公网不足的问题公网路由器层级通过接入层汇聚层核心层逐跳转发依赖路由表确定下一跳不使用核心是路由与的分工负责跨网定位目标公网局域网仅负责局域网内定位设备二者配合实现全程通信',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-09-23 20:18:51',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>3</sup></a><a href="/tags/HBase/" style="font-size: 1.05rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>4</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>5</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 1.05rem;">NAT<sup>2</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 1.05rem;">SGX<sup>2</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>11</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 1.05rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 1.05rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 1.05rem;">大数据<sup>7</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>5</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 1.05rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 1.05rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>4</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 1.05rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">九月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">八月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url">计算机网络</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/DNS/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>DNS</span></a><a class="article-meta__tags" href="/tags/NAT/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>NAT</span></a><a class="article-meta__tags" href="/tags/DHCP/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>DHCP</span></a><a class="article-meta__tags" href="/tags/ARP/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>ARP</span></a><a class="article-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>计算机网络</span></a></span></div></div><h1 class="post-title" itemprop="name headline">计算机网络核心概念串烧</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-07-26T02:00:00.000Z" title="发表于 2024-07-26 10:00:00">2024-07-26</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-09-23T12:18:51.439Z" title="更新于 2025-09-23 20:18:51">2025-09-23</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="计算机网络核心概念串烧"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/"><header><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url">计算机网络</a><a href="/tags/DNS/" tabindex="-1" itemprop="url">DNS</a><a href="/tags/NAT/" tabindex="-1" itemprop="url">NAT</a><a href="/tags/DHCP/" tabindex="-1" itemprop="url">DHCP</a><a href="/tags/ARP/" tabindex="-1" itemprop="url">ARP</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" tabindex="-1" itemprop="url">计算机网络</a><h1 id="CrawlerTitle" itemprop="name headline">计算机网络核心概念串烧</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2024-07-26T02:00:00.000Z" title="发表于 2024-07-26 10:00:00">2024-07-26</time><time itemprop="dateCreated datePublished" datetime="2025-09-23T12:18:51.439Z" title="更新于 2025-09-23 20:18:51">2025-09-23</time></header><h1 id="计算机网络核心概念串烧"><a href="#计算机网络核心概念串烧" class="headerlink" title="计算机网络核心概念串烧"></a>计算机网络核心概念串烧</h1><p>在学习软考的时候，发现对于计算机网络有些概念都有点遗忘了。所以这里特意将一些核心概念通过一个示例串联起来，方便理解和记忆。</p>
+<p>我以“设备访问某个域名（如<code>www.baidu.com</code>）” 的全过程为例子，沿着 “<strong>终端身份配置→DNS 解析（域名转 IP）→局域网内转发→跨网到公网→公网路由传输→目标服务器响应</strong>” 的完整链路拆解，同时串联 DHCP、DNS、IP、MAC、ARP、路由器转发等核心概念。</p>
+<h2 id="1-主要示例"><a href="#1-主要示例" class="headerlink" title="1.主要示例"></a>1.主要示例</h2><p>下面以 “家用电脑通过 Wi-Fi 访问<code>www.baidu.com</code>” 为例</p>
+<h3 id="前置：电脑通过-DHCP-获取局域网身份（上网基础）"><a href="#前置：电脑通过-DHCP-获取局域网身份（上网基础）" class="headerlink" title="前置：电脑通过 DHCP 获取局域网身份（上网基础）"></a>前置：电脑通过 DHCP 获取局域网身份（上网基础）</h3><p>电脑刚连接家庭 Wi-Fi 时，无 IP 地址，需通过<strong>DHCP（动态主机配置协议）</strong> 从路由器获取 “局域网通信资格”：</p>
+<ol>
+<li>电脑向局域网广播 “DHCP 发现报文”（目标 MAC：FF:FF:FF:FF:FF:FF，目标 IP：255.255.255.255），询问 “谁能分配 IP？”；</li>
+<li>家庭路由器（默认开启 DHCP 服务）收到请求后，单播回复 “DHCP 提供报文”，包含核心配置：<ul>
+<li>局域网 IP：192.168.1.100（电脑的 “局域网身份证”）；</li>
+<li>子网掩码：255.255.255.0（判断目标 IP 是否在同一局域网）；</li>
+<li>网关 IP：192.168.1.1（家庭路由器 LAN 口 IP，局域网通往公网的 “大门”）；</li>
+<li>DNS 服务器 IP：202.97.224.68（运营商提供的 DNS，用于解析域名）；</li>
+</ul>
+</li>
+<li>电脑确认配置后，路由器发送 “DHCP 确认报文”，电脑网络配置生效 —— 此时具备 “发起网络请求的基础”。</li>
+</ol>
+<h3 id="步骤-1：电脑发起-DNS-请求（域名→IP-的-“翻译”）"><a href="#步骤-1：电脑发起-DNS-请求（域名→IP-的-“翻译”）" class="headerlink" title="步骤 1：电脑发起 DNS 请求（域名→IP 的 “翻译”）"></a>步骤 1：电脑发起 DNS 请求（域名→IP 的 “翻译”）</h3><p>在浏览器输入<a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a>后，电脑需先通过<strong>DNS 协议</strong>将域名转为公网 IP：</p>
+<ol>
+<li><p>电脑判断 DNS 服务器位置：DNS 服务器 IP（202.97.224.68）与自身局域网 IP（192.168.1.100）不在同一网段（子网掩码 255.255.255.0，前者属于 202.97.224.0 段，后者属于 192.168.1.0 段），因此需通过<strong>网关（192.168.1.1）</strong> 转发 DNS 请求到公网；</p>
+</li>
+<li><p>封装 DNS 请求包：电脑构造 UDP 协议的 DNS 查询包（端口 53），内容为 “查询</p>
+<p><a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a></p>
+<p>的 A 记录（IP 地址）”，包的两层地址结构如下：</p>
+<ul>
+<li><strong>IP 层</strong>：源 IP&#x3D;192.168.1.100（电脑），目标 IP&#x3D;202.97.224.68（DNS 服务器）；</li>
+<li><strong>以太网帧层</strong>：源 MAC&#x3D;00:1A:2B:3C:4D:5E（电脑网卡 MAC），目标 MAC&#x3D;？（需通过 ARP 获取网关 MAC）。</li>
+</ul>
+</li>
+</ol>
+<h3 id="步骤-2：通过-ARP-获取网关-MAC（局域网内-“找下一跳”）"><a href="#步骤-2：通过-ARP-获取网关-MAC（局域网内-“找下一跳”）" class="headerlink" title="步骤 2：通过 ARP 获取网关 MAC（局域网内 “找下一跳”）"></a>步骤 2：通过 ARP 获取网关 MAC（局域网内 “找下一跳”）</h3><p>局域网内数据传输依赖<strong>MAC 地址</strong>（以太网帧必须指定目标 MAC 才能转发），电脑需通过<strong>ARP 协议</strong>获取网关（192.168.1.1）的 MAC：</p>
+<ol>
+<li>电脑查询本地 “ARP 缓存表”，发现无 192.168.1.1 对应的 MAC，于是向局域网广播 “ARP 请求帧”（目标 MAC：FF:FF:FF:FF:FF:FF），内容为 “谁是 192.168.1.1？请回复你的 MAC 地址！”；</li>
+<li>家庭路由器（网关）收到广播后，识别到请求 IP 是自身 LAN 口 IP，于是单播回复 “ARP 响应帧”，内容为 “我是 192.168.1.1，我的 MAC 是 00:AA:BB:CC:DD:EE（路由器 LAN 口 MAC）”；</li>
+<li>电脑将 “192.168.1.1→00:AA:BB:CC:DD:EE” 存入 ARP 缓存表（有效期 15 分钟），后续给网关发数据无需重复请求。</li>
+</ol>
+<h3 id="步骤-3：局域网转发-DNS-请求到家庭路由器（网关）"><a href="#步骤-3：局域网转发-DNS-请求到家庭路由器（网关）" class="headerlink" title="步骤 3：局域网转发 DNS 请求到家庭路由器（网关）"></a>步骤 3：局域网转发 DNS 请求到家庭路由器（网关）</h3><p>电脑补全以太网帧的目标 MAC 后，将 DNS 请求包通过 Wi-Fi 发送给家庭路由器：</p>
+<ol>
+<li>电脑无线网卡发送帧：源 MAC &#x3D; 电脑 MAC，目标 MAC &#x3D; 网关 LAN 口 MAC，帧内封装 DNS 查询的 IP 数据包；</li>
+<li>家庭路由器接收并解包：路由器 LAN 口收到帧后，检查目标 MAC 是自身 LAN 口 MAC，于是解包取出 IP 数据包（目标 IP&#x3D;202.97.224.68）；</li>
+<li>网关判断转发方向：路由器查看 IP 数据包的目标 IP，确认不在局域网（192.168.1.0 段），因此需通过<strong>WAN 口转发到公网</strong>，并触发 NAT 转换。</li>
+</ol>
+<h3 id="步骤-4：家庭路由器通过-NAT-转换，将请求发往公网接入路由器"><a href="#步骤-4：家庭路由器通过-NAT-转换，将请求发往公网接入路由器" class="headerlink" title="步骤 4：家庭路由器通过 NAT 转换，将请求发往公网接入路由器"></a>步骤 4：家庭路由器通过 NAT 转换，将请求发往公网接入路由器</h3><p>家用网络通常只有 1 个<strong>公网 IP</strong>（由运营商分配，如 120.204.197.5），需通过<strong>NAT（网络地址转换）</strong> 将 “局域网 IP” 转为 “公网 IP”，才能在公网传输：</p>
+<ol>
+<li>NAT 地址转换：路由器修改 IP 数据包的 “源 IP”—— 从 192.168.1.100（局域网 IP，公网不可见）改为 120.204.197.5（路由器 WAN 口公网 IP）；同时在 “NAT 映射表” 中记录：“192.168.1.100:54321（电脑随机端口）→120.204.197.5:67890（路由器 WAN 口端口）”，用于后续接收 DNS 应答时 “找到对应的电脑”；</li>
+<li>获取公网下一跳 MAC：路由器 WAN 口需将数据包发给 “运营商的公网接入路由器”（如小区宽带的接入路由器，IP：10.100.0.1），因此通过 WAN 口的 ARP 请求（仅在 “路由器 WAN 口与运营商接入路由器构成的小局域网” 内广播）获取其 MAC（如 00:CC:DD:EE:FF:AA）；</li>
+<li>发送到公网：路由器 WAN 口封装以太网帧（源 MAC &#x3D; 路由器 WAN 口 MAC，目标 MAC &#x3D; 运营商接入路由器 MAC），将 DNS 请求包通过光纤 &#x2F; 网线发送到<strong>公网接入层路由器</strong>（运营商小区接入路由器）。</li>
+</ol>
+<h3 id="步骤-5：公网接入层路由器转发-DNS-请求到汇聚层路由器"><a href="#步骤-5：公网接入层路由器转发-DNS-请求到汇聚层路由器" class="headerlink" title="步骤 5：公网接入层路由器转发 DNS 请求到汇聚层路由器"></a>步骤 5：公网接入层路由器转发 DNS 请求到汇聚层路由器</h3><p>公网第一层转发：<strong>接入层路由器</strong>（覆盖小区 &#x2F; 企业，功能是 “汇总用户终端流量，转发到汇聚层”）：</p>
+<ol>
+<li>接入层路由器（IP：10.100.0.1）收到 DNS 请求包后，解包查看目标 IP&#x3D;202.97.224.68（DNS 服务器）；</li>
+<li>查询自身 “路由表”：路由表中记录 “202.97.224.0&#x2F;24 网段（DNS 服务器所在网段）的下一跳是市汇聚层路由器，IP：10.200.0.1”；</li>
+<li>转发到汇聚层：接入层路由器通过广域网链路（如城域网光纤）将数据包发给<strong>市汇聚层路由器</strong>（IP：10.200.0.1）—— 注意：公网路由器间通信用 “广域网技术（如 MPLS）”，无 MAC 地址，直接通过 “下一跳 IP” 转发，无需 ARP。</li>
+</ol>
+<h3 id="步骤-6：公网汇聚层路由器转发-DNS-请求到核心层路由器"><a href="#步骤-6：公网汇聚层路由器转发-DNS-请求到核心层路由器" class="headerlink" title="步骤 6：公网汇聚层路由器转发 DNS 请求到核心层路由器"></a>步骤 6：公网汇聚层路由器转发 DNS 请求到核心层路由器</h3><p>公网第二层转发：<strong>汇聚层路由器</strong>（覆盖城市某区域 &#x2F; 区县，功能是 “汇总接入层流量，转发到核心层”）：</p>
+<ol>
+<li>市汇聚层路由器（IP：10.200.0.1）收到数据包后，查看目标 IP&#x3D;202.97.224.68；</li>
+<li>查询路由表：记录 “202.97.224.0&#x2F;24 网段的下一跳是省核心层路由器，IP：10.300.0.1”；</li>
+<li>转发到核心层：通过省级骨干光纤链路，将数据包发给<strong>省核心层路由器</strong>（IP：10.300.0.1）—— 核心层路由器是 “跨区域转发的关键”，承担大量数据流量。</li>
+</ol>
+<h3 id="步骤-7：公网核心层路由器转发-DNS-请求到-DNS-服务器所在网络"><a href="#步骤-7：公网核心层路由器转发-DNS-请求到-DNS-服务器所在网络" class="headerlink" title="步骤 7：公网核心层路由器转发 DNS 请求到 DNS 服务器所在网络"></a>步骤 7：公网核心层路由器转发 DNS 请求到 DNS 服务器所在网络</h3><p>公网第三层转发：<strong>核心层路由器</strong>（覆盖全省 &#x2F; 跨市，功能是 “跨区域骨干流量转发”）：</p>
+<ol>
+<li>省核心层路由器（IP：10.300.0.1）收到数据包后，查看目标 IP&#x3D;202.97.224.68（运营商 DNS 服务器，位于本省核心机房）；</li>
+<li>查询路由表：记录 “202.97.224.0&#x2F;24 网段的下一跳是 DNS 服务器的接入路由器，IP：202.97.224.1”；</li>
+<li>转发到 DNS 接入路由器：通过机房内部链路，将数据包发给<strong>DNS 服务器的接入路由器</strong>（IP：202.97.224.1）。</li>
+</ol>
+<h3 id="步骤-8：DNS-服务器返回解析结果（域名→IP）"><a href="#步骤-8：DNS-服务器返回解析结果（域名→IP）" class="headerlink" title="步骤 8：DNS 服务器返回解析结果（域名→IP）"></a>步骤 8：DNS 服务器返回解析结果（域名→IP）</h3><p>DNS 服务器（IP：202.97.224.68）处理请求并返回结果，按原路径反向转发：</p>
+<ol>
+<li>DNS 服务器接收请求：UDP 53 端口收到查询包，解析出 “查询<a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a>的 IP”，在本地缓存中找到对应的 A 记录（<a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a>→180.101.49.12）；</li>
+<li>封装 DNS 应答包：IP 层源 IP&#x3D;202.97.224.68，目标 IP&#x3D;120.204.197.5（家庭路由器公网 IP）；</li>
+<li>反向转发到家庭路由器：应答包按 “DNS 接入路由器→省核心层路由器→市汇聚层路由器→接入层路由器” 的路径反向传输，最终到达家庭路由器 WAN 口；</li>
+<li>NAT 反向映射：家庭路由器查询 “NAT 映射表”，发现目标 IP&#x3D;120.204.197.5 对应的局域网 IP 是 192.168.1.100，于是将 IP 层目标 IP 改为 192.168.1.100；</li>
+<li>转发到电脑：路由器 LAN 口通过 ARP 缓存获取电脑 MAC，发送应答包 —— 电脑最终拿到 “<a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a>的 IP 是 180.101.49.12”。</li>
+</ol>
+<h3 id="步骤-9：电脑发起-HTTPS-请求（访问百度服务器）"><a href="#步骤-9：电脑发起-HTTPS-请求（访问百度服务器）" class="headerlink" title="步骤 9：电脑发起 HTTPS 请求（访问百度服务器）"></a>步骤 9：电脑发起 HTTPS 请求（访问百度服务器）</h3><p>电脑拿到目标 IP 后，通过<strong>HTTPS 协议（端口 443）</strong> 向百度服务器（180.101.49.12）发送访问请求，流程与 DNS 请求类似，但目标是公网服务器：</p>
+<ol>
+<li>封装 HTTPS 请求包：IP 层源 IP&#x3D;192.168.1.100，目标 IP&#x3D;180.101.49.12；以太网帧目标 MAC &#x3D; 网关 LAN 口 MAC（ARP 缓存已存在）；</li>
+<li>家庭路由器 NAT 转换：将源 IP 改为 120.204.197.5，记录 NAT 映射（192.168.1.100:43210→120.204.197.5:56789），通过 WAN 口发送到公网接入层路由器。</li>
+</ol>
+<h3 id="步骤-10：公网路由器逐跳转发-HTTPS-请求到百度服务器"><a href="#步骤-10：公网路由器逐跳转发-HTTPS-请求到百度服务器" class="headerlink" title="步骤 10：公网路由器逐跳转发 HTTPS 请求到百度服务器"></a>步骤 10：公网路由器逐跳转发 HTTPS 请求到百度服务器</h3><p>HTTPS 请求在公网中通过 “接入层→汇聚层→核心层→百度 IDC 接入层” 的路径转发：</p>
+<ol>
+<li>接入层路由器→汇聚层路由器→核心层路由器：与 DNS 请求转发逻辑一致，通过路由表找到下一跳，逐跳转发；</li>
+<li>省核心层路由器→百度 IDC 接入路由器：核心层路由器查询路由表，发现 “180.101.49.0&#x2F;24 网段（百度服务器所在网段）的下一跳是百度 IDC 的接入路由器，IP：203.0.113.1”；</li>
+<li>百度 IDC 接入路由器转发：百度 IDC（互联网数据中心）的接入路由器收到请求后，根据 “负载均衡策略”，将请求转发到具体的百度服务器节点（如 180.101.49.12）。</li>
+</ol>
+<h3 id="步骤-11：百度服务器处理请求并返回响应"><a href="#步骤-11：百度服务器处理请求并返回响应" class="headerlink" title="步骤 11：百度服务器处理请求并返回响应"></a>步骤 11：百度服务器处理请求并返回响应</h3><p>百度服务器收到 HTTPS 请求后，处理并返回首页数据：</p>
+<ol>
+<li>接收请求：百度服务器的 HTTPS 443 端口收到请求包，解析出 “客户端要访问 <a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a> 首页”；</li>
+<li>处理请求：服务器调用后端服务，生成首页的 HTML、CSS、JS、图片等资源，封装成 HTTPS 响应包（IP 层源 IP&#x3D;180.101.49.12，目标 IP&#x3D;120.204.197.5）；</li>
+<li>返回响应：响应包按 “百度 IDC 接入路由器→省核心层路由器→市汇聚层路由器→接入层路由器→家庭路由器” 的路径反向转发。</li>
+</ol>
+<h3 id="步骤-12：电脑接收响应，浏览器渲染页面"><a href="#步骤-12：电脑接收响应，浏览器渲染页面" class="headerlink" title="步骤 12：电脑接收响应，浏览器渲染页面"></a>步骤 12：电脑接收响应，浏览器渲染页面</h3><ol>
+<li>家庭路由器转发响应：路由器 WAN 口收到响应包后，通过 NAT 映射表找到对应的电脑（192.168.1.100），修改 IP 层目标 IP，通过 LAN 口发送到电脑；</li>
+<li>电脑解包处理：电脑网卡接收帧，解包取出 HTTPS 响应数据，交给浏览器；</li>
+<li>浏览器渲染：浏览器解析 HTML、CSS、JS，加载图片等资源，最终在屏幕上显示百度首页 —— 整个访问流程完成。</li>
+</ol>
+<h2 id="2-疑问与解答"><a href="#2-疑问与解答" class="headerlink" title="2. 疑问与解答"></a>2. 疑问与解答</h2><h3 id="2-1-若家庭路由器有公网IP，为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）"><a href="#2-1-若家庭路由器有公网IP，为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）" class="headerlink" title="2.1 若家庭路由器有公网IP，为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）"></a>2.1 若家庭路由器有公网IP，为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）</h3><p>要解答此问题，需先明确两个核心概念：<strong>家庭路由器的双重角色</strong>与<strong>ARP“局域网边界”的实际定义</strong>。家庭路由器既是“家庭局域网的网关”，也是“运营商小局域网的终端”；而ARP请求的“局域网内”，特指家庭路由器WAN口与小区接入路由器共同所在的“运营商小局域网”，并非用户通常理解的“家庭局域网”。</p>
+<h3 id="2-1-1-核心前提：家庭路由器的双接口与双局域网属性"><a href="#2-1-1-核心前提：家庭路由器的双接口与双局域网属性" class="headerlink" title="2.1.1 核心前提：家庭路由器的双接口与双局域网属性"></a>2.1.1 核心前提：家庭路由器的双接口与双局域网属性</h3><p>家用路由器并非单一功能设备，而是连接“两个独立局域网”的桥梁，其两个关键接口对应不同网络属性，具体差异如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>接口类型</th>
+<th>连接的网络</th>
+<th>网络属性</th>
+<th>IP地址来源:</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LAN口</strong>（有线&#x2F;Wi-Fi）</td>
+<td>家庭局域网</td>
+<td>私网（如192.168.1.0&#x2F;24）</td>
+<td>路由器自身分配（DHCP服务器）</td>
+<td>连接家中电脑、手机、电视等终端，作为家庭局域网的“网关”</td>
+</tr>
+<tr>
+<td><strong>WAN口</strong>（网线&#x2F;光纤）</td>
+<td>运营商小局域网</td>
+<td>私网或公网（取决于运营商）</td>
+<td>运营商通过DHCP分配</td>
+<td>连接小区接入路由器，作为运营商小局域网的“终端设备”（类似家庭电脑在家庭局域网中的角色）</td>
+</tr>
+</tbody></table>
+<p>简言之，家庭路由器的“双重身份”表现为：</p>
+<ul>
+<li>对家庭终端（电脑、手机等）：是“家庭局域网的网关”；</li>
+<li>对小区接入路由器：是“运营商小局域网内的普通终端”。</li>
+</ul>
+<h3 id="2-1-2-关键问题：为何有公网IP仍需依赖运营商接入局域网？"><a href="#2-1-2-关键问题：为何有公网IP仍需依赖运营商接入局域网？" class="headerlink" title="2.1.2 关键问题：为何有公网IP仍需依赖运营商接入局域网？"></a>2.1.2 关键问题：为何有公网IP仍需依赖运营商接入局域网？</h3><p>即使家庭路由器获取了公网IP，也无法跳过运营商接入局域网直接连接公网，核心原因是运营商接入局域网解决了4个家庭路由器自身无法实现的核心需求：</p>
+<h4 id="1-接入认证：确保仅合法付费用户可使用公网"><a href="#1-接入认证：确保仅合法付费用户可使用公网" class="headerlink" title="1. 接入认证：确保仅合法付费用户可使用公网"></a>1. 接入认证：确保仅合法付费用户可使用公网</h4><p>运营商需通过认证验证用户合法性，该过程必须在“运营商接入局域网”内完成，具体流程如下：</p>
+<ul>
+<li>家庭路由器启动时，向小区接入路由器发送“PPPoE拨号请求”（或DHCP认证请求），携带用户宽带账号与密码；</li>
+<li>小区接入路由器将认证信息转发至运营商“认证服务器（AAA服务器）”，验证通过后，为家庭路由器分配公网IP（或确认已分配公网IP有效）；</li>
+<li>若无此认证，任何人可随意连接公网，运营商无法实现收费与管理。</li>
+</ul>
+<h4 id="2-流量汇聚：降低公网骨干网连接成本"><a href="#2-流量汇聚：降低公网骨干网连接成本" class="headerlink" title="2. 流量汇聚：降低公网骨干网连接成本"></a>2. 流量汇聚：降低公网骨干网连接成本</h4><p>公网骨干网端口资源昂贵（如100Gbps端口成本达几十万元），若每个家庭路由器直接对接骨干网，会导致两大问题：</p>
+<ul>
+<li>资源浪费：家庭宽带通常为100Mbps~1000Mbps，直接连接100Gbps骨干端口，相当于“大水管接小水龙头”，99%带宽被闲置；</li>
+<li>管理混乱：全国数亿家庭若均直接连骨干网，需数亿个骨干端口，公网无法承载。</li>
+</ul>
+<p>运营商接入局域网通过“分层汇聚”解决该问题：</p>
+<ul>
+<li>小区接入路由器：汇聚本小区所有家庭流量（如100户×100Mbps&#x3D;10Gbps），通过10Gbps端口连接市汇聚层路由器；</li>
+<li>市汇聚层路由器：汇聚多个小区流量（如10个小区×10Gbps&#x3D;100Gbps），通过100Gbps端口连接省核心骨干网。</li>
+</ul>
+<h4 id="3-安全管控：拦截恶意流量，保护公网与家庭网络"><a href="#3-安全管控：拦截恶意流量，保护公网与家庭网络" class="headerlink" title="3. 安全管控：拦截恶意流量，保护公网与家庭网络"></a>3. 安全管控：拦截恶意流量，保护公网与家庭网络</h4><p>公网存在大量恶意流量（如DDoS攻击、病毒包），若家庭路由器直接连公网，会面临双重风险：</p>
+<ul>
+<li>家庭网络被攻击：恶意流量直接冲击家庭路由器，可能突破防火墙入侵内网；</li>
+<li>家庭网络成为“攻击源”：若家庭设备被黑客控制（如沦为“肉鸡”），会向外发送攻击流量，影响公网稳定。</li>
+</ul>
+<p>运营商接入局域网的“安全防护”作用，体现在家庭路由器与公网骨干网之间的“防火墙”：</p>
+<ul>
+<li>小区接入路由器与运营商“边界防火墙”过滤流量：拦截已知恶意IP数据包、限制单家庭最大连接数、检测异常流量（如突发DDoS包）；</li>
+<li>若发现家庭路由器发送恶意流量，运营商可通过接入局域网临时封禁该公网IP，避免影响其他用户。</li>
+</ul>
+<h4 id="4-网络优化：提升访问速度与稳定性"><a href="#4-网络优化：提升访问速度与稳定性" class="headerlink" title="4. 网络优化：提升访问速度与稳定性"></a>4. 网络优化：提升访问速度与稳定性</h4><p>家庭路由器能力有限，无法实时感知公网链路状态，运营商接入局域网通过两大方式优化网络：</p>
+<ul>
+<li>DNS缓存加速：小区接入路由器缓存热门域名（如百度、微信）的DNS解析结果，家庭路由器查询时无需绕到省核心DNS服务器，速度更快；</li>
+<li>就近资源分配：访问视频网站时，接入路由器将流量转发至“就近的视频CDN节点”，而非直接连接网站总部服务器，降低延迟、提升画质。</li>
+</ul>
+<h3 id="2-1-3-延伸疑问：拥有公网IP的实际意义是什么？"><a href="#2-1-3-延伸疑问：拥有公网IP的实际意义是什么？" class="headerlink" title="2.1.3 延伸疑问：拥有公网IP的实际意义是什么？"></a>2.1.3 延伸疑问：拥有公网IP的实际意义是什么？</h3><p>公网IP的核心意义在于：<strong>设备是否可被公网主动定位并访问</strong>。以下通过具体场景说明其作用（以“北京用户公网IP访问NAS”为例）：</p>
+<h4 id="场景设定"><a href="#场景设定" class="headerlink" title="场景设定"></a>场景设定</h4><ul>
+<li>朋友（上海）：家庭局域网IP段192.168.2.0&#x2F;24，电脑IP 192.168.2.100，路由器WAN口公网IP 203.95.12.8；</li>
+<li>你（北京）：家庭公网IP 120.204.197.5，NAS内网IP 192.168.1.200（已配置端口映射：120.204.197.5:8080→192.168.1.200:8080）。</li>
+</ul>
+<h4 id="公网访问NAS的完整流程（6步）"><a href="#公网访问NAS的完整流程（6步）" class="headerlink" title="公网访问NAS的完整流程（6步）"></a>公网访问NAS的完整流程（6步）</h4><h5 id="步骤1：朋友侧局域网内发起请求（终端→家庭路由器）"><a href="#步骤1：朋友侧局域网内发起请求（终端→家庭路由器）" class="headerlink" title="步骤1：朋友侧局域网内发起请求（终端→家庭路由器）"></a>步骤1：朋友侧局域网内发起请求（终端→家庭路由器）</h5><ol>
+<li><strong>判断转发方向</strong>：朋友电脑检查目标IP 120.204.197.5，发现不在自身局域网（192.168.2.0&#x2F;24），需通过网关（朋友家路由器IP 192.168.2.1）转发至公网；</li>
+<li><strong>获取网关MAC</strong>：朋友电脑查询本地ARP缓存，找到朋友家路由器LAN口MAC（如00:EE:FF:AA:BB:CC），封装以太网帧（源MAC：朋友电脑MAC；目标MAC：路由器LAN口MAC），帧内包含IP数据包（源IP 192.168.2.100，目标IP 120.204.197.5，端口8080）；</li>
+<li><strong>发送至路由器</strong>：通过Wi-Fi&#x2F;网线将帧发送到朋友家路由器，路由器LAN口解包后提取IP数据包。</li>
+</ol>
+<h5 id="步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）"><a href="#步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）" class="headerlink" title="步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）"></a>步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）</h5><ol>
+<li><strong>NAT地址转换</strong>：朋友家路由器将IP数据包的源IP从192.168.2.100改为自身WAN口公网IP 203.95.12.8，同时在NAT映射表记录“192.168.2.100:随机端口→203.95.12.8:随机端口”（用于接收后续响应）；</li>
+<li><strong>转发至上海小区接入层路由器</strong>：朋友家路由器通过WAN口，向上海小区接入层路由器（IP 10.150.0.1）发送请求包——先通过ARP获取接入层路由器MAC（二者同属上海运营商接入局域网），封装帧后发送；</li>
+<li><strong>接入层→汇聚层转发</strong>：上海小区接入层路由器（10.150.0.1）汇总小区流量，查询路由表发现目标IP属北京运营商网段，转发至上海市区汇聚层路由器（10.250.0.1）；</li>
+<li><strong>汇聚层→核心层转发</strong>：上海汇聚层路由器（10.250.0.1）汇总多个小区流量，转发至上海核心层路由器（202.97.0.1），完成“朋友侧到公网骨干网的接入”。</li>
+</ol>
+<h5 id="步骤3：跨区域公网骨干网转发（上海→北京）"><a href="#步骤3：跨区域公网骨干网转发（上海→北京）" class="headerlink" title="步骤3：跨区域公网骨干网转发（上海→北京）"></a>步骤3：跨区域公网骨干网转发（上海→北京）</h5><ol>
+<li><strong>上海核心层→国家级骨干路由器</strong>：上海核心层路由器（202.97.0.1）将请求包转发至国家级骨干网路由器（如天津节点，IP 10.50.0.1）——骨干网路由器仅记录IP段聚合路由，不记录单个IP；</li>
+<li><strong>骨干网→北京核心层路由器</strong>：国家级骨干路由器（10.50.0.1）查询路由表，发现120.204.197.0&#x2F;24段归属北京运营商，通过跨区域光纤链路转发至北京核心层路由器（202.96.0.1）。</li>
+</ol>
+<h5 id="步骤4：你侧运营商转发（北京骨干网→你家路由器）"><a href="#步骤4：你侧运营商转发（北京骨干网→你家路由器）" class="headerlink" title="步骤4：你侧运营商转发（北京骨干网→你家路由器）"></a>步骤4：你侧运营商转发（北京骨干网→你家路由器）</h5><ol>
+<li><strong>北京核心层→汇聚层转发</strong>：北京核心层路由器（202.96.0.1）将请求包转发至你所在区域的北京汇聚层路由器（10.200.0.1）——核心层负责跨区域流量，本地流量由汇聚层分发；</li>
+<li><strong>汇聚层→小区接入层转发</strong>：北京汇聚层路由器（10.200.0.1）查询路由表，发现120.204.197.0&#x2F;24段对应你家小区接入层路由器，转发至你家小区接入层路由器（10.100.0.1）；</li>
+<li><strong>小区接入层→你家路由器</strong>：你家小区接入层路由器（10.100.0.1）查询ARP缓存维护的“IP-MAC关联表”，发现120.204.197.5对应你家路由器WAN口MAC（如00:AA:BB:CC:DD:EE），将请求包转发至你家路由器WAN口。</li>
+</ol>
+<h5 id="步骤5：你侧局域网内转发（你家路由器→NAS）"><a href="#步骤5：你侧局域网内转发（你家路由器→NAS）" class="headerlink" title="步骤5：你侧局域网内转发（你家路由器→NAS）"></a>步骤5：你侧局域网内转发（你家路由器→NAS）</h5><ol>
+<li><strong>NAT映射匹配</strong>：你家路由器接收请求包后，提取“目标IP 120.204.197.5+端口8080”，查询NAT映射表，匹配到提前配置的“120.204.197.5:8080→192.168.1.200:8080”；</li>
+<li><strong>转发至NAS</strong>：修改IP数据包的目标IP为NAS内网IP 192.168.1.200，通过ARP获取NAS的MAC（如00:FF:AA:BB:CC:DD），封装以太网帧后通过LAN口发送到NAS。</li>
+</ol>
+<h5 id="步骤6：NAS响应并按原路径返回"><a href="#步骤6：NAS响应并按原路径返回" class="headerlink" title="步骤6：NAS响应并按原路径返回"></a>步骤6：NAS响应并按原路径返回</h5><ol>
+<li><strong>NAS生成响应包</strong>：NAS处理请求后，返回首页数据，封装响应包（源IP 192.168.1.200，目标IP 192.168.2.100，端口8080）；</li>
+<li><strong>你侧局域网→北京运营商</strong>：响应包经你家路由器（NAT转换：源IP改为120.204.197.5）→小区接入层→北京汇聚层→北京核心层，进入公网骨干网；</li>
+<li><strong>骨干网→上海运营商</strong>：响应包经国家级骨干网→上海核心层→上海汇聚层→上海小区接入层，到达朋友家路由器；</li>
+<li><strong>朋友侧运营商→局域网</strong>：朋友家路由器通过NAT映射表找到“203.95.12.8:随机端口对应192.168.2.100:随机端口”，修改目标IP后转发到朋友电脑；</li>
+<li><strong>朋友电脑渲染页面</strong>：朋友电脑接收响应包，浏览器解析数据并显示NAS首页，整个访问流程完成。</li>
+</ol>
+<h2 id="3-核心概念串联总结"><a href="#3-核心概念串联总结" class="headerlink" title="3.核心概念串联总结"></a>3.核心概念串联总结</h2><ol>
+<li><strong>DHCP</strong>：给电脑分配 “局域网身份”（IP &#x2F; 网关 &#x2F; DNS），是上网的基础；</li>
+<li><strong>DNS</strong>：将域名（<a target="_blank" rel="noopener" href="https://www.baidu.com/">www.baidu.com</a>）转为公网 IP（180.101.49.12），解决 “公网定位目标” 的问题；</li>
+<li><strong>ARP</strong>：仅在局域网内生效，获取网关 &#x2F; 设备的 MAC 地址，解决 “局域网内转发目标” 的问题；</li>
+<li><strong>NAT</strong>：将局域网 IP 转为公网 IP，解决 “家用网络公网 IP 不足” 的问题；</li>
+<li><strong>公网路由器层级</strong>：通过 “接入层→汇聚层→核心层” 逐跳转发，依赖 “路由表” 确定下一跳，不使用 ARP，核心是 “IP 路由”；</li>
+<li><strong>IP 与 MAC 的分工</strong>：IP 负责 “跨网定位目标（公网 + 局域网）”，MAC 仅负责 “局域网内定位设备”，二者配合实现全程通信。</li>
+</ol>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/')">计算机网络核心概念串烧</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=计算机网络核心概念串烧&amp;url=http://example.com/2024/07/26/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/DNS/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>DNS<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/NAT/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>NAT<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/DHCP/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>DHCP<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/ARP/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>ARP<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>计算机网络<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/image-20250924140004853.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/12/22/mac%E5%AE%89%E8%A3%85%20picgo%20%E6%8A%A5%E9%94%99%20%E6%96%87%E4%BB%B6%E6%8D%9F%E5%9D%8F/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350521.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">mac安装 picgo 报错 文件损坏</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/06/27/DNS%E8%A7%A3%E9%94%81%E6%8A%80%E6%9C%AF%E8%AF%A6%E8%A7%A3%EF%BC%9A%E5%8E%9F%E7%90%86%E3%80%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%BA%94%E7%94%A8/" title="DNS解锁技术原理、实现"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250618094256140.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-27</div><div class="title">DNS解锁技术原理、实现</div></div></a></div><div><a href="/2025/06/29/HTTP%E8%AF%B7%E6%B1%82%E9%93%BE%E8%B7%AF%E4%B8%8EDNS%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/" title="HTTP请求链路与DNS分析技术实践：深入理解网络通信机制"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250607203155245.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-29</div><div class="title">HTTP请求链路与DNS分析技术实践：深入理解网络通信机制</div></div></a></div><div><a href="/2025/06/13/iptables-nat-dnat-snat/" title="深入理解 iptables NAT：DNAT 与 SNAT 详解"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350520.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-06-13</div><div class="title">深入理解 iptables NAT：DNAT 与 SNAT 详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E7%83%A7"><span class="toc-number">1.</span> <span class="toc-text">计算机网络核心概念串烧</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%B8%BB%E8%A6%81%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.主要示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%EF%BC%9A%E7%94%B5%E8%84%91%E9%80%9A%E8%BF%87-DHCP-%E8%8E%B7%E5%8F%96%E5%B1%80%E5%9F%9F%E7%BD%91%E8%BA%AB%E4%BB%BD%EF%BC%88%E4%B8%8A%E7%BD%91%E5%9F%BA%E7%A1%80%EF%BC%89"><span class="toc-number">1.1.1.</span> <span class="toc-text">前置：电脑通过 DHCP 获取局域网身份（上网基础）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E7%94%B5%E8%84%91%E5%8F%91%E8%B5%B7-DNS-%E8%AF%B7%E6%B1%82%EF%BC%88%E5%9F%9F%E5%90%8D%E2%86%92IP-%E7%9A%84-%E2%80%9C%E7%BF%BB%E8%AF%91%E2%80%9D%EF%BC%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">步骤 1：电脑发起 DNS 请求（域名→IP 的 “翻译”）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E9%80%9A%E8%BF%87-ARP-%E8%8E%B7%E5%8F%96%E7%BD%91%E5%85%B3-MAC%EF%BC%88%E5%B1%80%E5%9F%9F%E7%BD%91%E5%86%85-%E2%80%9C%E6%89%BE%E4%B8%8B%E4%B8%80%E8%B7%B3%E2%80%9D%EF%BC%89"><span class="toc-number">1.1.3.</span> <span class="toc-text">步骤 2：通过 ARP 获取网关 MAC（局域网内 “找下一跳”）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E5%B1%80%E5%9F%9F%E7%BD%91%E8%BD%AC%E5%8F%91-DNS-%E8%AF%B7%E6%B1%82%E5%88%B0%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%EF%BC%88%E7%BD%91%E5%85%B3%EF%BC%89"><span class="toc-number">1.1.4.</span> <span class="toc-text">步骤 3：局域网转发 DNS 请求到家庭路由器（网关）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%E9%80%9A%E8%BF%87-NAT-%E8%BD%AC%E6%8D%A2%EF%BC%8C%E5%B0%86%E8%AF%B7%E6%B1%82%E5%8F%91%E5%BE%80%E5%85%AC%E7%BD%91%E6%8E%A5%E5%85%A5%E8%B7%AF%E7%94%B1%E5%99%A8"><span class="toc-number">1.1.5.</span> <span class="toc-text">步骤 4：家庭路由器通过 NAT 转换，将请求发往公网接入路由器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-5%EF%BC%9A%E5%85%AC%E7%BD%91%E6%8E%A5%E5%85%A5%E5%B1%82%E8%B7%AF%E7%94%B1%E5%99%A8%E8%BD%AC%E5%8F%91-DNS-%E8%AF%B7%E6%B1%82%E5%88%B0%E6%B1%87%E8%81%9A%E5%B1%82%E8%B7%AF%E7%94%B1%E5%99%A8"><span class="toc-number">1.1.6.</span> <span class="toc-text">步骤 5：公网接入层路由器转发 DNS 请求到汇聚层路由器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-6%EF%BC%9A%E5%85%AC%E7%BD%91%E6%B1%87%E8%81%9A%E5%B1%82%E8%B7%AF%E7%94%B1%E5%99%A8%E8%BD%AC%E5%8F%91-DNS-%E8%AF%B7%E6%B1%82%E5%88%B0%E6%A0%B8%E5%BF%83%E5%B1%82%E8%B7%AF%E7%94%B1%E5%99%A8"><span class="toc-number">1.1.7.</span> <span class="toc-text">步骤 6：公网汇聚层路由器转发 DNS 请求到核心层路由器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-7%EF%BC%9A%E5%85%AC%E7%BD%91%E6%A0%B8%E5%BF%83%E5%B1%82%E8%B7%AF%E7%94%B1%E5%99%A8%E8%BD%AC%E5%8F%91-DNS-%E8%AF%B7%E6%B1%82%E5%88%B0-DNS-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%89%80%E5%9C%A8%E7%BD%91%E7%BB%9C"><span class="toc-number">1.1.8.</span> <span class="toc-text">步骤 7：公网核心层路由器转发 DNS 请求到 DNS 服务器所在网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-8%EF%BC%9ADNS-%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%94%E5%9B%9E%E8%A7%A3%E6%9E%90%E7%BB%93%E6%9E%9C%EF%BC%88%E5%9F%9F%E5%90%8D%E2%86%92IP%EF%BC%89"><span class="toc-number">1.1.9.</span> <span class="toc-text">步骤 8：DNS 服务器返回解析结果（域名→IP）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-9%EF%BC%9A%E7%94%B5%E8%84%91%E5%8F%91%E8%B5%B7-HTTPS-%E8%AF%B7%E6%B1%82%EF%BC%88%E8%AE%BF%E9%97%AE%E7%99%BE%E5%BA%A6%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%89"><span class="toc-number">1.1.10.</span> <span class="toc-text">步骤 9：电脑发起 HTTPS 请求（访问百度服务器）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-10%EF%BC%9A%E5%85%AC%E7%BD%91%E8%B7%AF%E7%94%B1%E5%99%A8%E9%80%90%E8%B7%B3%E8%BD%AC%E5%8F%91-HTTPS-%E8%AF%B7%E6%B1%82%E5%88%B0%E7%99%BE%E5%BA%A6%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.1.11.</span> <span class="toc-text">步骤 10：公网路由器逐跳转发 HTTPS 请求到百度服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-11%EF%BC%9A%E7%99%BE%E5%BA%A6%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%A4%84%E7%90%86%E8%AF%B7%E6%B1%82%E5%B9%B6%E8%BF%94%E5%9B%9E%E5%93%8D%E5%BA%94"><span class="toc-number">1.1.12.</span> <span class="toc-text">步骤 11：百度服务器处理请求并返回响应</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-12%EF%BC%9A%E7%94%B5%E8%84%91%E6%8E%A5%E6%94%B6%E5%93%8D%E5%BA%94%EF%BC%8C%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2"><span class="toc-number">1.1.13.</span> <span class="toc-text">步骤 12：电脑接收响应，浏览器渲染页面</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%96%91%E9%97%AE%E4%B8%8E%E8%A7%A3%E7%AD%94"><span class="toc-number">1.2.</span> <span class="toc-text">2. 疑问与解答</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E8%8B%A5%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%E6%9C%89%E5%85%AC%E7%BD%91IP%EF%BC%8C%E4%B8%BA%E4%BD%95%E4%BB%8D%E9%9C%80%E9%80%9A%E8%BF%87ARP%E8%8E%B7%E5%8F%96%E5%B0%8F%E5%8C%BA%E6%8E%A5%E5%85%A5%E8%B7%AF%E7%94%B1%E5%99%A8%EF%BC%9F%EF%BC%88ARP%E4%BB%85%E7%94%A8%E4%BA%8E%E5%B1%80%E5%9F%9F%E7%BD%91%E5%86%85%E7%9A%84%E7%9F%9B%E7%9B%BE%E7%82%B9%E8%A7%A3%E6%9E%90%EF%BC%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 若家庭路由器有公网IP，为何仍需通过ARP获取小区接入路由器？（ARP仅用于局域网内的矛盾点解析）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E6%A0%B8%E5%BF%83%E5%89%8D%E6%8F%90%EF%BC%9A%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E5%8F%8C%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8F%8C%E5%B1%80%E5%9F%9F%E7%BD%91%E5%B1%9E%E6%80%A7"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.1.1 核心前提：家庭路由器的双接口与双局域网属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E5%85%B3%E9%94%AE%E9%97%AE%E9%A2%98%EF%BC%9A%E4%B8%BA%E4%BD%95%E6%9C%89%E5%85%AC%E7%BD%91IP%E4%BB%8D%E9%9C%80%E4%BE%9D%E8%B5%96%E8%BF%90%E8%90%A5%E5%95%86%E6%8E%A5%E5%85%A5%E5%B1%80%E5%9F%9F%E7%BD%91%EF%BC%9F"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.1.2 关键问题：为何有公网IP仍需依赖运营商接入局域网？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%8E%A5%E5%85%A5%E8%AE%A4%E8%AF%81%EF%BC%9A%E7%A1%AE%E4%BF%9D%E4%BB%85%E5%90%88%E6%B3%95%E4%BB%98%E8%B4%B9%E7%94%A8%E6%88%B7%E5%8F%AF%E4%BD%BF%E7%94%A8%E5%85%AC%E7%BD%91"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">1. 接入认证：确保仅合法付费用户可使用公网</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%B5%81%E9%87%8F%E6%B1%87%E8%81%9A%EF%BC%9A%E9%99%8D%E4%BD%8E%E5%85%AC%E7%BD%91%E9%AA%A8%E5%B9%B2%E7%BD%91%E8%BF%9E%E6%8E%A5%E6%88%90%E6%9C%AC"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">2. 流量汇聚：降低公网骨干网连接成本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%AE%89%E5%85%A8%E7%AE%A1%E6%8E%A7%EF%BC%9A%E6%8B%A6%E6%88%AA%E6%81%B6%E6%84%8F%E6%B5%81%E9%87%8F%EF%BC%8C%E4%BF%9D%E6%8A%A4%E5%85%AC%E7%BD%91%E4%B8%8E%E5%AE%B6%E5%BA%AD%E7%BD%91%E7%BB%9C"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">3. 安全管控：拦截恶意流量，保护公网与家庭网络</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96%EF%BC%9A%E6%8F%90%E5%8D%87%E8%AE%BF%E9%97%AE%E9%80%9F%E5%BA%A6%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">4. 网络优化：提升访问速度与稳定性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E5%BB%B6%E4%BC%B8%E7%96%91%E9%97%AE%EF%BC%9A%E6%8B%A5%E6%9C%89%E5%85%AC%E7%BD%91IP%E7%9A%84%E5%AE%9E%E9%99%85%E6%84%8F%E4%B9%89%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.1.3 延伸疑问：拥有公网IP的实际意义是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF%E8%AE%BE%E5%AE%9A"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">场景设定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AC%E7%BD%91%E8%AE%BF%E9%97%AENAS%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%EF%BC%886%E6%AD%A5%EF%BC%89"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">公网访问NAS的完整流程（6步）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E6%9C%8B%E5%8F%8B%E4%BE%A7%E5%B1%80%E5%9F%9F%E7%BD%91%E5%86%85%E5%8F%91%E8%B5%B7%E8%AF%B7%E6%B1%82%EF%BC%88%E7%BB%88%E7%AB%AF%E2%86%92%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%EF%BC%89"><span class="toc-number">1.2.4.2.1.</span> <span class="toc-text">步骤1：朋友侧局域网内发起请求（终端→家庭路由器）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9A%E6%9C%8B%E5%8F%8B%E4%BE%A7%E8%BF%90%E8%90%A5%E5%95%86%E8%BD%AC%E5%8F%91%EF%BC%88%E5%AE%B6%E5%BA%AD%E8%B7%AF%E7%94%B1%E5%99%A8%E2%86%92%E4%B8%8A%E6%B5%B7%E9%AA%A8%E5%B9%B2%E7%BD%91%EF%BC%89"><span class="toc-number">1.2.4.2.2.</span> <span class="toc-text">步骤2：朋友侧运营商转发（家庭路由器→上海骨干网）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A43%EF%BC%9A%E8%B7%A8%E5%8C%BA%E5%9F%9F%E5%85%AC%E7%BD%91%E9%AA%A8%E5%B9%B2%E7%BD%91%E8%BD%AC%E5%8F%91%EF%BC%88%E4%B8%8A%E6%B5%B7%E2%86%92%E5%8C%97%E4%BA%AC%EF%BC%89"><span class="toc-number">1.2.4.2.3.</span> <span class="toc-text">步骤3：跨区域公网骨干网转发（上海→北京）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A44%EF%BC%9A%E4%BD%A0%E4%BE%A7%E8%BF%90%E8%90%A5%E5%95%86%E8%BD%AC%E5%8F%91%EF%BC%88%E5%8C%97%E4%BA%AC%E9%AA%A8%E5%B9%B2%E7%BD%91%E2%86%92%E4%BD%A0%E5%AE%B6%E8%B7%AF%E7%94%B1%E5%99%A8%EF%BC%89"><span class="toc-number">1.2.4.2.4.</span> <span class="toc-text">步骤4：你侧运营商转发（北京骨干网→你家路由器）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A45%EF%BC%9A%E4%BD%A0%E4%BE%A7%E5%B1%80%E5%9F%9F%E7%BD%91%E5%86%85%E8%BD%AC%E5%8F%91%EF%BC%88%E4%BD%A0%E5%AE%B6%E8%B7%AF%E7%94%B1%E5%99%A8%E2%86%92NAS%EF%BC%89"><span class="toc-number">1.2.4.2.5.</span> <span class="toc-text">步骤5：你侧局域网内转发（你家路由器→NAS）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A46%EF%BC%9ANAS%E5%93%8D%E5%BA%94%E5%B9%B6%E6%8C%89%E5%8E%9F%E8%B7%AF%E5%BE%84%E8%BF%94%E5%9B%9E"><span class="toc-number">1.2.4.2.6.</span> <span class="toc-text">步骤6：NAS响应并按原路径返回</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%B2%E8%81%94%E6%80%BB%E7%BB%93"><span class="toc-number">1.3.</span> <span class="toc-text">3.核心概念串联总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/09/24/%E9%9A%90%E8%AF%ADSecretflow%E2%80%94%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%BD%93%E9%AA%8C/" title="隐语Secretflow—源码编译安装体验"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/image-20250924140004853.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="隐语Secretflow—源码编译安装体验"/></a><div class="content"><a class="title" href="/2025/09/24/%E9%9A%90%E8%AF%ADSecretflow%E2%80%94%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%BD%93%E9%AA%8C/" title="隐语Secretflow—源码编译安装体验">隐语Secretflow—源码编译安装体验</a><time datetime="2025-09-24T06:00:00.000Z" title="发表于 2025-09-24 14:00:00">2025-09-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/" title="Zeppelin 源码编译构建与打包部署"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250916100006470.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Zeppelin 源码编译构建与打包部署"/></a><div class="content"><a class="title" href="/2025/09/17/Zeppelin%20%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%89%93%E5%8C%85%E9%83%A8%E7%BD%B2/" title="Zeppelin 源码编译构建与打包部署">Zeppelin 源码编译构建与打包部署</a><time datetime="2025-09-17T02:00:00.000Z" title="发表于 2025-09-17 10:00:00">2025-09-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/" title="一站式搭建Spark-Hadoop集群及Zeppelin"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092159955.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一站式搭建Spark-Hadoop集群及Zeppelin"/></a><div class="content"><a class="title" href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/" title="一站式搭建Spark-Hadoop集群及Zeppelin">一站式搭建Spark-Hadoop集群及Zeppelin</a><time datetime="2025-09-13T09:00:00.000Z" title="发表于 2025-09-13 17:00:00">2025-09-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804100847374.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"/></a><div class="content"><a class="title" href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程">Spark、Hadoop集群及Zeppelin的镜像具体构建过程</a><time datetime="2025-09-11T06:52:01.000Z" title="发表于 2025-09-11 14:52:01">2025-09-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/07/Zeppelin%20%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/" title="Zeppelin 使用体验"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092337513.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Zeppelin 使用体验"/></a><div class="content"><a class="title" href="/2025/09/07/Zeppelin%20%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/" title="Zeppelin 使用体验">Zeppelin 使用体验</a><time datetime="2025-09-07T14:00:00.000Z" title="发表于 2025-09-07 22:00:00">2025-09-07</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">64</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">93</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>3</sup></a><a href="/tags/HBase/" style="font-size: 0.88rem;">HBase<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>4</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>8</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>5</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 0.88rem;">NAT<sup>2</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/SGX/" style="font-size: 0.88rem;">SGX<sup>2</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>11</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TDX/" style="font-size: 0.88rem;">TDX<sup>2</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>9</sup></a><a href="/tags/TME/" style="font-size: 0.88rem;">TME<sup>2</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">分布式计算<sup>3</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" style="font-size: 0.88rem;">大数据<sup>7</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">安全<sup>2</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>5</sup></a><a href="/tags/%E6%8A%80%E6%9C%AF%E4%B8%93%E6%A0%8F/" style="font-size: 0.88rem;">技术专栏<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C/" style="font-size: 0.88rem;">网络<sup>4</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>4</sup></a><a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84/" style="font-size: 0.88rem;">集群架构<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
