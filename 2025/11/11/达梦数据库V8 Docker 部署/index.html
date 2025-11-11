@@ -1,0 +1,579 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>达梦数据库V8 Docker部署使用 | 凌霄的博客</title><meta name="keywords" content="Docker,达梦数据库,数据库,国产数据库"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="达梦数据库V8 Docker部署使用"><meta name="application-name" content="达梦数据库V8 Docker部署使用"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="达梦数据库V8 Docker部署使用"><meta property="og:url" content="http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="记录在Docker环境下部署达梦数据库V8的过程，解决官方镜像缺失和数据库大小写敏感问题，包含使用dminit工具初始化新实例、创建自定义镜像并推送至仓库的详细步骤。"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png"><meta name="description" content="记录在Docker环境下部署达梦数据库V8的过程，解决官方镜像缺失和数据库大小写敏感问题，包含使用dminit工具初始化新实例、创建自定义镜像并推送至仓库的详细步骤。"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: '达梦数据库V8 Docker部署使用',
+  postAI: '',
+  pageFillDescription: '达梦数据库V8 Docker 部署及使用达梦数据库部署及使用官方之前提供镜像但是目前官方没有提供了这里为了不耽误太多时间所以用了一个其他同学的一个镜像其基于官方镜像镜像做了部分修改我一开始测试的时候也使用了这个镜像进行达梦数据库的一些测试支持达梦数据源工作但是发现其默认的这个达梦实例端口的是标识符大小写敏感的返回为则为敏感返回则为不敏感创建表若表名或列名未添加双引号则表名和列名会自动转换为大写形式若对表名或列名添加双引号则会固定书写时的大小写同名的数据库对象如果大小写不同那么则为两个不同的对象字段若表名或列名未添加双引号则表名和列名会自动转换为大写形式或操作时如果不对表名或列名添加双引号那么表名和列名都自动转换为大写形式对表进行操作时如果没有小写形式的字段不能采取小写加的形式指定过滤字段会被认定为无效的字段如果对表名或列名添加会固定书写时的大小写形式中是大写形式则过滤字段就是大写字段中是小写字段则过滤字段就是小写字段对其进行操作时需要利用指定表名和字段名否则默认会认定以大写形式去查询对象查询时和界定符中字符串区分大小写界定符中的字符串若是大写形式那仅查询这个大写形式的对象若是或小写形式那仅查询这个小写形式的对象操作依旧但是我想建一个标识符大小写不敏感的数据库进行操作但是了解发现一旦达梦数据库实例安装好之后就不能调整标识符大小写敏感所以我需要重新初始化一个达梦实例因为我是电脑所以也无法使用官方的图形化工具这里记录一下建立达梦实例的过程最后我会将镜像打包生成一个新的镜像供后续自己使用或者同学们学习使用下拉运行如果后续官方提供镜像也可以用官方的跑起来之后其实就可以正常连接了默认账号是密码端口是进入容器内使用来创建数据库是数据库初始化工具可以利用工具提供的各种参数设置数据库存放路径段页大小是否对大小写敏感以及是否使用等创建出满足用户需要的数据库该工具位于安装目录的目录下进入到此目录执行显示类似如下执行结果就可以了然后提醒一下这个官方的许可好像是只能天试用如果是长期使用的请注意命令中支持很多参数设置详细可以看初始化文件存放的路径初始数据库存放的路径控制文件路径日志文件路径数据文件使用的簇大小可选值单位页数据页大小可选值单位日志文件大小单位为范围为大小敏感可选值字符集可选值权限管理模式可选值类型长度是否以字符为单位可选值设置密码设置密码数据库名实例名监听端口号系统缓存大小单位设置时区页检查模式可选值设置页检查算法设置默认加密算法设置默认算法设置根密钥加密引擎设置日志文件加密算法若未设置则不加密设置设置页加密分片大小可选值单位设置全库加密算法设置空格填充模式可选值数据文件镜像路径数据文件镜像回滚文件镜像路径初始化时设置中的初始化时设置中的系统内的库初始化时设置中的初始化配置文件配置文件格式见系统管理员手册是否覆盖所有同名文件不覆盖部分覆盖完全覆盖是否使用改进的字符类型算法指定初始化过程中生成的日志文件所在路径分布式环境下协同工作的监听端口初始化时设置中的启用时指定数据文件的缺省路径指定连接分布式系统的服务地址指定连接分布式系统的服务端口号指定分布式系统的副本数指定分布式系统的中数据库名默认与一致指定分布式系统中该数据库的共享属性指定分布式系统中该数据库的系统表空间数据文件的区块策略微区策略宏区策略是否仅支持创建事务型表是否是否生成表日志是否是否仅使用管理段记录事务信息是否是否按定长存储可选值是否禁止打开日志可选值指定集群中的实例角色无取值时也可以用代替打印帮助信息后台启动服务验证达梦数据库进程可以观察到已经起起来了使用账号密码端口就可以访问到这个实例啦新建用户视图其实有些类似中的数据库的概念但是还是有区别的并授权然后就可以切换这个账号密码来登录端口实例了不建立这个账号直接使用也是可以正常使用的可以使用这个建表语句测试下标识符大小写是否敏感制作镜像过程在容器内执行清理操作删除临时文件清除命令历史退出容器新增标识符大小写不敏感达梦实例镜像打包推送自制镜像启动这样就可以不需要任何配置即可启动一个达梦数据库容器内置两个实例端口账号密码端口账号密码此实例其中还有包含一个用户账号密码',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-11-12 00:27:20',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>4</sup></a><a href="/tags/GRUB/" style="font-size: 1.05rem;">GRUB<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>4</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Hypervisor/" style="font-size: 1.05rem;">Hypervisor<sup>2</sup></a><a href="/tags/KVM/" style="font-size: 1.05rem;">KVM<sup>2</sup></a><a href="/tags/Kerberos/" style="font-size: 1.05rem;">Kerberos<sup>1</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>7</sup></a><a href="/tags/Linux%E8%BF%90%E7%BB%B4/" style="font-size: 1.05rem;">Linux运维<sup>1</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>10</sup></a><a href="/tags/TPM/" style="font-size: 1.05rem;">TPM<sup>1</sup></a><a href="/tags/UEFI/" style="font-size: 1.05rem;">UEFI<sup>1</sup></a><a href="/tags/VMware/" style="font-size: 1.05rem;">VMware<sup>1</sup></a><a href="/tags/Xen/" style="font-size: 1.05rem;">Xen<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 1.05rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">云计算<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%8F%AF%E4%BF%A1%E5%90%AF%E5%8A%A8/" style="font-size: 1.05rem;">可信启动<sup>1</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 1.05rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 1.05rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8%E5%90%AF%E5%8A%A8/" style="font-size: 1.05rem;">安全启动<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 1.05rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>5</sup></a><a href="/tags/%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" style="font-size: 1.05rem;">故障排查<sup>1</sup></a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 1.05rem;">日志<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 1.05rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" style="font-size: 1.05rem;">磁盘空间<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%BF%97/" style="font-size: 1.05rem;">系统日志<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93/" style="font-size: 1.05rem;">缓存污染<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">网络安全<sup>1</sup></a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" style="font-size: 1.05rem;">虚拟化<sup>5</sup></a><a href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" style="font-size: 1.05rem;">论文翻译<sup>1</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>8</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/11/"><span class="card-archive-list-date">十一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">十月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">九月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">11</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">八月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/12/"><span class="card-archive-list-date">十二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Docker/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Docker</span></a><a class="article-meta__tags" href="/tags/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>达梦数据库</span></a><a class="article-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>数据库</span></a><a class="article-meta__tags" href="/tags/%E5%9B%BD%E4%BA%A7%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>国产数据库</span></a></span></div></div><h1 class="post-title" itemprop="name headline">达梦数据库V8 Docker部署使用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-11-11T12:00:00.000Z" title="发表于 2025-11-11 20:00:00">2025-11-11</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-11-11T16:27:20.544Z" title="更新于 2025-11-12 00:27:20">2025-11-12</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="达梦数据库V8 Docker部署使用"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/"><header><a class="post-meta-categories" href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url">后端</a><a href="/tags/Docker/" tabindex="-1" itemprop="url">Docker</a><a href="/tags/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url">达梦数据库</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url">数据库</a><a href="/tags/%E5%9B%BD%E4%BA%A7%E6%95%B0%E6%8D%AE%E5%BA%93/" tabindex="-1" itemprop="url">国产数据库</a><h1 id="CrawlerTitle" itemprop="name headline">达梦数据库V8 Docker部署使用</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2025-11-11T12:00:00.000Z" title="发表于 2025-11-11 20:00:00">2025-11-11</time><time itemprop="dateCreated datePublished" datetime="2025-11-11T16:27:20.544Z" title="更新于 2025-11-12 00:27:20">2025-11-12</time></header><h1 id="达梦数据库V8-Docker-部署及使用"><a href="#达梦数据库V8-Docker-部署及使用" class="headerlink" title="达梦数据库V8 Docker 部署及使用"></a>达梦数据库V8 Docker 部署及使用</h1><p>官方之前提供docker镜像，但是目前官方没有提供了。这里为了不耽误太多时间，所以用了一个其他同学的一个镜像（其基于官方镜像V8.1镜像做了部分修改）。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://hub.docker.com/r/xuxuclassmate/dameng">https://hub.docker.com/r/xuxuclassmate/dameng</a></p>
+</blockquote>
+<p>我一开始测试的时候也使用了这个镜像，进行达梦数据库的一些测试（Kuscia支持达梦数据源工作）。但是发现其默认的这个达梦实例（5236端口的），是标识符大小写敏感的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 返回为1则为敏感，返回0则为不敏感</span><br><span class="line">SELECT CASE_SENSITIVE();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://eco.dameng.com/community/training/6e3229b02cf35a142766aebf8cdef19e">https://eco.dameng.com/community/training/6e3229b02cf35a142766aebf8cdef19e</a></p>
+<p>1.创建表：若表名或列名未添加双引号“”，则表名和列名会自动转换为大写形式<br>&lt;1&gt;若对表名或列名添加双引号“”，则会固定书写时的大、小写<br>&lt;2&gt;同名的数据库对象，如果大小写不同，那么则为两个不同的对象。<br>2.字段：若表名或列名未添加双引号“”，则表名和列名会自动转换为大写形式<br>3.DML 或 DDL 操作时：<br>&lt;1&gt;如果不对表名或列名添加双引号“”，那么表名和列名都自动转换为大写形式；<br>&lt;2&gt;对表进行 DML 操作时，如果没有小写形式的字段，不能采取小写加””的形式指定过滤字段，会被认定为无效的字段；<br>&lt;3&gt;如果对表名或列名添加‘“”，会固定书写时的大、小写形式，“”中是大写形式，则过滤字段就是大写字段，“”中是小写字段，则过滤字段就是小写字段；<br>&lt;4&gt;对其进行 DML 操作时，需要利用“”指定表名和字段名，否则默认会认定以大写形式去查询对象；<br>&lt;5&gt;查询时，‘’和“”界定符中字符串区分大小写，界定符中的字符串若是大写形式，那仅查询这个大写形式的对象，若是或小写形式，那仅查询这个小写形式的对象，DML 操作依旧。</p>
+</blockquote>
+<p>但是我想 建一个标识符大小写不敏感的数据库进行操作。但是了解发现，一旦达梦数据库实例安装好之后，就不能调整 标识符大小写敏感。所以我需要重新初始化一个达梦实例。因为我是mac电脑，所以也无法使用官方的图形化工具，这里记录一下建立达梦实例的过程，最后我会将镜像打包，生成一个新的镜像，供后续自己使用或者同学们学习使用。</p>
+<p>下拉 xuxuclassmate&#x2F;dameng 运行，如果后续官方提供镜像，也可以用官方的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5236:5236 -p 5237:5237  --restart=always --name dameng --privileged=true -e PAGE_SIZE=16 -e LD_LIBRARY_PATH=/opt/dmdbms/bin -e INSTANCE_NAME=dm8db xuxuclassmate/dameng</span><br></pre></td></tr></table></figure>
+
+<p>跑起来，之后其实就可以正常连接了。默认账号是：SYSDBA，密码：SYSDBA001，端口是5236。</p>
+<p>进入容器内，使用 dminit 来创建数据库。 dminit 是 DM 数据库初始化工具。可以利用 dminit 工具提供的各种参数，设置数据库存放路径、段页大小、 是否对大小写敏感、以及是否使用 UNICODE 等，创建出满足用户需要的数据库。</p>
+<p>该工具位于安装目录的&#x2F;bin 目录下——<code>/opt/dmdbms/bin/</code>。进入到此目录</p>
+<p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./dminit path=/dm/db CASE_SENSITIVE=0 CHARSET=1 db_name=kuscia instance_name=kusciaServer port_num=5237 LOG_SIZE=512 SYSDBA_PWD=SYSDBA001 EXTENT_SIZE=16 PAGE_SIZE=16</span><br></pre></td></tr></table></figure>
+
+<p>显示类似如下执行结果，就可以了。然后提醒一下，这个官方的许可好像是只能14天试用，如果是长期使用的，请注意！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">initdb V8</span><br><span class="line">db version: 0x7000c</span><br><span class="line">file dm.key not found, use default license!</span><br><span class="line">License will expire in 14 day(s) on 2025-11-24</span><br><span class="line">Normal of FAST</span><br><span class="line">Normal of DEFAULT</span><br><span class="line">Normal of RECYCLE</span><br><span class="line">Normal of KEEP</span><br><span class="line">Normal of ROLL</span><br><span class="line"></span><br><span class="line"> log file path: /dm/db/kuscia/kuscia01.log</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> log file path: /dm/db/kuscia/kuscia02.log</span><br><span class="line"></span><br><span class="line">write to dir [/dm/db/kuscia].</span><br><span class="line"></span><br><span class="line">create dm database success. 2025-11-10 23:22:43</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>命令中支持很多参数设置，详细可以看：<a target="_blank" rel="noopener" href="https://eco.dameng.com/community/post/20230714144924LI8MZP0RKTRSVRBL2I">https://eco.dameng.com/community/post/20230714144924LI8MZP0RKTRSVRBL2I</a></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">INI_FILE                   初始化文件dm.ini存放的路径</span><br><span class="line">PATH                       初始数据库存放的路径</span><br><span class="line">CTL_PATH                   控制文件路径</span><br><span class="line">LOG_PATH                   日志文件路径</span><br><span class="line">EXTENT_SIZE                数据文件使用的簇大小(<span class="number">16</span>)，可选值：<span class="number">16</span>, <span class="number">32</span>, <span class="number">64</span>，单位：页</span><br><span class="line">PAGE_SIZE                  数据页大小(<span class="number">8</span>)，可选值：<span class="number">4</span>, <span class="number">8</span>, <span class="number">16</span>, <span class="number">32</span>，单位：K</span><br><span class="line">LOG_SIZE                   日志文件大小(<span class="number">256</span>)，单位为：M，范围为：<span class="number">256</span>M ~ <span class="number">2</span>G</span><br><span class="line">CASE_SENSITIVE             大小敏感(Y)，可选值：Y<span class="regexp">/N，1/</span><span class="number">0</span></span><br><span class="line">CHARSET/UNICODE_FLAG       字符集(<span class="number">0</span>)，可选值：<span class="number">0</span>[GB18030]，<span class="number">1</span>[UTF-<span class="number">8</span>]，<span class="number">2</span>[EUC-KR]</span><br><span class="line">SEC_PRIV_MODE              权限管理模式(<span class="number">0</span>)，可选值：<span class="number">0</span>[TRADITION]，<span class="number">1</span>[BMJ]，<span class="number">2</span>[EVAL]，<span class="number">3</span>[ZB]</span><br><span class="line">LENGTH_IN_CHAR             VARCHAR类型长度是否以字符为单位(N)，可选值：Y<span class="regexp">/N，1/</span><span class="number">0</span></span><br><span class="line">SYSDBA_PWD                 设置SYSDBA密码(SYSDBA)</span><br><span class="line">SYSAUDITOR_PWD             设置SYSAUDITOR密码(SYSAUDITOR)</span><br><span class="line">DB_NAME                    数据库名(DAMENG)</span><br><span class="line">INSTANCE_NAME              实例名(DMSERVER)</span><br><span class="line">PORT_NUM                   监听端口号(<span class="number">5236</span>)</span><br><span class="line">BUFFER                     系统缓存大小(<span class="number">100</span>)，单位M</span><br><span class="line">TIME_ZONE                  设置时区(+<span class="number">08</span>:<span class="number">00</span>)</span><br><span class="line">PAGE_CHECK                 页检查模式(<span class="number">1</span>)，可选值：<span class="number">0</span><span class="regexp">/1/</span><span class="number">2</span></span><br><span class="line">PAGE_HASH_NAME             设置页检查HASH算法</span><br><span class="line">EXTERNAL_CIPHER_NAME       设置默认加密算法</span><br><span class="line">EXTERNAL_HASH_NAME         设置默认HASH算法</span><br><span class="line">EXTERNAL_CRYPTO_NAME       设置根密钥加密引擎</span><br><span class="line">RLOG_ENCRYPT_NAME          设置日志文件加密算法，若未设置，则不加密</span><br><span class="line">USBKEY_PIN                 设置USBKEY PIN</span><br><span class="line">PAGE_ENC_SLICE_SIZE        设置页加密分片大小，可选值：<span class="number">0</span>、<span class="number">512</span>、<span class="number">4096</span>，单位：<span class="keyword">Byte</span></span><br><span class="line">ENCRYPT_NAME               设置全库加密算法</span><br><span class="line">BLANK_PAD_MODE             设置空格填充模式(<span class="number">0</span>)，可选值：<span class="number">0</span>/<span class="number">1</span></span><br><span class="line">SYSTEM_MIRROR_PATH         SYSTEM数据文件镜像路径</span><br><span class="line">MAIN_MIRROR_PATH           MAIN数据文件镜像</span><br><span class="line">ROLL_MIRROR_PATH           回滚文件镜像路径</span><br><span class="line">MAL_FLAG                   初始化时设置dm.ini中的MAL_INI(<span class="number">0</span>)</span><br><span class="line">ARCH_FLAG                  初始化时设置dm.ini中的ARCH_INI(<span class="number">0</span>)</span><br><span class="line">MPP_FLAG                   Mpp系统内的库初始化时设置dm.ini中的mpp_ini(<span class="number">0</span>)</span><br><span class="line">CONTROL                    初始化配置文件（配置文件格式见系统管理员手册）</span><br><span class="line">AUTO_OVERWRITE             是否覆盖所有同名文件(<span class="number">0</span>) <span class="number">0</span>:不覆盖 <span class="number">1</span>:部分覆盖 <span class="number">2</span>:完全覆盖</span><br><span class="line">USE_NEW_HASH               是否使用改进的字符类型HASH算法(<span class="number">1</span>)</span><br><span class="line">ELOG_PATH                  指定初始化过程中生成的日志文件所在路径</span><br><span class="line">AP_PORT_NUM                分布式环境下协同工作的监听端口</span><br><span class="line">DFS_FLAG                   初始化时设置dm.ini中的DFS_INI(<span class="number">0</span>)</span><br><span class="line">DFS_PATH                   启用dfs时指定数据文件的缺省路径</span><br><span class="line">DFS_HOST                   指定连接分布式系统DFS的服务地址(localhost)</span><br><span class="line">DFS_PORT                   指定连接分布式系统DFS的服务端口号(<span class="number">3332</span>)</span><br><span class="line">DFS_COPY_NUM               指定分布式系统的副本数(<span class="number">3</span>)</span><br><span class="line">DFS_DB_NAME                指定分布式系统的中数据库名(默认与DB_NAME一致)</span><br><span class="line">SHARE_FLAG                 指定分布式系统中该数据库的共享属性(<span class="number">0</span>)</span><br><span class="line">REGION_MODE                指定分布式系统中该数据库的系统表空间数据文件的区块策略(<span class="number">0</span>) <span class="number">0</span>:微区策略 <span class="number">1</span>:宏区策略</span><br><span class="line">HUGE_WITH_DELTA            是否仅支持创建事务型HUGE表(<span class="number">1</span>) <span class="number">1</span>:是 <span class="number">0</span>:否</span><br><span class="line">RLOG_GEN_FOR_HUGE          是否生成HUGE表REDO日志(<span class="number">1</span>) <span class="number">1</span>:是 <span class="number">0</span>:否</span><br><span class="line">PSEG_MGR_FLAG              是否仅使用管理段记录事务信息(<span class="number">0</span>) <span class="number">1</span>:是 <span class="number">0</span>:否</span><br><span class="line">CHAR_FIX_STORAGE           <span class="keyword">CHAR</span>是否按定长存储(N)，可选值：Y<span class="regexp">/N，1/</span><span class="number">0</span></span><br><span class="line">SQL_LOG_FORBID             是否禁止打开SQL日志(N)，可选值：Y<span class="regexp">/N，1/</span><span class="number">0</span></span><br><span class="line">DPC_MODE                   指定DPC集群中的实例角色(<span class="number">0</span>) <span class="number">0</span>:无 <span class="number">1</span>:MP <span class="number">2</span>:BP <span class="number">3</span>:SP，取值<span class="number">1</span><span class="regexp">/2/</span><span class="number">3</span>时也可以用MP<span class="regexp">/BP/</span>SP代替</span><br><span class="line">HELP                       打印帮助信息</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>后台启动dmserver服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup ./dmserver /dm/db/kuscia/dm.ini &amp;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>验证达梦数据库进程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@69663ad9670d:/opt/dmdbms/bin# ps -ef|grep dms</span><br><span class="line">root          58       1  2 23:21 ?        00:00:02 ./dmserver /opt/dmdbms/data/DAMENG/dm.ini -noconsole</span><br><span class="line">root         168      39 25 23:24 pts/0    00:00:01 ./dmserver /dm/db/kuscia/dm.ini</span><br><span class="line">root         239      39  0 23:24 pts/0    00:00:00 grep --color=auto dms</span><br></pre></td></tr></table></figure>
+
+<p>可以观察到已经起起来了。使用账号：SYSDBA，密码：SYSDBA001，端口：5237。就可以访问到这个实例啦。</p>
+<p>新建用户视图SQL（其实有些类似mysql中的数据库的概念，但是还是有区别的），并授权：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">create user KUSCIA identified by 1234567890;</span><br><span class="line">GRANT DBA TO KUSCIA;</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以切换这个账号：KUSCIA，密码：1234567890 来登录5237端口实例了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@69663ad9670d:/opt/dmdbms/bin# ./disql KUSCIA/1234567890:5237</span><br><span class="line"></span><br><span class="line">Server[LOCALHOST:5237]:mode is normal, state is open</span><br><span class="line">login used time : 10.566(ms)</span><br><span class="line">disql V8</span><br><span class="line">SQL&gt; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>不建立这个KUSCIA账号，直接使用SYSDBA，也是可以正常使用的。</p>
+</blockquote>
+<p>可以使用这个建表语句测试下，标识符大小写是否敏感。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE test_dataproxy_table (</span><br><span class="line">    id INT,</span><br><span class="line">    name VARCHAR(100),</span><br><span class="line">    age INT,</span><br><span class="line">    salary DECIMAL(10,2),</span><br><span class="line">    created_date DATE,</span><br><span class="line">    created_time TIMESTAMP,</span><br><span class="line">    is_active INT, </span><br><span class="line">    description CLOB,</span><br><span class="line">    data_blob BLOB</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>制作镜像过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 在容器内执行清理操作</span><br><span class="line">rm -rf /tmp/*  # 删除临时文件</span><br><span class="line">history -c     # 清除命令历史</span><br><span class="line">exit           # 退出容器</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit -m &quot;新增标识符大小写不敏感达梦实例&quot; 69663ad9670d dameng:8.1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>镜像打包推送：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep dameng:8.1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker tag dameng:8.1 kongxr7/dameng:8.1</span><br><span class="line">docker tag dameng:8.1 kongxr7/dameng:latest</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#docker save -o dameng-8.1.tar kongxr7/dameng:8.1</span><br><span class="line">#docker load -i /tmp/dameng-8.1.tar</span><br><span class="line"></span><br><span class="line">docker push kongxr7/dameng:8.1</span><br><span class="line">docker push kongxr7/dameng:latest</span><br></pre></td></tr></table></figure>
+
+
+
+<p>自制镜像启动：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5236:5236 -p 5237:5237  --restart=always --name tmp-dameng kongxr7/dameng:8.1</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以不需要任何配置，即可启动一个达梦数据库容器，内置两个实例。</p>
+<p>5236端口，账号：SYSDBA，密码：SYSDBA001</p>
+<p>5237端口，账号：SYSDBA，密码：SYSDBA001。此实例其中还有包含一个KUSCIA用户（账号：KUSCIA，密码：1234567890）</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/')">达梦数据库V8 Docker部署使用</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=达梦数据库V8 Docker部署使用&amp;url=http://example.com/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Docker/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Docker<span class="tagsPageCount">3</span></a><a class="post-meta__box__tags" href="/tags/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>达梦数据库<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>数据库<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E5%9B%BD%E4%BA%A7%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>国产数据库<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/11/03/%E9%9A%90%E8%AF%AD%E2%80%94%E2%80%94Mooc%E7%AC%AC%E4%B8%89%E6%9C%9F%E2%80%94%E2%80%94%E3%80%902%E3%80%91%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91%E5%88%A9%E7%94%A8%E5%8F%8A%E6%8E%88%E6%9D%83%E8%BF%90%E8%90%A5/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/1587012355de4f27e68172ba497616fa.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">公共数据开发利用与授权运营：隐语MOOC笔记（二）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/09/11/Spark%E3%80%81Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin%E7%9A%84%E9%95%9C%E5%83%8F%E5%85%B7%E4%BD%93%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B/" title="Spark、Hadoop集群及Zeppelin的镜像具体构建过程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804100847374.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-09-11</div><div class="title">Spark、Hadoop集群及Zeppelin的镜像具体构建过程</div></div></a></div><div><a href="/2025/09/13/%E4%B8%80%E7%AB%99%E5%BC%8F%E6%90%AD%E5%BB%BASpark-Hadoop%E9%9B%86%E7%BE%A4%E5%8F%8AZeppelin/" title="一站式搭建Spark-Hadoop集群及Zeppelin"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250804092159955.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-09-13</div><div class="title">一站式搭建Spark-Hadoop集群及Zeppelin</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8-Docker-%E9%83%A8%E7%BD%B2%E5%8F%8A%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">达梦数据库V8 Docker 部署及使用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/" title="达梦数据库V8 Docker部署使用"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-12_00-26-26.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="达梦数据库V8 Docker部署使用"/></a><div class="content"><a class="title" href="/2025/11/11/%E8%BE%BE%E6%A2%A6%E6%95%B0%E6%8D%AE%E5%BA%93V8%20Docker%20%E9%83%A8%E7%BD%B2/" title="达梦数据库V8 Docker部署使用">达梦数据库V8 Docker部署使用</a><time datetime="2025-11-11T12:00:00.000Z" title="发表于 2025-11-11 20:00:00">2025-11-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/03/%E9%9A%90%E8%AF%AD%E2%80%94%E2%80%94Mooc%E7%AC%AC%E4%B8%89%E6%9C%9F%E2%80%94%E2%80%94%E3%80%902%E3%80%91%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91%E5%88%A9%E7%94%A8%E5%8F%8A%E6%8E%88%E6%9D%83%E8%BF%90%E8%90%A5/" title="公共数据开发利用与授权运营：隐语MOOC笔记（二）"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/1587012355de4f27e68172ba497616fa.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="公共数据开发利用与授权运营：隐语MOOC笔记（二）"/></a><div class="content"><a class="title" href="/2025/11/03/%E9%9A%90%E8%AF%AD%E2%80%94%E2%80%94Mooc%E7%AC%AC%E4%B8%89%E6%9C%9F%E2%80%94%E2%80%94%E3%80%902%E3%80%91%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE%E5%BC%80%E5%8F%91%E5%88%A9%E7%94%A8%E5%8F%8A%E6%8E%88%E6%9D%83%E8%BF%90%E8%90%A5/" title="公共数据开发利用与授权运营：隐语MOOC笔记（二）">公共数据开发利用与授权运营：隐语MOOC笔记（二）</a><time datetime="2025-11-03T10:00:00.000Z" title="发表于 2025-11-03 18:00:00">2025-11-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/10/30/%E9%9A%90%E8%AF%AD%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0%E6%B5%81%E9%80%9A%E6%8A%80%E6%9C%AFMOOC%E4%B8%89%E6%9C%9F%E2%80%94%E2%80%94%E3%80%901%E3%80%91%E5%9B%BD%E5%AE%B6%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0%E7%9B%B8%E5%85%B3%E6%94%BF%E7%AD%96%E8%A7%A3%E8%AF%BB/" title="国家数据要素政策解读：隐语MOOC三期笔记（一）"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="国家数据要素政策解读：隐语MOOC三期笔记（一）"/></a><div class="content"><a class="title" href="/2025/10/30/%E9%9A%90%E8%AF%AD%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0%E6%B5%81%E9%80%9A%E6%8A%80%E6%9C%AFMOOC%E4%B8%89%E6%9C%9F%E2%80%94%E2%80%94%E3%80%901%E3%80%91%E5%9B%BD%E5%AE%B6%E6%95%B0%E6%8D%AE%E8%A6%81%E7%B4%A0%E7%9B%B8%E5%85%B3%E6%94%BF%E7%AD%96%E8%A7%A3%E8%AF%BB/" title="国家数据要素政策解读：隐语MOOC三期笔记（一）">国家数据要素政策解读：隐语MOOC三期笔记（一）</a><time datetime="2025-10-30T10:00:00.000Z" title="发表于 2025-10-30 18:00:00">2025-10-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/10/13/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%8F%90Issue%E4%B8%8EPR/" title="怎么提Issue与PR"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/3564d61e60e59786c3e06fbcb40d0aad.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="怎么提Issue与PR"/></a><div class="content"><a class="title" href="/2025/10/13/%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%8F%90Issue%E4%B8%8EPR/" title="怎么提Issue与PR">怎么提Issue与PR</a><time datetime="2025-10-13T11:00:00.000Z" title="发表于 2025-10-13 19:00:00">2025-10-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/09/29/SecretPad%20All%20in%20One%20%E4%B8%AD%E5%BF%83%E5%8C%96%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95/" title="SecretPad All-in-One中心化部署模式安装与测试"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/image-20250929143618895.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SecretPad All-in-One中心化部署模式安装与测试"/></a><div class="content"><a class="title" href="/2025/09/29/SecretPad%20All%20in%20One%20%E4%B8%AD%E5%BF%83%E5%8C%96%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95/" title="SecretPad All-in-One中心化部署模式安装与测试">SecretPad All-in-One中心化部署模式安装与测试</a><time datetime="2025-09-29T10:00:00.000Z" title="发表于 2025-09-29 18:00:00">2025-09-29</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2025 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">73</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">105</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">6</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>4</sup></a><a href="/tags/GRUB/" style="font-size: 0.88rem;">GRUB<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>4</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>1</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>4</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Hypervisor/" style="font-size: 0.88rem;">Hypervisor<sup>2</sup></a><a href="/tags/KVM/" style="font-size: 0.88rem;">KVM<sup>2</sup></a><a href="/tags/Kerberos/" style="font-size: 0.88rem;">Kerberos<sup>1</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>1</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>7</sup></a><a href="/tags/Linux%E8%BF%90%E7%BB%B4/" style="font-size: 0.88rem;">Linux运维<sup>1</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>10</sup></a><a href="/tags/TPM/" style="font-size: 0.88rem;">TPM<sup>1</sup></a><a href="/tags/UEFI/" style="font-size: 0.88rem;">UEFI<sup>1</sup></a><a href="/tags/VMware/" style="font-size: 0.88rem;">VMware<sup>1</sup></a><a href="/tags/Xen/" style="font-size: 0.88rem;">Xen<sup>1</sup></a><a href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 0.88rem;">云原生<sup>1</sup></a><a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">云计算<sup>1</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">分布式存储<sup>2</sup></a><a href="/tags/%E5%8F%AF%E4%BF%A1%E5%90%AF%E5%8A%A8/" style="font-size: 0.88rem;">可信启动<sup>1</sup></a><a href="/tags/%E5%9C%B0%E7%90%86%E4%BD%8D%E7%BD%AE%E9%99%90%E5%88%B6/" style="font-size: 0.88rem;">地理位置限制<sup>1</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/" style="font-size: 0.88rem;">学习路线<sup>1</sup></a><a href="/tags/%E5%AE%89%E5%85%A8%E5%90%AF%E5%8A%A8/" style="font-size: 0.88rem;">安全启动<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%93%88%E5%B8%8C/" style="font-size: 0.88rem;">密码哈希<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>5</sup></a><a href="/tags/%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5/" style="font-size: 0.88rem;">故障排查<sup>1</sup></a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 0.88rem;">日志<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>2</sup></a><a href="/tags/%E6%B5%81%E5%AA%92%E4%BD%93%E8%A7%A3%E9%94%81/" style="font-size: 0.88rem;">流媒体解锁<sup>1</sup></a><a href="/tags/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" style="font-size: 0.88rem;">磁盘空间<sup>1</sup></a><a href="/tags/%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%BF%97/" style="font-size: 0.88rem;">系统日志<sup>1</sup></a><a href="/tags/%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93/" style="font-size: 0.88rem;">缓存污染<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">网络安全<sup>1</sup></a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" style="font-size: 0.88rem;">虚拟化<sup>5</sup></a><a href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" style="font-size: 0.88rem;">论文翻译<sup>1</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>8</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
