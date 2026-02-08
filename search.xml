@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>模拟不同地区IP进行测试的几种方法</title>
+      <link href="/2026/02/09/%E6%A8%A1%E6%8B%9F%E4%B8%8D%E5%90%8C%E5%9C%B0%E5%8C%BAIP%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95/"/>
+      <url>/2026/02/09/%E6%A8%A1%E6%8B%9F%E4%B8%8D%E5%90%8C%E5%9C%B0%E5%8C%BAIP%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95/</url>
+      
+        <content type="html"><![CDATA[<h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h2><p>前段时间在做智能路由的功能，需要根据用户的 IP 地址判断地理位置，然后把请求路由到最近的服务节点。本地开发的时候，怎么模拟不同地区的 IP 成了个问题。</p><p>总不能真的去各个国家部署测试机器吧？太折腾了。后来发现其实有几种简单的方法可以模拟。</p><h2 id="方法一：修改-HTTP-请求头（最常用）"><a href="#方法一：修改-HTTP-请求头（最常用）" class="headerlink" title="方法一：修改 HTTP 请求头（最常用）"></a>方法一：修改 HTTP 请求头（最常用）</h2><p>大部分 Web 应用在反向代理后面（Nginx、Cloudflare 这些），服务端获取客户端 IP 主要靠 HTTP 请求头。直接修改这些头就能”伪造”IP。</p><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>当请求经过反向代理时，代理会在请求头里加上客户端的真实 IP。常见的头有：</p><ul><li><code>X-Forwarded-For</code>：记录请求经过的所有代理 IP 链，格式是 <code>客户端IP, 代理1IP, 代理2IP</code></li><li><code>X-Real-IP</code>：客户端的真实 IP（通常由 Nginx 设置）</li><li><code>CF-Connecting-IP</code>：Cloudflare 用的头</li></ul><p>服务端拿 IP 的时候，优先级一般是这样的：</p><pre class="mermaid">flowchart TD    A[收到HTTP请求] --> B{有X-Forwarded-For?}    B -->|有| C[取第一个IP]    B -->|没有| D{有X-Real-IP?}    D -->|有| E[取X-Real-IP]    D -->|没有| F[取RemoteAddr]    C --> G[作为客户端IP]    E --> G    F --> G</pre><h3 id="用-curl-测试"><a href="#用-curl-测试" class="headerlink" title="用 curl 测试"></a>用 curl 测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 模拟美国IP（Google DNS）</span></span><br><span class="line">curl -H <span class="string">&quot;Host: your-domain.com&quot;</span> \</span><br><span class="line">      -H <span class="string">&quot;X-Forwarded-For: 8.8.8.8&quot;</span> \</span><br><span class="line">      http://your-server.com/api/check-location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟中国IP（腾讯DNS）</span></span><br><span class="line">curl -H <span class="string">&quot;Host: your-domain.com&quot;</span> \</span><br><span class="line">      -H <span class="string">&quot;X-Forwarded-For: 119.29.29.29&quot;</span> \</span><br><span class="line">      http://your-server.com/api/check-location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模拟多个代理的情况</span></span><br><span class="line">curl -H <span class="string">&quot;X-Forwarded-For: 8.8.8.8, 203.0.113.1, 198.51.100.1&quot;</span> \</span><br><span class="line">      http://your-server.com/api/check-location</span><br></pre></td></tr></table></figure><h3 id="Go-服务端获取-IP-的代码"><a href="#Go-服务端获取-IP-的代码" class="headerlink" title="Go 服务端获取 IP 的代码"></a>Go 服务端获取 IP 的代码</h3><p>那天写代码的时候，踩了个坑：<code>X-Forwarded-For</code> 可能包含多个 IP，要取第一个才是客户端 IP。</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;net&quot;</span></span><br><span class="line">    <span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GetClientIP</span><span class="params">(r *http.Request)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">    <span class="comment">// 优先检查 X-Forwarded-For</span></span><br><span class="line">    <span class="keyword">if</span> xff := r.Header.Get(<span class="string">&quot;X-Forwarded-For&quot;</span>); xff != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        <span class="comment">// 可能有多个IP，取第一个（客户端IP）</span></span><br><span class="line">        <span class="keyword">if</span> idx := strings.Index(xff, <span class="string">&quot;,&quot;</span>); idx != <span class="number">-1</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> strings.TrimSpace(xff[:idx])</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> strings.TrimSpace(xff)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其次检查 X-Real-IP</span></span><br><span class="line">    <span class="keyword">if</span> xri := r.Header.Get(<span class="string">&quot;X-Real-IP&quot;</span>); xri != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> strings.TrimSpace(xri)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最后才用 RemoteAddr（直连的情况）</span></span><br><span class="line">    <span class="keyword">if</span> ip, _, err := net.SplitHostPort(r.RemoteAddr); err == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ip</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> r.RemoteAddr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>这个函数有个前提：<strong>必须信任反向代理传过来的头</strong>。不然任何人都能伪造 IP，后面会说安全问题。</p><h2 id="方法二：使用代理服务器"><a href="#方法二：使用代理服务器" class="headerlink" title="方法二：使用代理服务器"></a>方法二：使用代理服务器</h2><p>如果服务端直接从 TCP 连接拿 IP（不看 HTTP 头），那就得上真正的代理。</p><h3 id="用-VPN-或-SOCKS-代理"><a href="#用-VPN-或-SOCKS-代理" class="headerlink" title="用 VPN 或 SOCKS 代理"></a>用 VPN 或 SOCKS 代理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过 SOCKS5 代理发送请求</span></span><br><span class="line">curl --socks5 127.0.0.1:1080 \</span><br><span class="line">      http://your-server.com/api/check-location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者用所有请求都走代理</span></span><br><span class="line"><span class="built_in">export</span> ALL_PROXY=socks5://127.0.0.1:1080</span><br><span class="line">curl http://your-server.com/api/check-location</span><br></pre></td></tr></table></figure><p>这个方法麻烦点，但更真实。服务端拿到的 <code>RemoteAddr</code> 就是代理服务器的 IP。</p><h2 id="常用的测试-IP"><a href="#常用的测试-IP" class="headerlink" title="常用的测试 IP"></a>常用的测试 IP</h2><p>搞了一份常用的测试 IP，都是公共服务 DNS，稳定可用：</p><table><thead><tr><th>地区</th><th>IP地址</th><th>说明</th></tr></thead><tbody><tr><td>美国加州</td><td>8.8.8.8</td><td>Google DNS</td></tr><tr><td>美国加州</td><td>1.1.1.1</td><td>Cloudflare DNS</td></tr><tr><td>中国广州</td><td>119.29.29.29</td><td>腾讯 DNSPod</td></tr><tr><td>中国香港</td><td>210.0.0.58</td><td>香港电讯 DNS</td></tr><tr><td>日本东京</td><td>202.12.27.33</td><td>APNIC DNS</td></tr><tr><td>英国伦敦</td><td>77.88.8.1</td><td>Yandex DNS</td></tr></tbody></table><p>[配图: IP地理位置查询工具的截图，显示这些IP的地理位置]</p><h2 id="安全问题：IP-伪造的风险"><a href="#安全问题：IP-伪造的风险" class="headerlink" title="安全问题：IP 伪造的风险"></a>安全问题：IP 伪造的风险</h2><p>前面提到，直接修改 HTTP 头伪造 IP 有个严重的安全问题：<strong>任何人都能改</strong>。</p><p>如果不验证 HTTP 头的来源，攻击者可以：</p><ul><li>伪造 IP 绕过地理位置限制</li><li>伪造 IP 进行刷票、刷接口</li><li>伪造 IP 躲避封禁</li></ul><h3 id="生产环境的正确做法"><a href="#生产环境的正确做法" class="headerlink" title="生产环境的正确做法"></a>生产环境的正确做法</h3><ol><li><strong>在反向代理层面处理</strong>：Nginx 或 Cloudflare 负责解析真实 IP，设置 <code>X-Real-IP</code></li><li><strong>服务端只信任代理的头</strong>：比如只信任内网 Nginx 传过来的 <code>X-Real-IP</code></li><li><strong>限制可信代理范围</strong>：用防火墙规则，只允许特定的反向代理访问</li></ol><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Nginx 配置示例</span></span><br><span class="line"><span class="attribute">set_real_ip_from</span> <span class="number">10.0.0.0</span>/<span class="number">8</span>;  <span class="comment"># 内网代理段</span></span><br><span class="line"><span class="attribute">set_real_ip_from</span> <span class="number">172.16.0.0</span>/<span class="number">12</span>;</span><br><span class="line"><span class="attribute">real_ip_header</span> X-Forwarded-For;</span><br><span class="line"><span class="attribute">real_ip_recursive</span> <span class="literal">on</span>;</span><br></pre></td></tr></table></figure><p>这样服务端拿到的 IP 才是可信的。</p><h2 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h2><p>除了测试智能路由，这个技巧还有很多用处：</p><ul><li><strong>测试 A&#x2F;B 实验</strong>：根据地区投放不同功能</li><li><strong>验证 CDN 缓存</strong>：不同地区的节点缓存是否生效</li><li><strong>模拟攻击来源</strong>：测试防刷、限流策略</li><li><strong>调试 IP 定位</strong>：验证 IP 地理位置库的准确性</li></ul><p>那天排查一个 bug，用户用国外vpn 反馈访问慢，就是用这个方法复现的。伪造了几个不同国家的 IP，发现确实路由到了错误的服务节点。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>模拟不同地区 IP 进行测试，核心就是理解服务端是怎么获取客户端 IP 的：</p><ul><li><strong>有反向代理的情况</strong>：修改 HTTP 头（<code>X-Forwarded-For</code>、<code>X-Real-IP</code>）最方便</li><li><strong>直连的情况</strong>：得用真正的代理服务器</li><li><strong>生产环境</strong>：必须验证 HTTP 头的来源，防止 IP 伪造</li></ul><p>本地测试时用方法一就够，简单快捷。但上线前一定要考虑安全问题，不然容易被钻空子。</p><hr><p><strong>延伸阅读</strong>：</p><ul><li>Nginx <code>ngx_http_realip_module</code> 文档</li><li>Cloudflare <code>CF-Connecting-IP</code> 头说明</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 代理 </tag>
+            
+            <tag> HTTP </tag>
+            
+            <tag> 测试 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记</title>
       <link href="/2025/11/23/%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6%E5%AE%89%E5%85%A8%E5%8F%AF%E8%A1%8C%E6%B5%81%E9%80%9A%E6%96%B0%E6%A8%A1%E5%BC%8F/"/>
       <url>/2025/11/23/%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6%E5%AE%89%E5%85%A8%E5%8F%AF%E8%A1%8C%E6%B5%81%E9%80%9A%E6%96%B0%E6%A8%A1%E5%BC%8F/</url>
@@ -40,7 +69,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -52,8 +81,6 @@
             <tag> 隐私计算 </tag>
             
             <tag> MPC </tag>
-            
-            <tag> 中止安全 </tag>
             
         </tags>
       
@@ -71,7 +98,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -84,8 +111,6 @@
             
             <tag> 不经意传输 </tag>
             
-            <tag> OT </tag>
-            
         </tags>
       
     </entry>
@@ -93,13 +118,29 @@
     
     
     <entry>
-      <title></title>
+      <title>spark-submit 提交spark作业到k8s</title>
       <link href="/2025/11/13/spark-submit%20%E6%8F%90%E4%BA%A4spark%E4%BD%9C%E4%B8%9A%E5%88%B0k8s/"/>
       <url>/2025/11/13/spark-submit%20%E6%8F%90%E4%BA%A4spark%E4%BD%9C%E4%B8%9A%E5%88%B0k8s/</url>
       
         <content type="html"><![CDATA[<h1 id="spark-submit-提交spark作业到k8s"><a href="#spark-submit-提交spark作业到k8s" class="headerlink" title="spark-submit 提交spark作业到k8s"></a>spark-submit 提交spark作业到k8s</h1><p>本文主要介绍下 Spark On K8s 的运行流程。我在做一个产品的过程中有涉及到这一部分，虽然产品的实际情况比这复杂，但是了解了这个即可。</p><h3 id="整体流程概述"><a href="#整体流程概述" class="headerlink" title="整体流程概述"></a>整体流程概述</h3><p>当你使用 <code>spark-submit</code> 提交任务到 Kubernetes 集群时，整个过程可以分为两个主要阶段：</p><ol><li><strong>提交阶段</strong>：在你的本地机器或 CI&#x2F;CD 环境中发生，<code>spark-submit</code> 与 Kubernetes API Server 交互。</li><li><strong>执行阶段</strong>：在 Kubernetes 集群内部发生，由 Spark Driver Pod 和 Executor Pods 协同完成。</li></ol><p>整个流程的时序图如下所示，清晰地展示了各个组件间的交互：</p><p><img src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/deepseek_mermaid_20251113_92302f.png" alt="deepseek_mermaid_20251113_92302f"></p><h3 id="详细流程分解"><a href="#详细流程分解" class="headerlink" title="详细流程分解"></a>详细流程分解</h3><h4 id="阶段一：提交阶段-——-spark-submit-与-Kubernetes-API-Server-的交互"><a href="#阶段一：提交阶段-——-spark-submit-与-Kubernetes-API-Server-的交互" class="headerlink" title="阶段一：提交阶段 ——  spark-submit 与 Kubernetes API Server 的交互"></a>阶段一：提交阶段 ——  <code>spark-submit</code> 与 Kubernetes API Server 的交互</h4><p>1.<strong>命令执行</strong>：你执行一个类似下面的命令：</p><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">$&#123;SPARK_HOME&#125;/bin/spark-submit \</span><br><span class="line">    --master $&#123;COMPUT_CLUSTER_URL&#125; \</span><br><span class="line">    --deploy-<span class="built_in">mode</span> cluster \</span><br><span class="line">    --conf spark.kubernetes.namespace=$&#123;COMPUT_CLUSTER_NAMESPACE&#125; \</span><br><span class="line">    --conf spark.kubernetes.authenticate.ssl.trustCerts=false \</span><br><span class="line">    --conf spark.kubernetes.driver.pod.name=$random_pod_name \</span><br><span class="line">    --conf spark.kubernetes.executor.podNamePrefix=$random_pod_name-executor-pod \</span><br><span class="line">    --conf spark.kubernetes.authenticate.driver.serviceAccountName=$&#123;COMPUT_CLUSTER_ACCOUNT&#125; \</span><br><span class="line">    --conf spark.driver.memory=$&#123;spark_driver_memory:-<span class="number">1</span>g&#125; \</span><br><span class="line">    --conf spark.executor.memory=$&#123;spark_executor_memory:-<span class="number">2</span>g&#125; \</span><br><span class="line">    --conf spark.executor.memoryOverhead=<span class="number">2</span>g \</span><br><span class="line">    --conf spark.executor.cores=$&#123;spark_executor_cores:-<span class="number">2</span>&#125; \</span><br><span class="line">    --conf spark.executor.instances=$&#123;spark_num_executors:-<span class="number">2</span>&#125; \</span><br><span class="line">    --conf spark.shuffle.io.maxRetries=<span class="number">10</span> \</span><br><span class="line">    --conf spark.shuffle.io.retryWait=<span class="number">10</span>s \</span><br><span class="line">    --conf spark.worker.cleanup.interval=<span class="number">60</span> \</span><br><span class="line">    --conf spark.worker.cleanup.appDataTtl=<span class="number">60</span> \</span><br><span class="line">    --conf spark.kubernetes.container.image=<span class="number">192</span>.<span class="number">168</span>.<span class="number">230</span>.<span class="number">10</span>:<span class="number">5000</span>/gdios/contract-lite/spark:v3.<span class="number">3</span>.<span class="number">2</span>-custom \</span><br><span class="line">    --conf spark.kubernetes.container.image.pullPolicy=IfNotPresent \</span><br><span class="line">    --conf spark.kubernetes.driver.podTemplateFile=./podTemplate/spark-pod-driver-template.yaml \</span><br><span class="line">    --conf spark.kubernetes.executor.podTemplateFile=./podTemplate/spark-pod-executor-template.yaml \</span><br><span class="line">    --conf spark.memory.fraction=<span class="number">0</span>.<span class="number">7</span> \</span><br><span class="line">    --conf spark.memory.storageFraction=<span class="number">0</span>.<span class="number">2</span> \</span><br><span class="line">    --conf spark.kubernetes.driver.service.deleteOnTermination=true \</span><br><span class="line">    $&#123;JARS_PARAM&#125; \</span><br><span class="line"><span class="function">    local:/<span class="title">opt</span>/<span class="title">spark_app</span>/$&#123;<span class="title">PYTHON_FILE</span>&#125; &quot;$&#123;<span class="title">PYTHON_ARGS</span>[@]&#125;&quot;</span></span><br></pre></td></tr></table></figure><p>参数详细解析</p><p>下表详细解析了通过 <code>spark-submit</code> 将作业提交到 Kubernetes 集群时使用的各项参数。</p><h4 id="1-基础集群配置"><a href="#1-基础集群配置" class="headerlink" title="1. 基础集群配置"></a>1. 基础集群配置</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>--master k8s://...</code></td><td align="left"><strong>作用</strong>：指定 Kubernetes API Server 的地址，作为 Spark Master。<br><strong>说明</strong>：这是 Spark 与 K8s 集群通信的入口点。</td></tr><tr><td align="left"><code>--deploy-mode cluster</code></td><td align="left"><strong>作用</strong>：指定为集群部署模式。<br><strong>说明</strong>：Driver 程序将会在 K8s 集群的一个 Pod 中运行，而不是在提交客户端上。</td></tr></tbody></table><h4 id="2-Kubernetes-核心认证与命名空间"><a href="#2-Kubernetes-核心认证与命名空间" class="headerlink" title="2. Kubernetes 核心认证与命名空间"></a>2. Kubernetes 核心认证与命名空间</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.namespace</code></td><td align="left"><strong>作用</strong>：指定 Spark 应用运行的 Kubernetes 命名空间。<br><strong>说明</strong>：所有的 Driver 和 Executor Pod 都会在此命名空间中创建。</td></tr><tr><td align="left"><code>spark.kubernetes.authenticate.ssl.trustCerts</code></td><td align="left"><strong>作用</strong>：控制是否禁用 SSL 证书验证。<br><strong>说明</strong>：在测试环境或使用自签名证书时可设为 <code>false</code>。生产环境建议启用并配置正确证书。</td></tr><tr><td align="left"><code>spark.kubernetes.authenticate.driver.serviceAccountName</code></td><td align="left"><strong>作用</strong>：指定 Driver Pod 使用的 Service Account。<br><strong>说明</strong>：<strong>至关重要</strong>。此 Service Account 必须拥有创建和删除 Pod 的权限，否则 Executor 将无法启动。</td></tr></tbody></table><h4 id="3-Pod-命名与标识"><a href="#3-Pod-命名与标识" class="headerlink" title="3. Pod 命名与标识"></a>3. Pod 命名与标识</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.driver.pod.name</code></td><td align="left"><strong>作用</strong>：自定义 Driver Pod 的名称。<br><strong>说明</strong>：便于识别和管理，若不指定则会生成随机名称。</td></tr><tr><td align="left"><code>spark.kubernetes.executor.podNamePrefix</code></td><td align="left"><strong>作用</strong>：设置 Executor Pod 名称的前缀。<br><strong>说明</strong>：所有 Executor Pod 名称都将以此前缀开头，方便在 K8s 中识别隶属于同一应用的 Pod。</td></tr></tbody></table><h4 id="4-资源分配配置"><a href="#4-资源分配配置" class="headerlink" title="4. 资源分配配置"></a>4. 资源分配配置</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.driver.memory</code></td><td align="left"><strong>作用</strong>：设置 Driver 进程的堆内存大小（例如：<code>1g</code>）。</td></tr><tr><td align="left"><code>spark.executor.memory</code></td><td align="left"><strong>作用</strong>：设置每个 Executor 的堆内存大小（例如：<code>2g</code>）。</td></tr><tr><td align="left"><code>spark.executor.memoryOverhead</code></td><td align="left"><strong>作用</strong>：设置每个 Executor 的堆外内存。<br><strong>说明</strong>：用于 JVM 开销、原生数据结构等。Pod 总内存 &#x3D; <code>executor.memory</code> + <code>executor.memoryOverhead</code>。</td></tr><tr><td align="left"><code>spark.executor.cores</code></td><td align="left"><strong>作用</strong>：为每个 Executor 分配的 CPU 核心数（例如：<code>2</code>）。</td></tr><tr><td align="left"><code>spark.executor.instances</code></td><td align="left"><strong>作用</strong>：启动的 Executor 实例数量（例如：<code>2</code>）。</td></tr></tbody></table><h4 id="5-网络与稳定性配置"><a href="#5-网络与稳定性配置" class="headerlink" title="5. 网络与稳定性配置"></a>5. 网络与稳定性配置</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.shuffle.io.maxRetries</code><br><code>spark.shuffle.io.retryWait</code></td><td align="left"><strong>作用</strong>：配置 Shuffle 操作的失败重试次数和等待时间。<br><strong>说明</strong>：在网络不稳定的环境中，增加重试有助于提高作业稳定性。</td></tr><tr><td align="left"><code>spark.driver.port</code><br><code>spark.driver.blockManager.port</code></td><td align="left"><strong>作用</strong>：固定 Driver 的通信端口。<br><strong>说明</strong>：在 K8s 环境中，固定端口可以简化网络策略（NetworkPolicy）的配置。</td></tr></tbody></table><h4 id="6-容器镜像与拉取策略"><a href="#6-容器镜像与拉取策略" class="headerlink" title="6. 容器镜像与拉取策略"></a>6. 容器镜像与拉取策略</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.container.image</code></td><td align="left"><strong>作用</strong>：指定包含 Spark 运行时和应用程序代码的 Docker 镜像。<br><strong>说明</strong>：这个镜像是运行所有 Pod 的基础。</td></tr><tr><td align="left"><code>spark.kubernetes.container.image.pullPolicy</code></td><td align="left"><strong>作用</strong>：设置镜像拉取策略。<br><strong>说明</strong>：<code>IfNotPresent</code> 表示如果本地已存在则不拉取，<code>Always</code> 表示总是重新拉取。</td></tr></tbody></table><h4 id="7-高级-Pod-配置"><a href="#7-高级-Pod-配置" class="headerlink" title="7. 高级 Pod 配置"></a>7. 高级 Pod 配置</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.driver.podTemplateFile</code><br><code>spark.kubernetes.executor.podTemplateFile</code></td><td align="left"><strong>作用</strong>：通过模板文件对 Driver 和 Executor Pod 进行高级自定义。<br><strong>说明</strong>：<strong>功能强大</strong>。可用于挂载数据卷（Volume）、设置环境变量、配置资源限制（limits&#x2F;requests）、节点亲和性等。</td></tr></tbody></table><h4 id="8-内存管理"><a href="#8-内存管理" class="headerlink" title="8. 内存管理"></a>8. 内存管理</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.memory.fraction</code></td><td align="left"><strong>作用</strong>：设置用于执行和存储的统一内存（Unified Memory）占总堆内存的比例（例如：<code>0.7</code>）。</td></tr><tr><td align="left"><code>spark.memory.storageFraction</code></td><td align="left"><strong>作用</strong>：在统一内存中，专门用于数据缓存（Storage）的内存所占比例（例如：<code>0.2</code>）。</td></tr></tbody></table><h4 id="9-清理与生命周期"><a href="#9-清理与生命周期" class="headerlink" title="9. 清理与生命周期"></a>9. 清理与生命周期</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.driver.service.deleteOnTermination</code></td><td align="left"><strong>作用</strong>：控制在 Driver Pod 终止时是否自动删除其对应的 K8s Service。<br><strong>说明</strong>：设置为 <code>true</code> 可自动清理资源。</td></tr><tr><td align="left"><code>spark.worker.cleanup.interval</code><br><code>spark.worker.cleanup.appDataTtl</code></td><td align="left"><strong>作用</strong>：设置工作目录的清理间隔和应用数据的存活时间（TTL），单位为秒。</td></tr></tbody></table><h4 id="10-应用代码与依赖"><a href="#10-应用代码与依赖" class="headerlink" title="10. 应用代码与依赖"></a>10. 应用代码与依赖</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>--jars</code></td><td align="left"><strong>作用</strong>：通过逗号分隔的列表，指定需要分发到 Driver 和 Executor 的额外 JAR 包。</td></tr><tr><td align="left"><code>--py-files</code></td><td align="left"><strong>作用</strong>：对于 PySpark 应用，指定需要分发的 <code>.zip</code>, <code>.egg</code>, 或 <code>.py</code> 文件。</td></tr><tr><td align="left"><code>local:///path/to/app</code></td><td align="left"><strong>作用</strong>：指定应用程序代码在容器镜像中的路径。<br><strong>说明</strong>：<code>local:</code> 前缀表示代码位于镜像内部，无需从外部下载。</td></tr><tr><td align="left"><code>&lt;application-arguments&gt;</code></td><td align="left"><strong>作用</strong>：传递给应用程序主类 <code>main</code> 方法的参数。</td></tr></tbody></table><h3 id="补充：其他重要参数"><a href="#补充：其他重要参数" class="headerlink" title="补充：其他重要参数"></a>补充：其他重要参数</h3><p>除了上述参数，以下配置在生产环境中也十分常用，特别是在资源管理和调度方面。</p><h4 id="1-动态资源分配-Dynamic-Resource-Allocation"><a href="#1-动态资源分配-Dynamic-Resource-Allocation" class="headerlink" title="1. 动态资源分配 (Dynamic Resource Allocation)"></a>1. 动态资源分配 (Dynamic Resource Allocation)</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.dynamicAllocation.enabled</code></td><td align="left"><strong>作用</strong>：设置为 <code>true</code> 以启用动态资源分配。<br><strong>说明</strong>：Spark 会根据工作负载自动增减 Executor 数量，非常适合多租户和资源共享的环境。</td></tr><tr><td align="left"><code>spark.dynamicAllocation.minExecutors</code></td><td align="left"><strong>作用</strong>：动态分配下，Executor 的最小数量。<br><strong>说明</strong>：确保即使在空闲时也保留指定数量的 Executor，以减少冷启动延迟。</td></tr><tr><td align="left"><code>spark.dynamicAllocation.maxExecutors</code></td><td align="left"><strong>作用</strong>：动态分配下，Executor 的最大数量。<br><strong>说明</strong>：控制资源使用的上限，防止单个作业占用过多集群资源。</td></tr><tr><td align="left"><code>spark.dynamicAllocation.initialExecutors</code></td><td align="left"><strong>作用</strong>：作业启动时初始化的 Executor 数量。</td></tr></tbody></table><h4 id="2-调度与亲和性-Scheduling-Affinity"><a href="#2-调度与亲和性-Scheduling-Affinity" class="headerlink" title="2. 调度与亲和性 (Scheduling &amp; Affinity)"></a>2. 调度与亲和性 (Scheduling &amp; Affinity)</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.driver.node.selector.[labelKey]</code><br><code>spark.kubernetes.executor.node.selector.[labelKey]</code></td><td align="left"><strong>作用</strong>：通过节点标签（Node Selector）将 Driver 或 Executor Pod 调度到特定节点。<br><strong>示例</strong>：<code>--conf spark.kubernetes.executor.node.selector.disktype=ssd</code></td></tr><tr><td align="left"><code>spark.kubernetes.driver.tolerations.[tolerationNum].[key/operator/value/effect]</code><br><code>spark.kubernetes.executor.tolerations.[...</code></td><td align="left"><strong>作用</strong>：为 Pod 添加容忍度（Toleration），使其可以被调度到带有特定污点（Taint）的节点上。<br><strong>说明</strong>：常用于将 Spark 作业调度到专用节点组。</td></tr></tbody></table><h4 id="3-依赖与文件管理"><a href="#3-依赖与文件管理" class="headerlink" title="3. 依赖与文件管理"></a>3. 依赖与文件管理</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>--files</code></td><td align="left"><strong>作用</strong>：指定需要上传到每个 Executor 工作目录的普通文件列表。<br><strong>说明</strong>：例如配置文件、脚本等。</td></tr><tr><td align="left"><code>spark.kubernetes.file.upload.path</code></td><td align="left"><strong>作用</strong>：指定一个 Driver 可访问的 HDFS 兼容路径，用于上传作业依赖。<br><strong>说明</strong>：当直接通过 <code>k8s://</code> 提交时，此路径可作为依赖文件的中转站。</td></tr></tbody></table><h4 id="4-Pod-元数据"><a href="#4-Pod-元数据" class="headerlink" title="4. Pod 元数据"></a>4. Pod 元数据</h4><table><thead><tr><th align="left">参数</th><th align="left">作用与说明</th></tr></thead><tbody><tr><td align="left"><code>spark.kubernetes.driver.label.[labelKey]</code><br><code>spark.kubernetes.executor.label.[labelKey]</code></td><td align="left"><strong>作用</strong>：为 Driver 或 Executor Pod 添加自定义标签（Label）。<br><strong>示例</strong>：<code>--conf spark.kubernetes.driver.label.app-owner=team-a</code></td></tr><tr><td align="left"><code>spark.kubernetes.driver.annotation.[annotationKey]</code><br><code>spark.kubernetes.executor.annotation.[annotationKey]</code></td><td align="left"><strong>作用</strong>：为 Driver 或 Executor Pod 添加自定义注解（Annotation）。<br><strong>说明</strong>：可用于集成监控、日志等第三方系统。</td></tr></tbody></table>]]></content>
       
       
+      <categories>
+          
+          <category> 大数据 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kubernetes </tag>
+            
+            <tag> Spark </tag>
+            
+            <tag> Docker </tag>
+            
+        </tags>
       
     </entry>
     
@@ -115,7 +156,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -125,10 +166,6 @@
             <tag> Docker </tag>
             
             <tag> 达梦数据库 </tag>
-            
-            <tag> 数据库 </tag>
-            
-            <tag> 国产数据库 </tag>
             
         </tags>
       
@@ -156,8 +193,6 @@
             <tag> 隐私计算 </tag>
             
             <tag> 隐语 </tag>
-            
-            <tag> 数据要素 </tag>
             
         </tags>
       
@@ -202,16 +237,10 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
-      
-        <tags>
-            
-            <tag> PR </tag>
-            
-        </tags>
       
     </entry>
     
@@ -256,8 +285,6 @@
           
           <category> 大数据 </category>
           
-          <category> 隐私计算 </category>
-          
       </categories>
       
       
@@ -266,8 +293,6 @@
             <tag> 隐私计算 </tag>
             
             <tag> Kuscia </tag>
-            
-            <tag> P2P </tag>
             
         </tags>
       
@@ -285,7 +310,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -295,8 +320,6 @@
             <tag> 隐私计算 </tag>
             
             <tag> SecretFlow </tag>
-            
-            <tag> Python </tag>
             
             <tag> Bazel </tag>
             
@@ -318,7 +341,7 @@
       
       <categories>
           
-          <category> 网络安全 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -326,8 +349,6 @@
         <tags>
             
             <tag> DNS </tag>
-            
-            <tag> 缓存污染 </tag>
             
         </tags>
       
@@ -345,7 +366,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -355,10 +376,6 @@
             <tag> DNS </tag>
             
             <tag> DHCP </tag>
-            
-            <tag> ARP </tag>
-            
-            <tag> 计算机网络 </tag>
             
         </tags>
       
@@ -376,7 +393,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 数据库 </category>
           
       </categories>
       
@@ -384,8 +401,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-            <tag> 系统日志 </tag>
             
         </tags>
       
@@ -403,7 +418,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 网络 </category>
           
       </categories>
       
@@ -411,8 +426,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-            <tag> 日志清理 </tag>
             
         </tags>
       
@@ -440,8 +453,6 @@
             <tag> Spark </tag>
             
             <tag> Zeppelin </tag>
-            
-            <tag> 大数据 </tag>
             
         </tags>
       
@@ -505,8 +516,6 @@
             
             <tag> Docker </tag>
             
-            <tag> 大数据 </tag>
-            
         </tags>
       
     </entry>
@@ -534,8 +543,6 @@
             
             <tag> Zeppelin </tag>
             
-            <tag> 大数据 </tag>
-            
         </tags>
       
     </entry>
@@ -560,8 +567,6 @@
         <tags>
             
             <tag> Spark </tag>
-            
-            <tag> 源码 </tag>
             
         </tags>
       
@@ -592,8 +597,6 @@
             
             <tag> Hadoop </tag>
             
-            <tag> 故障排查 </tag>
-            
         </tags>
       
     </entry>
@@ -610,7 +613,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -619,13 +622,11 @@
             
             <tag> 密码学 </tag>
             
-            <tag> 非对称加密 </tag>
+            <tag> RSA </tag>
             
             <tag> 数字签名 </tag>
             
             <tag> 数字证书 </tag>
-            
-            <tag> CA </tag>
             
         </tags>
       
@@ -643,18 +644,14 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 网络 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 磁盘空间 </tag>
-            
             <tag> 日志 </tag>
-            
-            <tag> Linux运维 </tag>
             
         </tags>
       
@@ -672,7 +669,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -684,10 +681,6 @@
             <tag> 数字签名 </tag>
             
             <tag> 数字证书 </tag>
-            
-            <tag> CA </tag>
-            
-            <tag> OpenSSL </tag>
             
         </tags>
       
@@ -705,7 +698,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -714,13 +707,11 @@
             
             <tag> 密码学 </tag>
             
-            <tag> 非对称加密 </tag>
+            <tag> RSA </tag>
             
             <tag> 数字签名 </tag>
             
             <tag> 数字证书 </tag>
-            
-            <tag> CA </tag>
             
         </tags>
       
@@ -738,7 +729,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -754,8 +745,6 @@
             <tag> UEFI </tag>
             
             <tag> GRUB </tag>
-            
-            <tag> 安全启动 </tag>
             
         </tags>
       
@@ -773,7 +762,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -785,10 +774,6 @@
             <tag> 机密计算 </tag>
             
             <tag> Intel SGX </tag>
-            
-            <tag> 硬件安全 </tag>
-            
-            <tag> 可信执行环境 </tag>
             
         </tags>
       
@@ -806,7 +791,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -818,12 +803,6 @@
             <tag> Hypervisor </tag>
             
             <tag> KVM </tag>
-            
-            <tag> VMware </tag>
-            
-            <tag> Xen </tag>
-            
-            <tag> 云计算 </tag>
             
         </tags>
       
@@ -841,7 +820,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -851,8 +830,6 @@
             <tag> 密码学 </tag>
             
             <tag> RSA </tag>
-            
-            <tag> 非对称加密 </tag>
             
             <tag> 数字签名 </tag>
             
@@ -872,7 +849,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -905,7 +882,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -915,8 +892,6 @@
             <tag> HyperEnclave </tag>
             
             <tag> TEE </tag>
-            
-            <tag> 内存管理 </tag>
             
         </tags>
       
@@ -934,7 +909,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -963,7 +938,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -992,7 +967,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -1006,8 +981,6 @@
             <tag> 虚拟化 </tag>
             
             <tag> 机密计算 </tag>
-            
-            <tag> 论文翻译 </tag>
             
         </tags>
       
@@ -1025,7 +998,7 @@
       
       <categories>
           
-          <category> 隐私计算 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -1035,8 +1008,6 @@
             <tag> HyperEnclave </tag>
             
             <tag> TEE </tag>
-            
-            <tag> 学习路线 </tag>
             
         </tags>
       
@@ -1054,7 +1025,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -1064,8 +1035,6 @@
             <tag> HDFS </tag>
             
             <tag> Spark </tag>
-            
-            <tag> 大数据 </tag>
             
             <tag> RDD </tag>
             
@@ -1096,8 +1065,6 @@
             
             <tag> Spring </tag>
             
-            <tag> AI </tag>
-            
         </tags>
       
     </entry>
@@ -1122,8 +1089,6 @@
         <tags>
             
             <tag> Spark </tag>
-            
-            <tag> 分布式计算 </tag>
             
             <tag> RDD </tag>
             
@@ -1177,12 +1142,6 @@
             
             <tag> Spark </tag>
             
-            <tag> 大数据 </tag>
-            
-            <tag> 分布式计算 </tag>
-            
-            <tag> 技术专栏 </tag>
-            
         </tags>
       
     </entry>
@@ -1199,7 +1158,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
@@ -1235,12 +1194,6 @@
             
             <tag> Java </tag>
             
-            <tag> JDK </tag>
-            
-            <tag> 开发环境 </tag>
-            
-            <tag> 版本管理 </tag>
-            
         </tags>
       
     </entry>
@@ -1257,7 +1210,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -1286,7 +1239,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 网络 </category>
           
       </categories>
       
@@ -1294,14 +1247,6 @@
         <tags>
             
             <tag> DNS </tag>
-            
-            <tag> 代理 </tag>
-            
-            <tag> 网络安全 </tag>
-            
-            <tag> 流媒体解锁 </tag>
-            
-            <tag> 地理位置限制 </tag>
             
         </tags>
       
@@ -1319,18 +1264,14 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 广告投放 </tag>
-            
-            <tag> RTB </tag>
-            
-            <tag> DSP </tag>
+            <tag> Spark </tag>
             
         </tags>
       
@@ -1355,15 +1296,9 @@
       
         <tags>
             
-            <tag> TEE </tag>
+            <tag> Linux </tag>
             
-            <tag> 隐私计算 </tag>
-            
-            <tag> TME </tag>
-            
-            <tag> SGX </tag>
-            
-            <tag> TDX </tag>
+            <tag> Java </tag>
             
         </tags>
       
@@ -1390,8 +1325,6 @@
             
             <tag> HDFS </tag>
             
-            <tag> 分布式存储 </tag>
-            
         </tags>
       
     </entry>
@@ -1415,15 +1348,7 @@
       
         <tags>
             
-            <tag> TEE </tag>
-            
-            <tag> 隐私计算 </tag>
-            
-            <tag> TME </tag>
-            
-            <tag> SGX </tag>
-            
-            <tag> TDX </tag>
+            <tag> Java </tag>
             
         </tags>
       
@@ -1445,6 +1370,12 @@
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> MySQL </tag>
+            
+        </tags>
       
     </entry>
     
@@ -1469,8 +1400,6 @@
             
             <tag> Kubernetes </tag>
             
-            <tag> 云原生 </tag>
-            
         </tags>
       
     </entry>
@@ -1487,14 +1416,12 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> 密码哈希 </tag>
             
             <tag> Argon2 </tag>
             
@@ -1543,18 +1470,14 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 密码存储 </tag>
-            
             <tag> 系统安全 </tag>
-            
-            <tag> 哈希算法 </tag>
             
         </tags>
       
@@ -1576,6 +1499,14 @@
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> 隐私计算 </tag>
+            
+            <tag> MPC </tag>
+            
+        </tags>
       
     </entry>
     
@@ -1604,13 +1535,9 @@
             
             <tag> Spark </tag>
             
-            <tag> 大数据 </tag>
-            
             <tag> Hive </tag>
             
             <tag> YARN </tag>
-            
-            <tag> HBase </tag>
             
         </tags>
       
@@ -1633,6 +1560,14 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> Java </tag>
+            
+            <tag> Spark </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -1647,14 +1582,14 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 哈希 </tag>
+            <tag> 密码学 </tag>
             
         </tags>
       
@@ -1753,20 +1688,18 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 分布式存储 </tag>
+            <tag> HDFS </tag>
             
             <tag> MinIO </tag>
             
             <tag> 对象存储 </tag>
-            
-            <tag> S3兼容 </tag>
             
         </tags>
       
@@ -1784,10 +1717,16 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> HDFS </tag>
+            
+        </tags>
       
     </entry>
     
@@ -1808,6 +1747,14 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> HDFS </tag>
+            
+            <tag> Hadoop </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -1822,7 +1769,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -1830,10 +1777,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-            <tag> 网络 </tag>
-            
-            <tag> 安全 </tag>
             
             <tag> 防火墙 </tag>
             
@@ -1855,7 +1798,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -1865,10 +1808,6 @@
             <tag> Linux </tag>
             
             <tag> Java </tag>
-            
-            <tag> 网络 </tag>
-            
-            <tag> 系统 </tag>
             
         </tags>
       
@@ -1886,7 +1825,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -1894,10 +1833,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-            <tag> 网络 </tag>
-            
-            <tag> 系统 </tag>
             
         </tags>
       
@@ -1915,7 +1850,7 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
@@ -1923,10 +1858,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-            <tag> 网络 </tag>
-            
-            <tag> 安全 </tag>
             
             <tag> 防火墙 </tag>
             
@@ -1946,10 +1877,16 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 安全 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
       
     </entry>
     
@@ -1970,6 +1907,12 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -1989,6 +1932,12 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -2003,10 +1952,16 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 数据库 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> Redis </tag>
+            
+        </tags>
       
     </entry>
     
@@ -2022,10 +1977,18 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 大数据 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> Java </tag>
+            
+        </tags>
       
     </entry>
     
@@ -2046,6 +2009,12 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -2060,10 +2029,16 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 基础设施 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
       
     </entry>
     
@@ -2088,12 +2063,6 @@
             
             <tag> Spark </tag>
             
-            <tag> 大数据 </tag>
-            
-            <tag> 分布式计算 </tag>
-            
-            <tag> 集群架构 </tag>
-            
         </tags>
       
     </entry>
@@ -2110,7 +2079,7 @@
       
       <categories>
           
-          <category> 前端 </category>
+          <category> 网络 </category>
           
       </categories>
       
@@ -2129,10 +2098,16 @@
       
       <categories>
           
-          <category> 后端 </category>
+          <category> 基础设施 </category>
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> macOS </tag>
+            
+        </tags>
       
     </entry>
     
