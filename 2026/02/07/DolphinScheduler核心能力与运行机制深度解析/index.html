@@ -1,0 +1,705 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>DolphinScheduler 核心能力与运行机制深度解析 | 凌霄的博客</title><meta name="keywords" content="DolphinScheduler,任务调度,工作流"><meta name="author" content="XR"><meta name="copyright" content="XR"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="DolphinScheduler 核心能力与运行机制深度解析"><meta name="application-name" content="DolphinScheduler 核心能力与运行机制深度解析"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="DolphinScheduler 核心能力与运行机制深度解析"><meta property="og:url" content="http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/index.html"><meta property="og:site_name" content="凌霄的博客"><meta property="og:description" content="DolphinScheduler 是分布式可视化工作流调度系统。本文深入解析其核心任务类型、运行架构、工作流执行流程，以及与 Airflow、XXL-Job 的核心差异。"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png"><meta property="article:author" content="XR"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png"><meta name="description" content="DolphinScheduler 是分布式可视化工作流调度系统。本文深入解析其核心任务类型、运行架构、工作流执行流程，以及与 Airflow、XXL-Job 的核心差异。"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🧱 团队小组发动机"]},
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: XR","link":"链接: ","source":"来源: 凌霄的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '凌霄的博客',
+  title: 'DolphinScheduler 核心能力与运行机制深度解析',
+  postAI: '',
+  pageFillDescription: '背景问题, 一、支持的任务类型, 1. 大数据计算类任务, 2. 脚本x2F命令类任务, 3. 数据同步x2F存储类任务, 4. 调度x2F控制类任务, 5. 第三方集成类任务, 二、核心运行架构, 1. Master Server（主节点）, 2. Worker Server（工作节点）, 3. ZooKeeper 集群, 4. 元数据数据库（MySQLx2FPostgreSQL）, 三、工作流执行流程, 1. 工作流编排与提交, 2. 任务调度与执行流程, 3. 任务异常处理, 四、核心设计亮点, 1. 可视化 DAG 编排, 2. 分布式高可用, 3. 插件化架构, 4. 全链路监控, 5. 资源管理, 五、与其他调度工具的对比, 对比 Airflow, 对比 XXL-Job, 对比 Oozie, 总结背景问题前段时间在公司接触大数据平台顺便了解了一下调度系统的实现发现现在用的团队挺多号称分布式可视化高可用就想深入扒一扒这玩意儿到底好在哪跟这些有啥区别这篇文章就是想搞清楚几个问题到底支持哪些任务类型它的架构是怎么设计的怎么做到高可用的一个工作流从提交到执行完成中间经历了什么跟其他调度工具比有啥优缺点一支持的任务类型支持的任务类型挺多的核心思想是所有任务都通过插件实现不用自己写代码上点点配置就能跑大数据计算类任务这类任务的原理很简单插件帮你拼命令比如任务你在上配置包路径或本地主类名资源参数数量内存大小运行模式本地插件拿到这些配置后自动拼接成命令然后提交到集群执行插件自动生成的命令示例更直接内置编辑器写完点运行就行插件会连接到或执行并返回结果支持查看结果集失败重跑脚本命令类任务有两种方式直接在写脚本内容配置脚本文件路径本地文件系统或插件会在节点上启动进程执行脚本支持自定义环境变量和执行用户任务配置请求方法参数请求头插件发起网络请求并校验响应码任务基于协议远程连接服务器执行指定命令或脚本支持无密登录数据同步存储类任务封装了数据同步工具的原生命令配置源端和目标端的数据源信息同步规则插件自动触发同步任务支持进度监控支持文件操作上传下载移动删除配置文件路径和操作类型就行适配主流分布式文件系统和对象存储调度控制类任务子工作流可以把已创建的工作流作为子节点嵌入主工作流实现模块化复用这个功能挺实用的比如把通用的数据预处理流程做成子工作流多个主流程复用等待判定分支等待任务固定时长延迟判定任务基于参数或执行结果做条件判断分支任务支持并行串行依赖触发第三方集成类任务通过插件调用第三方服务的远程触发交互式笔记执行支持通过与其他调度系统集成实现跨系统的任务编排和能力互补核心共性所有任务都是无代码可视化配置插件层屏蔽了底层执行细节用户只管业务参数二核心运行架构采用分布式主从架构分为大核心组件底层依赖做集群协调节点选举和状态存储前端界面集群集群集群协调元数据数据库主节点核心职责工作流解析任务调度分配集群节点管理任务状态监控运行逻辑接收提交的工作流解析图并拆分任务根据任务类型资源负载将任务分配到空闲的节点实时监控和任务状态处理失败超时等异常支持集群部署避免单点故障负责主节点选举一个挂了别的会自动接管工作节点核心职责任务实际执行日志收集执行结果上报运行逻辑接收分配的任务加载对应的任务插件执行插件封装的命令或逻辑执行过程中实时收集日志并写入日志存储本地或任务完成后将执行结果成功失败终止上报至也支持集群部署可以横向扩容每个向注册通过发现可用的集群核心作用节点注册与发现主节点选举任务执行锁防止并发执行冲突节点状态同步在这个架构里扮演协调者的角色确保分布式环境下的数据一致性元数据数据库存储内容工作流定义任务配置信息调度规则定时依赖执行日志任务工作流运行状态集群节点信息数据库只存元数据和运行状态不存实际的任务日志日志单独存储避免数据库膨胀三工作流执行流程一个工作流从提交到执行完成整个过程挺清晰的工作流编排与提交前端提供拖拽式编辑器把左侧任务节点拖入画布通过箭头连接节点设置依赖关系串行并行条件依赖配置每个节点的业务参数和调度属性超时时间失败重跑次数执行用户提交后工作流定义任务配置等元数据持久化到数据库注册工作流信息任务调度与执行流程数据库提交工作流读取工作流定义解析生成执行计划查询可用节点遍历任务分配任务加载插件执行任务实时上报状态和日志上报执行结果任务成功触发下游任务任务失败处理失败重跑或终止更新工作流状态返回执行结果详细步骤触发调度工作流满足触发条件定时手动上游依赖触发从数据库读取工作流信息解析图并生成任务执行计划任务分配根据任务分片策略按负载指定执行节点随机将任务发送至对应节点通过发送任务执行指令任务执行接收指令加载对应的任务插件初始化执行环境执行插件逻辑如拼接命令运行脚本实时将执行日志和状态上报至依赖推进当一个任务执行完成后更新任务状态解析图触发下游依赖任务重复上述分配执行流程直至整个工作流所有任务执行完成任务异常处理失败重跑支持任务级工作流级重跑可指定重跑节点跳过已成功节点重新分配重跑任务至超时终止配置任务工作流超时时间超时后自动发送终止指令停止任务进程并标记状态为超时失败节点故障节点故障通过检测到节点离线将该节点上未完成的任务重新分配至其他空闲节点故障自动选举新的接管所有调度任务无任务丢失四核心设计亮点可视化编排不用写代码拖拽就能完成复杂工作流设计支持图放大缩小保存导出直观展示任务依赖关系这个对非技术人员很友好降低了使用门槛分布式高可用均支持集群部署无单点故障可根据业务负载横向扩容节点节点故障时会自动选举新的接管调度任务整个过程秒级完成业务无感知插件化架构所有任务类型都基于插件实现新增任务类型只需开发自定义插件无需修改核心代码扩展性强社区也贡献了不少第三方插件全链路监控支持工作流任务级别的状态监控待执行运行中成功失败超时实时查看执行日志支持日志检索下载排查问题时方便不用上服务器翻日志文件资源管理支持配置任务执行的资源队列队列执行节点组实现任务资源隔离避免资源抢占这个在生产环境挺重要防止核心任务被抢资源五与其他调度工具的对比对比需要编写代码学习曲线陡峭全程可视化操作门槛更低国内大数据生态适配方面对的原生支持更友好虽然也能做但配置起来麻烦对比更偏向轻量级单机任务调度适合常规后台任务专注于大数据工作流调度支持复杂编排和多任务类型集成如果只是简单的定时任务够用但要处理复杂的大数据任务依赖更合适对比是生态的老牌调度系统但配置全是维护起来头大摆脱了配置可视化操作更高效分布式架构上支持更大规模的任务调度且部署维护更简单的架构相对老旧扩展性不如总结在国内大数据调度领域用得挺多不是没道理的上手简单可视化编程不用写代码功能全面支持各类大数据任务脚本任务数据同步稳定可靠分布式架构均支持集群部署无单点故障扩展性强插件化架构自定义任务类型只需开发插件国内生态友好对的支持比更好当然也有不足比如社区文档不如完善第三方生态相对小但对于国内团队来说是个不错的选择延伸阅读官方文档官方文档仓库',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-02-09 00:24:00',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><a id="site-name" href="/" accesskey="h"><div class="title">凌霄的博客</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 1.05rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 1.05rem;">DNS<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 1.05rem;">Docker<sup>4</sup></a><a href="/tags/GRUB/" style="font-size: 1.05rem;">GRUB<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 1.05rem;">HDFS<sup>7</sup></a><a href="/tags/HTTP/" style="font-size: 1.05rem;">HTTP<sup>2</sup></a><a href="/tags/Hadoop/" style="font-size: 1.05rem;">Hadoop<sup>5</sup></a><a href="/tags/Hive/" style="font-size: 1.05rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 1.05rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Hypervisor/" style="font-size: 1.05rem;">Hypervisor<sup>2</sup></a><a href="/tags/Java/" style="font-size: 1.05rem;">Java<sup>16</sup></a><a href="/tags/KVM/" style="font-size: 1.05rem;">KVM<sup>2</sup></a><a href="/tags/Kerberos/" style="font-size: 1.05rem;">Kerberos<sup>1</sup></a><a href="/tags/Kubernetes/" style="font-size: 1.05rem;">Kubernetes<sup>2</sup></a><a href="/tags/Linux/" style="font-size: 1.05rem;">Linux<sup>10</sup></a><a href="/tags/Maven/" style="font-size: 1.05rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 1.05rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 1.05rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 1.05rem;">RDD<sup>2</sup></a><a href="/tags/RSA/" style="font-size: 1.05rem;">RSA<sup>3</sup></a><a href="/tags/SecretPad/" style="font-size: 1.05rem;">SecretPad<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 1.05rem;">Spark<sup>14</sup></a><a href="/tags/Spring/" style="font-size: 1.05rem;">Spring<sup>3</sup></a><a href="/tags/TEE/" style="font-size: 1.05rem;">TEE<sup>7</sup></a><a href="/tags/TPM/" style="font-size: 1.05rem;">TPM<sup>1</sup></a><a href="/tags/UEFI/" style="font-size: 1.05rem;">UEFI<sup>1</sup></a><a href="/tags/YARN/" style="font-size: 1.05rem;">YARN<sup>1</sup></a><a href="/tags/Zeppelin/" style="font-size: 1.05rem;">Zeppelin<sup>4</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 1.05rem;">代理<sup>1</sup></a><a href="/tags/%E5%8F%AF%E4%BF%A1%E5%90%AF%E5%8A%A8/" style="font-size: 1.05rem;">可信启动<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 1.05rem;">密码学<sup>8</sup></a><a href="/tags/%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8/" style="font-size: 1.05rem;">对象存储<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 1.05rem;">并发<sup>2</sup></a><a href="/tags/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" style="font-size: 1.05rem;">数字签名<sup>4</sup></a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 1.05rem;">日志<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">机密计算<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 1.05rem;">网络分析<sup>1</sup></a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" style="font-size: 1.05rem;">虚拟化<sup>5</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 1.05rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 1.05rem;">隐私计算<sup>9</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/02/"><span class="card-archive-list-date">二月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/11/"><span class="card-archive-list-date">十一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/10/"><span class="card-archive-list-date">十月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/09/"><span class="card-archive-list-date">九月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">11</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/08/"><span class="card-archive-list-date">八月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">6</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/07/"><span class="card-archive-list-date">七月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">17</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/06/"><span class="card-archive-list-date">六月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">32</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/DolphinScheduler/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>DolphinScheduler</span></a><a class="article-meta__tags" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>任务调度</span></a><a class="article-meta__tags" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>工作流</span></a></span></div></div><h1 class="post-title" itemprop="name headline">DolphinScheduler 核心能力与运行机制深度解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2026-02-06T16:13:23.000Z" title="发表于 2026-02-07 00:13:23">2026-02-07</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2026-02-08T16:24:00.822Z" title="更新于 2026-02-09 00:24:00">2026-02-09</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="DolphinScheduler 核心能力与运行机制深度解析"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为杭州"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>杭州</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"><header><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url">大数据</a><a href="/tags/DolphinScheduler/" tabindex="-1" itemprop="url">DolphinScheduler</a><a href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" tabindex="-1" itemprop="url">任务调度</a><a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" tabindex="-1" itemprop="url">工作流</a><h1 id="CrawlerTitle" itemprop="name headline">DolphinScheduler 核心能力与运行机制深度解析</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">XR</span><time itemprop="dateCreated datePublished" datetime="2026-02-06T16:13:23.000Z" title="发表于 2026-02-07 00:13:23">2026-02-07</time><time itemprop="dateCreated datePublished" datetime="2026-02-08T16:24:00.822Z" title="更新于 2026-02-09 00:24:00">2026-02-09</time></header><h2 id="背景问题"><a href="#背景问题" class="headerlink" title="背景问题"></a>背景问题</h2><p>前段时间在公司接触大数据平台，顺便了解了一下调度系统的实现。发现现在用 DolphinScheduler 的团队挺多，号称分布式、可视化、高可用。就想深入扒一扒，这玩意儿到底好在哪，跟 Airflow、XXL-Job 这些有啥区别。</p>
+<p>这篇文章就是想搞清楚几个问题：</p>
+<ul>
+<li>DolphinScheduler 到底支持哪些任务类型？</li>
+<li>它的架构是怎么设计的？怎么做到高可用的？</li>
+<li>一个工作流从提交到执行完成，中间经历了什么？</li>
+<li>跟其他调度工具比，有啥优缺点？</li>
+</ul>
+<h2 id="一、支持的任务类型"><a href="#一、支持的任务类型" class="headerlink" title="一、支持的任务类型"></a>一、支持的任务类型</h2><p>DolphinScheduler 支持的任务类型挺多的，核心思想是<strong>所有任务都通过插件实现</strong>，不用自己写代码，Web UI 上点点配置就能跑。</p>
+<h3 id="1-大数据计算类任务"><a href="#1-大数据计算类任务" class="headerlink" title="1. 大数据计算类任务"></a>1. 大数据计算类任务</h3><p><strong>Spark&#x2F;Flink&#x2F;MapReduce</strong></p>
+<p>这类任务的原理很简单：插件帮你拼命令。</p>
+<p>比如 Spark 任务，你在 Web UI 上配置：</p>
+<ul>
+<li>JAR 包路径（HDFS 或本地）</li>
+<li>主类名</li>
+<li>资源参数（executor 数量、内存大小）</li>
+<li>运行模式（YARN&#x2F;K8s&#x2F;本地）</li>
+</ul>
+<p>插件拿到这些配置后，自动拼接成 <code>spark-submit</code> 命令，然后提交到集群执行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 插件自动生成的命令示例</span></span><br><span class="line">spark-submit \</span><br><span class="line">  --master yarn \</span><br><span class="line">  --deploy-mode cluster \</span><br><span class="line">  --executor-memory 4G \</span><br><span class="line">  --executor-cores 2 \</span><br><span class="line">  --num-executors 10 \</span><br><span class="line">  --class com.example.WordCount \</span><br><span class="line">  hdfs:///path/to/job.jar input output</span><br></pre></td></tr></table></figure>
+
+<p><strong>Hive&#x2F;Spark SQL</strong></p>
+<p>更直接，内置 SQL 编辑器，写完 SQL 点运行就行。插件会连接到 Hive Metastore 或 Spark Thrift Server，执行 SQL 并返回结果。支持查看结果集、失败重跑。</p>
+<h3 id="2-脚本-命令类任务"><a href="#2-脚本-命令类任务" class="headerlink" title="2. 脚本&#x2F;命令类任务"></a>2. 脚本&#x2F;命令类任务</h3><p><strong>Shell&#x2F;Python&#x2F;Perl</strong></p>
+<p>有两种方式：</p>
+<ol>
+<li>直接在 Web UI 写脚本内容</li>
+<li>配置脚本文件路径（本地文件系统或 HDFS）</li>
+</ol>
+<p>插件会在 Worker 节点上启动进程执行脚本，支持自定义环境变量和执行用户。</p>
+<p><strong>HTTP&#x2F;SSH</strong></p>
+<ul>
+<li>HTTP 任务：配置 URL、请求方法（GET&#x2F;POST）、参数、请求头，插件发起网络请求并校验响应码</li>
+<li>SSH 任务：基于 SSH 协议远程连接服务器，执行指定命令或脚本，支持无密登录</li>
+</ul>
+<h3 id="3-数据同步-存储类任务"><a href="#3-数据同步-存储类任务" class="headerlink" title="3. 数据同步&#x2F;存储类任务"></a>3. 数据同步&#x2F;存储类任务</h3><p><strong>DataX&#x2F;Sqoop</strong></p>
+<p>封装了数据同步工具的原生命令。配置源端和目标端的数据源信息、同步规则，插件自动触发同步任务，支持进度监控。</p>
+<p><strong>HDFS&#x2F;FTP&#x2F;S3</strong></p>
+<p>支持文件操作：上传、下载、移动、删除。配置文件路径和操作类型就行，适配主流分布式文件系统和对象存储。</p>
+<h3 id="4-调度-控制类任务"><a href="#4-调度-控制类任务" class="headerlink" title="4. 调度&#x2F;控制类任务"></a>4. 调度&#x2F;控制类任务</h3><p><strong>子工作流</strong></p>
+<p>可以把已创建的工作流作为子节点嵌入主工作流，实现模块化复用。这个功能挺实用的，比如把通用的数据预处理流程做成子工作流，多个主流程复用。</p>
+<p><strong>等待&#x2F;判定&#x2F;分支</strong></p>
+<ul>
+<li>等待任务：固定时长延迟</li>
+<li>判定任务：基于参数或执行结果做条件判断</li>
+<li>分支任务：支持并行、串行、依赖触发</li>
+</ul>
+<h3 id="5-第三方集成类任务"><a href="#5-第三方集成类任务" class="headerlink" title="5. 第三方集成类任务"></a>5. 第三方集成类任务</h3><p><strong>Zeppelin&#x2F;Jupyter</strong></p>
+<p>通过插件调用第三方服务的 REST API，远程触发交互式笔记执行。</p>
+<p><strong>XXL-Job&#x2F;Airflow</strong></p>
+<p>支持通过 API 与其他调度系统集成，实现跨系统的任务编排和能力互补。</p>
+<p><strong>核心共性</strong>：所有任务都是”无代码可视化配置”，插件层屏蔽了底层执行细节，用户只管业务参数。</p>
+<h2 id="二、核心运行架构"><a href="#二、核心运行架构" class="headerlink" title="二、核心运行架构"></a>二、核心运行架构</h2><p>DolphinScheduler 采用<strong>分布式主从架构</strong>，分为 4 大核心组件，底层依赖 ZooKeeper 做集群协调、节点选举和状态存储。</p>
+<pre class="mermaid">flowchart TB
+    UI[Web UI<br/>前端界面]
+
+    subgraph Master["Master Server 集群"]
+        M1[Master 1]
+        M2[Master 2]
+        M3[Master 3]
+    end
+
+    subgraph Worker["Worker Server 集群"]
+        W1[Worker 1]
+        W2[Worker 2]
+        W3[Worker 3]
+    end
+
+    ZK[ZooKeeper<br/>集群协调]
+    DB[(元数据数据库<br/>MySQL/PG)]
+
+    UI --> Master
+    Master --> Worker
+    Master --> ZK
+    Worker --> ZK
+    Master --> DB
+    Worker --> DB
+
+    style Master fill:#e1f5ff
+    style Worker fill:#fff4e1
+    style ZK fill:#ffe1e1
+    style DB fill:#e1ffe1</pre>
+
+<h3 id="1-Master-Server（主节点）"><a href="#1-Master-Server（主节点）" class="headerlink" title="1. Master Server（主节点）"></a>1. Master Server（主节点）</h3><p><strong>核心职责</strong>：</p>
+<ul>
+<li>工作流解析</li>
+<li>任务调度分配</li>
+<li>集群节点管理</li>
+<li>任务状态监控</li>
+</ul>
+<p><strong>运行逻辑</strong>：</p>
+<p>接收 Web UI 提交的工作流，解析 DAG 图并拆分任务。根据任务类型、资源负载，将任务分配到空闲的 Worker 节点。实时监控 Worker 和任务状态，处理失败、超时等异常。</p>
+<p>Master 支持集群部署，避免单点故障。ZooKeeper 负责主节点选举，一个 Master 挂了，别的 Master 会自动接管。</p>
+<h3 id="2-Worker-Server（工作节点）"><a href="#2-Worker-Server（工作节点）" class="headerlink" title="2. Worker Server（工作节点）"></a>2. Worker Server（工作节点）</h3><p><strong>核心职责</strong>：</p>
+<ul>
+<li>任务实际执行</li>
+<li>日志收集</li>
+<li>执行结果上报</li>
+</ul>
+<p><strong>运行逻辑</strong>：</p>
+<p>接收 Master 分配的任务，加载对应的任务插件，执行插件封装的命令或逻辑。执行过程中实时收集日志并写入日志存储（本地或 ELK）。任务完成后将执行结果（成功&#x2F;失败&#x2F;终止）上报至 Master。</p>
+<p>Worker 也支持集群部署，可以横向扩容。每个 Worker 向 ZooKeeper 注册，Master 通过 ZooKeeper 发现可用的 Worker。</p>
+<h3 id="3-ZooKeeper-集群"><a href="#3-ZooKeeper-集群" class="headerlink" title="3. ZooKeeper 集群"></a>3. ZooKeeper 集群</h3><p><strong>核心作用</strong>：</p>
+<ul>
+<li>Master&#x2F;Worker 节点注册与发现</li>
+<li>主节点选举</li>
+<li>任务执行锁（防止并发执行冲突）</li>
+<li>节点状态同步</li>
+</ul>
+<p>ZooKeeper 在这个架构里扮演协调者的角色，确保分布式环境下的数据一致性。</p>
+<h3 id="4-元数据数据库（MySQL-PostgreSQL）"><a href="#4-元数据数据库（MySQL-PostgreSQL）" class="headerlink" title="4. 元数据数据库（MySQL&#x2F;PostgreSQL）"></a>4. 元数据数据库（MySQL&#x2F;PostgreSQL）</h3><p><strong>存储内容</strong>：</p>
+<ul>
+<li>工作流 DAG 定义</li>
+<li>任务配置信息</li>
+<li>调度规则（定时&#x2F;依赖）</li>
+<li>执行日志</li>
+<li>任务&#x2F;工作流运行状态</li>
+<li>集群节点信息</li>
+</ul>
+<p>数据库只存元数据和运行状态，不存实际的任务日志。日志单独存储，避免数据库膨胀。</p>
+<h2 id="三、工作流执行流程"><a href="#三、工作流执行流程" class="headerlink" title="三、工作流执行流程"></a>三、工作流执行流程</h2><p>一个工作流从提交到执行完成，整个过程挺清晰的。</p>
+<h3 id="1-工作流编排与提交"><a href="#1-工作流编排与提交" class="headerlink" title="1. 工作流编排与提交"></a>1. 工作流编排与提交</h3><p>前端 Web UI 提供拖拽式 DAG 编辑器。把左侧任务节点拖入画布，通过箭头连接节点设置依赖关系（串行&#x2F;并行&#x2F;条件依赖）。配置每个节点的业务参数和调度属性（超时时间、失败重跑次数、执行用户）。</p>
+<p>提交后，工作流 DAG 定义、任务配置等元数据持久化到数据库，ZooKeeper 注册工作流信息。</p>
+<h3 id="2-任务调度与执行流程"><a href="#2-任务调度与执行流程" class="headerlink" title="2. 任务调度与执行流程"></a>2. 任务调度与执行流程</h3><pre class="mermaid">sequenceDiagram
+    participant UI as Web UI
+    participant Master as Master Server
+    participant ZK as ZooKeeper
+    participant Worker as Worker Server
+    participant DB as 数据库
+
+    UI->>Master: 提交工作流
+    Master->>DB: 读取工作流定义
+    Master->>Master: 解析DAG，生成执行计划
+    Master->>ZK: 查询可用Worker节点
+
+    loop 遍历任务
+        Master->>Worker: 分配任务
+        Worker->>Worker: 加载插件，执行任务
+        Worker->>Master: 实时上报状态和日志
+        Worker->>Master: 上报执行结果
+
+        alt 任务成功
+            Master->>Master: 触发下游任务
+        else 任务失败
+            Master->>Master: 处理失败重跑或终止
+        end
+    end
+
+    Master->>DB: 更新工作流状态
+    Master->>UI: 返回执行结果</pre>
+
+<p><strong>详细步骤</strong>：</p>
+<ol>
+<li><p><strong>触发调度</strong>：工作流满足触发条件（定时&#x2F;手动&#x2F;上游依赖触发），Master 从数据库读取工作流信息，解析 DAG 图并生成任务执行计划。</p>
+</li>
+<li><p><strong>任务分配</strong>：Master 根据任务分片策略（按 Worker 负载&#x2F;指定执行节点&#x2F;随机），将任务发送至对应 Worker 节点，通过 ZooKeeper 发送任务执行指令。</p>
+</li>
+<li><p><strong>任务执行</strong>：Worker 接收指令，加载对应的任务插件，初始化执行环境，执行插件逻辑（如拼接 <code>spark-submit</code> 命令、运行 Shell 脚本）。实时将执行日志和状态上报至 Master。</p>
+</li>
+<li><p><strong>依赖推进</strong>：当一个任务执行完成后，Master 更新任务状态，解析 DAG 图触发下游依赖任务。重复上述分配-执行流程，直至整个工作流所有任务执行完成。</p>
+</li>
+</ol>
+<h3 id="3-任务异常处理"><a href="#3-任务异常处理" class="headerlink" title="3. 任务异常处理"></a>3. 任务异常处理</h3><p><strong>失败重跑</strong>：支持任务级&#x2F;工作流级重跑，可指定重跑节点（跳过已成功节点）。Master 重新分配重跑任务至 Worker。</p>
+<p><strong>超时终止</strong>：配置任务&#x2F;工作流超时时间，超时后 Master 自动发送终止指令，Worker 停止任务进程并标记状态为超时失败。</p>
+<p><strong>节点故障</strong>：</p>
+<ul>
+<li>Worker 节点故障：Master 通过 ZooKeeper 检测到节点离线，将该节点上未完成的任务重新分配至其他空闲 Worker</li>
+<li>Master 节点故障：ZooKeeper 自动选举新的 Master，接管所有调度任务，无任务丢失</li>
+</ul>
+<h2 id="四、核心设计亮点"><a href="#四、核心设计亮点" class="headerlink" title="四、核心设计亮点"></a>四、核心设计亮点</h2><h3 id="1-可视化-DAG-编排"><a href="#1-可视化-DAG-编排" class="headerlink" title="1. 可视化 DAG 编排"></a>1. 可视化 DAG 编排</h3><p>不用写代码，拖拽就能完成复杂工作流设计。支持 DAG 图放大、缩小、保存、导出，直观展示任务依赖关系。这个对非技术人员很友好，降低了使用门槛。</p>
+<h3 id="2-分布式高可用"><a href="#2-分布式高可用" class="headerlink" title="2. 分布式高可用"></a>2. 分布式高可用</h3><p>Master&#x2F;Worker 均支持集群部署，无单点故障。可根据业务负载横向扩容节点。Master 节点故障时，ZooKeeper 会自动选举新的 Master 接管调度任务，整个过程秒级完成，业务无感知。</p>
+<h3 id="3-插件化架构"><a href="#3-插件化架构" class="headerlink" title="3. 插件化架构"></a>3. 插件化架构</h3><p>所有任务类型都基于插件实现，新增任务类型只需开发自定义插件，无需修改核心代码。扩展性强，社区也贡献了不少第三方插件。</p>
+<h3 id="4-全链路监控"><a href="#4-全链路监控" class="headerlink" title="4. 全链路监控"></a>4. 全链路监控</h3><p>支持工作流&#x2F;任务级别的状态监控（待执行&#x2F;运行中&#x2F;成功&#x2F;失败&#x2F;超时），实时查看执行日志，支持日志检索、下载。排查问题时方便，不用上服务器翻日志文件。</p>
+<h3 id="5-资源管理"><a href="#5-资源管理" class="headerlink" title="5. 资源管理"></a>5. 资源管理</h3><p>支持配置任务执行的资源队列（YARN 队列）、执行节点组，实现任务资源隔离，避免资源抢占。这个在生产环境挺重要，防止核心任务被抢资源。</p>
+<h2 id="五、与其他调度工具的对比"><a href="#五、与其他调度工具的对比" class="headerlink" title="五、与其他调度工具的对比"></a>五、与其他调度工具的对比</h2><h3 id="对比-Airflow"><a href="#对比-Airflow" class="headerlink" title="对比 Airflow"></a>对比 Airflow</h3><p>Airflow 需要编写 Python DAG 代码，学习曲线陡峭。DolphinScheduler 全程可视化操作，门槛更低。</p>
+<p>国内大数据生态适配方面，DolphinScheduler 对 Hive&#x2F;Spark&#x2F;Flink 的原生支持更友好。Airflow 虽然也能做，但配置起来麻烦。</p>
+<h3 id="对比-XXL-Job"><a href="#对比-XXL-Job" class="headerlink" title="对比 XXL-Job"></a>对比 XXL-Job</h3><p>XXL-Job 更偏向轻量级单机任务调度，适合常规后台任务。DolphinScheduler 专注于大数据工作流调度，支持复杂 DAG 编排和多任务类型集成。</p>
+<p>如果只是简单的定时任务，XXL-Job 够用。但要处理复杂的大数据任务依赖，DolphinScheduler 更合适。</p>
+<h3 id="对比-Oozie"><a href="#对比-Oozie" class="headerlink" title="对比 Oozie"></a>对比 Oozie</h3><p>Oozie 是 Hadoop 生态的老牌调度系统，但配置全是 XML，维护起来头大。DolphinScheduler 摆脱了 XML 配置，可视化操作更高效。</p>
+<p>分布式架构上，DolphinScheduler 支持更大规模的任务调度，且部署维护更简单。Oozie 的架构相对老旧，扩展性不如 DolphinScheduler。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>DolphinScheduler 在国内大数据调度领域用得挺多，不是没道理的：</p>
+<ul>
+<li><strong>上手简单</strong>：可视化 DAG 编程，不用写代码</li>
+<li><strong>功能全面</strong>：支持各类大数据任务、脚本任务、数据同步</li>
+<li><strong>稳定可靠</strong>：分布式架构，Master&#x2F;Worker 均支持集群部署，无单点故障</li>
+<li><strong>扩展性强</strong>：插件化架构，自定义任务类型只需开发插件</li>
+<li><strong>国内生态友好</strong>：对 Hive&#x2F;Spark&#x2F;Flink 的支持比 Airflow 更好</li>
+</ul>
+<p>当然也有不足，比如社区文档不如 Airflow 完善，第三方生态相对小。但对于国内团队来说，DolphinScheduler 是个不错的选择。</p>
+<hr>
+<p><strong>延伸阅读</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://dolphinscheduler.apache.org/zh-cn/docs/3.1.8/about">DolphinScheduler 官方文档</a></li>
+<li>Apache Airflow 官方文档</li>
+<li>XXL-Job GitHub 仓库</li>
+</ul>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">XR</div><div class="post-copyright__author_desc">一片叶、一朵云</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/')">DolphinScheduler 核心能力与运行机制深度解析</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231130275.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226231143327.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=DolphinScheduler 核心能力与运行机制深度解析&amp;url=http://example.com/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/&amp;pic=https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">凌霄的博客</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/DolphinScheduler/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>DolphinScheduler<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>任务调度<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>工作流<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350520.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/11/23/%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6%E5%AE%89%E5%85%A8%E5%8F%AF%E8%A1%8C%E6%B5%81%E9%80%9A%E6%96%B0%E6%A8%A1%E5%BC%8F/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记</div></div></a></div><div class="next-post pull-right"><a href="/2026/02/09/%E6%A8%A1%E6%8B%9F%E4%B8%8D%E5%90%8C%E5%9C%B0%E5%8C%BAIP%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350520.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">模拟不同地区IP进行测试的几种方法</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">XR</h1><div class="author-info__desc">一片叶、一朵云</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/kongxiaoran" target="_blank" title="Github"></a></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">背景问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%94%AF%E6%8C%81%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">一、支持的任务类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%A4%A7%E6%95%B0%E6%8D%AE%E8%AE%A1%E7%AE%97%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.1.</span> <span class="toc-text">1. 大数据计算类任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%84%9A%E6%9C%AC-%E5%91%BD%E4%BB%A4%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.2.</span> <span class="toc-text">2. 脚本&#x2F;命令类任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-%E5%AD%98%E5%82%A8%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.3.</span> <span class="toc-text">3. 数据同步&#x2F;存储类任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%B0%83%E5%BA%A6-%E6%8E%A7%E5%88%B6%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.4.</span> <span class="toc-text">4. 调度&#x2F;控制类任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E7%AC%AC%E4%B8%89%E6%96%B9%E9%9B%86%E6%88%90%E7%B1%BB%E4%BB%BB%E5%8A%A1"><span class="toc-number">2.5.</span> <span class="toc-text">5. 第三方集成类任务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E8%BF%90%E8%A1%8C%E6%9E%B6%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">二、核心运行架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Master-Server%EF%BC%88%E4%B8%BB%E8%8A%82%E7%82%B9%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">1. Master Server（主节点）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Worker-Server%EF%BC%88%E5%B7%A5%E4%BD%9C%E8%8A%82%E7%82%B9%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">2. Worker Server（工作节点）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-ZooKeeper-%E9%9B%86%E7%BE%A4"><span class="toc-number">3.3.</span> <span class="toc-text">3. ZooKeeper 集群</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%85%83%E6%95%B0%E6%8D%AE%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%88MySQL-PostgreSQL%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">4. 元数据数据库（MySQL&#x2F;PostgreSQL）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%B7%A5%E4%BD%9C%E6%B5%81%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">三、工作流执行流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%BC%96%E6%8E%92%E4%B8%8E%E6%8F%90%E4%BA%A4"><span class="toc-number">4.1.</span> <span class="toc-text">1. 工作流编排与提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.2.</span> <span class="toc-text">2. 任务调度与执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BB%BB%E5%8A%A1%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">4.3.</span> <span class="toc-text">3. 任务异常处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E4%BA%AE%E7%82%B9"><span class="toc-number">5.</span> <span class="toc-text">四、核心设计亮点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8F%AF%E8%A7%86%E5%8C%96-DAG-%E7%BC%96%E6%8E%92"><span class="toc-number">5.1.</span> <span class="toc-text">1. 可视化 DAG 编排</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%88%86%E5%B8%83%E5%BC%8F%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="toc-number">5.2.</span> <span class="toc-text">2. 分布式高可用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%8F%92%E4%BB%B6%E5%8C%96%E6%9E%B6%E6%9E%84"><span class="toc-number">5.3.</span> <span class="toc-text">3. 插件化架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%85%A8%E9%93%BE%E8%B7%AF%E7%9B%91%E6%8E%A7"><span class="toc-number">5.4.</span> <span class="toc-text">4. 全链路监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86"><span class="toc-number">5.5.</span> <span class="toc-text">5. 资源管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%8E%E5%85%B6%E4%BB%96%E8%B0%83%E5%BA%A6%E5%B7%A5%E5%85%B7%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">6.</span> <span class="toc-text">五、与其他调度工具的对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94-Airflow"><span class="toc-number">6.1.</span> <span class="toc-text">对比 Airflow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94-XXL-Job"><span class="toc-number">6.2.</span> <span class="toc-text">对比 XXL-Job</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94-Oozie"><span class="toc-number">6.3.</span> <span class="toc-text">对比 Oozie</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/02/09/%E6%A8%A1%E6%8B%9F%E4%B8%8D%E5%90%8C%E5%9C%B0%E5%8C%BAIP%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95/" title="模拟不同地区IP进行测试的几种方法"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/kongxiaoran/image-repo/blog20241226224350520.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="模拟不同地区IP进行测试的几种方法"/></a><div class="content"><a class="title" href="/2026/02/09/%E6%A8%A1%E6%8B%9F%E4%B8%8D%E5%90%8C%E5%9C%B0%E5%8C%BAIP%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95/" title="模拟不同地区IP进行测试的几种方法">模拟不同地区IP进行测试的几种方法</a><time datetime="2026-02-08T16:06:00.000Z" title="发表于 2026-02-09 00:06:00">2026-02-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" title="DolphinScheduler 核心能力与运行机制深度解析"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250625095124143.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="DolphinScheduler 核心能力与运行机制深度解析"/></a><div class="content"><a class="title" href="/2026/02/07/DolphinScheduler%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" title="DolphinScheduler 核心能力与运行机制深度解析">DolphinScheduler 核心能力与运行机制深度解析</a><time datetime="2026-02-06T16:13:23.000Z" title="发表于 2026-02-07 00:13:23">2026-02-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/23/%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6%E5%AE%89%E5%85%A8%E5%8F%AF%E8%A1%8C%E6%B5%81%E9%80%9A%E6%96%B0%E6%A8%A1%E5%BC%8F/" title="隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250722115459961.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记"/></a><div class="content"><a class="title" href="/2025/11/23/%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6%E5%AE%89%E5%85%A8%E5%8F%AF%E8%A1%8C%E6%B5%81%E9%80%9A%E6%96%B0%E6%A8%A1%E5%BC%8F/" title="隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记">隐语——数据要素流通技术MOOC三期 课程笔记——数据组件安全可行流通新模式课堂笔记</a><time datetime="2025-11-23T10:00:00.000Z" title="发表于 2025-11-23 18:00:00">2025-11-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/17/%E5%AF%B9%E4%BA%8E%E5%A4%9A%E6%96%B9%E5%AE%89%E5%85%A8%E8%AE%A1%E7%AE%97%E7%9A%84%E4%B8%AD%E6%AD%A2%E5%AE%89%E5%85%A8%E7%9A%84%E7%90%86%E8%A7%A3/" title="理解多方安全计算(MPC)中的“中止安全”"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/PixPin_2025-11-15_10-51-57.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="理解多方安全计算(MPC)中的“中止安全”"/></a><div class="content"><a class="title" href="/2025/11/17/%E5%AF%B9%E4%BA%8E%E5%A4%9A%E6%96%B9%E5%AE%89%E5%85%A8%E8%AE%A1%E7%AE%97%E7%9A%84%E4%B8%AD%E6%AD%A2%E5%AE%89%E5%85%A8%E7%9A%84%E7%90%86%E8%A7%A3/" title="理解多方安全计算(MPC)中的“中止安全”">理解多方安全计算(MPC)中的“中止安全”</a><time datetime="2025-11-17T14:00:00.000Z" title="发表于 2025-11-17 22:00:00">2025-11-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/11/16/%E4%B8%8D%E7%BB%8F%E6%84%8F%E4%BC%A0%E8%BE%93%E5%AD%A6%E4%B9%A0%E6%96%87%E6%A1%A3/" title="深入解析不经意传输(Oblivious Transfer)"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://raw.githubusercontent.com/kongxiaoran/image-repo/main/blog/20250721154750949.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入解析不经意传输(Oblivious Transfer)"/></a><div class="content"><a class="title" href="/2025/11/16/%E4%B8%8D%E7%BB%8F%E6%84%8F%E4%BC%A0%E8%BE%93%E5%AD%A6%E4%B9%A0%E6%96%87%E6%A1%A3/" title="深入解析不经意传输(Oblivious Transfer)">深入解析不经意传输(Oblivious Transfer)</a><time datetime="2025-11-16T14:15:00.000Z" title="发表于 2025-11-16 22:15:00">2025-11-16</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2024 - 2026 By <a class="footer-bar-link" href="/" title="XR" target="_blank">XR</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">79</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">59</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">6</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/Argon2/" style="font-size: 0.88rem;">Argon2<sup>1</sup></a><a href="/tags/DNS/" style="font-size: 0.88rem;">DNS<sup>4</sup></a><a href="/tags/Docker/" style="font-size: 0.88rem;">Docker<sup>4</sup></a><a href="/tags/GRUB/" style="font-size: 0.88rem;">GRUB<sup>1</sup></a><a href="/tags/HDFS/" style="font-size: 0.88rem;">HDFS<sup>7</sup></a><a href="/tags/HTTP/" style="font-size: 0.88rem;">HTTP<sup>2</sup></a><a href="/tags/Hadoop/" style="font-size: 0.88rem;">Hadoop<sup>5</sup></a><a href="/tags/Hive/" style="font-size: 0.88rem;">Hive<sup>1</sup></a><a href="/tags/HyperEnclave/" style="font-size: 0.88rem;">HyperEnclave<sup>5</sup></a><a href="/tags/Hypervisor/" style="font-size: 0.88rem;">Hypervisor<sup>2</sup></a><a href="/tags/Java/" style="font-size: 0.88rem;">Java<sup>16</sup></a><a href="/tags/KVM/" style="font-size: 0.88rem;">KVM<sup>2</sup></a><a href="/tags/Kerberos/" style="font-size: 0.88rem;">Kerberos<sup>1</sup></a><a href="/tags/Kubernetes/" style="font-size: 0.88rem;">Kubernetes<sup>2</sup></a><a href="/tags/Linux/" style="font-size: 0.88rem;">Linux<sup>10</sup></a><a href="/tags/Maven/" style="font-size: 0.88rem;">Maven<sup>1</sup></a><a href="/tags/MinIO/" style="font-size: 0.88rem;">MinIO<sup>1</sup></a><a href="/tags/NAT/" style="font-size: 0.88rem;">NAT<sup>1</sup></a><a href="/tags/RDD/" style="font-size: 0.88rem;">RDD<sup>2</sup></a><a href="/tags/RSA/" style="font-size: 0.88rem;">RSA<sup>3</sup></a><a href="/tags/SecretPad/" style="font-size: 0.88rem;">SecretPad<sup>1</sup></a><a href="/tags/Spark/" style="font-size: 0.88rem;">Spark<sup>14</sup></a><a href="/tags/Spring/" style="font-size: 0.88rem;">Spring<sup>3</sup></a><a href="/tags/TEE/" style="font-size: 0.88rem;">TEE<sup>7</sup></a><a href="/tags/TPM/" style="font-size: 0.88rem;">TPM<sup>1</sup></a><a href="/tags/UEFI/" style="font-size: 0.88rem;">UEFI<sup>1</sup></a><a href="/tags/YARN/" style="font-size: 0.88rem;">YARN<sup>1</sup></a><a href="/tags/Zeppelin/" style="font-size: 0.88rem;">Zeppelin<sup>4</sup></a><a href="/tags/%E4%BB%A3%E7%90%86/" style="font-size: 0.88rem;">代理<sup>1</sup></a><a href="/tags/%E5%8F%AF%E4%BF%A1%E5%90%AF%E5%8A%A8/" style="font-size: 0.88rem;">可信启动<sup>1</sup></a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" style="font-size: 0.88rem;">密码学<sup>8</sup></a><a href="/tags/%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8/" style="font-size: 0.88rem;">对象存储<sup>1</sup></a><a href="/tags/%E5%B9%B6%E5%8F%91/" style="font-size: 0.88rem;">并发<sup>2</sup></a><a href="/tags/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" style="font-size: 0.88rem;">数字签名<sup>4</sup></a><a href="/tags/%E6%97%A5%E5%BF%97/" style="font-size: 0.88rem;">日志<sup>1</sup></a><a href="/tags/%E6%9C%BA%E5%AF%86%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">机密计算<sup>2</sup></a><a href="/tags/%E7%BD%91%E7%BB%9C%E5%88%86%E6%9E%90/" style="font-size: 0.88rem;">网络分析<sup>1</sup></a><a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" style="font-size: 0.88rem;">虚拟化<sup>5</sup></a><a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" style="font-size: 0.88rem;">防火墙<sup>2</sup></a><a href="/tags/%E9%9A%90%E7%A7%81%E8%AE%A1%E7%AE%97/" style="font-size: 0.88rem;">隐私计算<sup>9</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("12/26/2024 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2024 By 安知鱼 V1.6.14",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 XR 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.cbd.int/mermaid@10.2.4/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  anzhiyu.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+      appKey: 'MR93sqmbPdh7Zm1bZzjXNvlm',
+      avatar: 'mp',
+      serverURLs: 'https://cbsqtaqs.api.lncldglobal.com',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://cbsqtaqs.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": 'cbSQtAqs68yENzUQ5wpQK826-MdYXbMMI',
+        "X-LC-Key": 'MR93sqmbPdh7Zm1bZzjXNvlm',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
